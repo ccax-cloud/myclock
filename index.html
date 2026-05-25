@@ -35,19 +35,23 @@
             background-size: 400% 400%;
             transition: all 2s ease;
             color: #fff;
-            padding: 30px 10px;
+            padding: 25px 10px;
             overflow-x: hidden; /* 严禁手机端左右滑动 */
             overflow-y: auto;
         }
 
-        /* 外部大外壳：使用弹性布局，确保卡片和按钮垂直排列，绝不重叠 */
+        /* 外部大外壳 */
         .control-block {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 45px; /* 两组卡片之间的间距 */
             width: 100%;
             max-width: 474px; 
+            margin-bottom: 50px; /* 大幅拉开【时钟组】与【图表组】之间的物理距离 */
+        }
+        
+        .control-block:last-child {
+            margin-bottom: 20px;
         }
 
         /* 1x1 外部金色虚线框架（时钟与图表通用） */
@@ -56,7 +60,7 @@
             padding: 10px;
             border: 2px dashed rgba(212, 175, 55, 0.4);
             border-radius: 4px;
-            margin-bottom: 25px; /* 卡片与下方按钮之间保持 25px 绝对间距 */
+            margin-bottom: 12px; /* 进一步压缩卡片与下方按钮的初始间距，使其靠得更近 */
             transform-origin: top center; 
         }
 
@@ -121,20 +125,20 @@
             overflow: hidden;
         }
 
-        /* 按钮包装器：如果是两个按钮，它们之间也拉开距离 */
+        /* 按钮包装器：控制按钮紧凑度 */
         .btn-group {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            gap: 15px; /* 两个按钮之间的间距 */
+            gap: 10px; /* 缩小打卡和截图按钮之间的上下间距 */
         }
 
         /* 按钮样式优化 */
         .btn {
             width: 85%;
             max-width: 300px;
-            padding: 14px 28px;
+            padding: 13px 28px;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
             font-weight: 700;
@@ -257,11 +261,11 @@
             height: 180px; 
         }
 
-        /* 📱 核心响应式修复 */
+        /* 📱 核心响应式缩放机制 */
         @media (max-width: 480px) {
             .capture-wrapper {
                 transform: scale(calc((window.innerWidth - 20) / 474)); 
-                margin-bottom: 0; /* 消除原生外边距，改由 JS 动态补齐占位 */
+                margin-bottom: 0; 
             }
         }
     </style>
@@ -318,7 +322,7 @@
 
     <script>
         // ======= 【核心配置区】 =======
-        // 已经自动填入您专属的 Firebase 实时数据库网址
+        // 已经自动为您保留了专属的 Firebase 数据库网址
         const FIREBASE_DB_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/checkins.json"; 
         // ==============================
 
@@ -327,7 +331,7 @@
         let globalColors = [];
         let globalHistoryData = {}; 
 
-        // 智能修复：精准计算缩放引发的空白塌陷，彻底防止按钮与下方的卡片重叠
+        // 动态计算缩放，确保按钮和上方的卡片紧凑贴合，同时推开下方的其他区块
         function handleResponsiveScale() {
             const width = window.innerWidth;
             const wrappers = document.querySelectorAll('.capture-wrapper');
@@ -339,12 +343,11 @@
                     w.style.transform = `scale(${scaleFactor})`;
                 });
                 
-                // 根据实际缩放比例，计算出卡片缩放后在屏幕上实际占用的物理高度
                 const renderedHeight = 474 * scaleFactor;
                 
-                // 动态将按钮挤下去，留出 35px 的清爽呼吸感空隙
-                blocks[0].style.height = `${renderedHeight + 145}px`;
-                blocks[1].style.height = `${renderedHeight + 75}px`;
+                // 压缩按钮盒子的上部空白，使其在手机端紧贴 1x1 卡片边界（只留 12 像素间隙）
+                blocks[0].style.height = `${renderedHeight + 115}px`;
+                blocks[1].style.height = `${renderedHeight + 55}px`;
             } else {
                 wrappers.forEach(w => w.style.transform = 'none');
                 blocks.forEach(b => b.style.height = 'auto');
