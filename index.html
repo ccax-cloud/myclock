@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- 更新为 zero_wing 设计的时间管理图标 -->
 <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/1584/1584858.png">
     
     <!-- 引入 html2canvas 和 Chart.js -->
@@ -398,31 +399,26 @@
         justify-content: flex-start;
     }
 
-    /* 手机版保持一行 */
+    /* 手机版保持竖排 */
     .page-view {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: center;
+        flex-direction: column;
+        align-items: center;
         gap: 12px;
-        overflow-x: auto;
-        padding-bottom: 10px;
     }
 
     .control-block {
-        margin-bottom: 30px;
-        width: 46vw;
-        min-width: 180px;
-        flex-shrink: 0;
+        margin-bottom: 24px;
+        width: 100%;
+        align-items: center;
     }
 
     .capture-wrapper {
-        width: 46vw;
-        height: 46vw;
-        min-width: 180px;
-        min-height: 180px;
-        max-width: 320px;
-        max-height: 320px;
-        padding: 6px;
+        width: 92vw;
+        height: 92vw;
+        max-width: 450px;
+        max-height: 450px;
+        padding: 8px;
+        margin-bottom: 10px;
     }
 
     .clock-box,
@@ -438,85 +434,80 @@
 
     #tracker-capture-area .tracker-grid {
         flex-grow: 0;
-        margin-top: 18px;
+        margin-top: 20px;
     }
 
     /* 时间 */
     .time-display {
-        font-size: 42px;
-        margin-bottom: 10px;
+        font-size: 56px;
+        margin-bottom: 12px;
     }
 
     .date-display {
-        font-size: 11px;
-        letter-spacing: 2px;
+        font-size: 14px;
+        letter-spacing: 3px;
     }
 
     .timezone-display {
-        font-size: 9px;
+        font-size: 10px;
     }
 
     /* panel */
     .panel-box {
-        padding: 16px 12px;
+        padding: 22px 18px;
     }
 
     .dashboard-header {
-        margin-bottom: 12px;
+        margin-bottom: 18px;
     }
 
     .dashboard-title {
-        font-size: 12px;
+        font-size: 14px;
     }
 
     /* tabs */
-    .tabs {
-        padding: 2px;
-    }
-
     .tab {
-        padding: 4px 7px;
-        font-size: 9px;
+        font-size: 10px;
+        padding: 5px 9px;
     }
 
     /* stats */
     .stats-grid {
-        gap: 8px;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 16px;
     }
 
     .tracker-grid {
-        gap: 10px;
+        gap: 14px;
     }
 
     .tracker-section {
-        gap: 8px;
+        gap: 10px;
     }
 
     .section-title {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .stat-card {
-        padding: 8px;
+        padding: 12px;
     }
 
     .stat-label {
-        font-size: 8px;
-        margin-bottom: 4px;
+        font-size: 9px;
     }
 
     .stat-value {
-        font-size: 15px;
+        font-size: 18px;
     }
 
     .stat-sub-value {
-        font-size: 8px;
+        font-size: 10px;
     }
 
     /* 图表 */
     .chart-container {
-        height: calc(100% - 90px);
+        height: calc(100% - 100px);
     }
 
     /* 按钮 */
@@ -525,28 +516,28 @@
     }
 
     .btn {
-        font-size: 10px;
-        padding: 10px 12px;
+        font-size: 11px;
+        padding: 11px 16px;
     }
 
     .btn-row {
         width: 100%;
-        gap: 4px;
+        gap: 6px;
     }
 
     .btn-row .btn {
-        font-size: 8px;
-        padding: 8px 2px;
+        font-size: 9px;
+        padding: 9px 3px;
     }
 
-    /* page switch */
+    /* 顶部切换 */
     .page-switcher {
-        margin-bottom: 18px;
+        margin-bottom: 20px;
     }
 
     .page-tab {
-        padding: 8px 14px;
-        font-size: 10px;
+        font-size: 11px;
+        padding: 9px 16px;
     }
 }
     </style>
