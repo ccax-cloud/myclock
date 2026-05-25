@@ -40,15 +40,14 @@
             overflow-y: auto;
         }
 
-        /* 📦 核心改变：把卡片和按钮捆绑成一个固定的标准 474px 宽度的整体大盒子 */
+        /* 外部大外壳 */
         .control-block {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 474px; 
-            margin-bottom: 40px; /* 两组之间在电脑端的标准间距 */
-            transform-origin: top center; /* 以顶部中心为锚点进行整体无缝缩放 */
-            flex-shrink: 0;
+            width: 100%;
+            max-width: 474px; 
+            margin-bottom: 50px; /* 电脑端间距 */
         }
 
         /* 1x1 外部金色虚线框架 */
@@ -57,7 +56,7 @@
             padding: 10px;
             border: 2px dashed rgba(212, 175, 55, 0.4);
             border-radius: 4px;
-            margin-bottom: 15px; /* 卡片和自己下方的按钮保持 15px 紧凑距离 */
+            margin-bottom: 15px; /* 卡片与自己下方按钮保持紧凑的 15px */
             width: 474px;
             height: 474px;
         }
@@ -123,16 +122,16 @@
             overflow: hidden;
         }
 
-        /* 按钮包装器：控制按钮紧凑度 */
+        /* 按钮包装器 */
         .btn-group {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            gap: 12px; /* 两个按钮之间紧凑排列 */
+            gap: 10px; 
         }
 
-        /* 按钮样式优化 */
+        /* 按钮样式 */
         .btn {
             width: 85%;
             max-width: 300px;
@@ -259,16 +258,48 @@
             height: 180px; 
         }
 
-        /* 📱 绝妙的移动端整体缩放机制：再也不会产生多余的“隐形空白” */
+        /* 📱 完美重构的手机自适应逻辑（不使用 scale，绝无隐形空白，也绝不溢出） */
         @media (max-width: 480px) {
-            body {
-                padding: 20px 0; /* 压缩顶部间距 */
-            }
             .control-block {
-                /* 让一整组（卡片+对应的控制按钮）做纯净的整体缩放 */
-                transform: scale(calc((window.innerWidth - 20) / 474)); 
-                /* 关键修复：用 margin-bottom 负值吞掉缩放产生的多余隐形高度，并精确留出 60px 的清爽外间距 */
-                margin-bottom: calc(-474px * (1 - (window.innerWidth - 20) / 474) + 60px); 
+                margin-bottom: 55px; /* 让第一组按钮和下方的 Timeline 之间空出非常明显的 55px 距离 */
+            }
+            /* 手机上卡片外壳等比变成正方形，完美适应屏幕 */
+            .capture-wrapper {
+                width: 92vw;
+                height: 92vw;
+                max-width: 450px;
+                max-height: 450px;
+                padding: 8px;
+            }
+            /* 内部区域无缝填满 */
+            #capture-area, #chart-capture-area {
+                width: 100%;
+                height: 100%;
+                padding: 20px 16px;
+            }
+            
+            /* 时钟字体稍微调小一点，防止小屏幕手机挤到边缘 */
+            .time-display {
+                font-size: 64px;
+            }
+            .date-display {
+                font-size: 14px;
+                letter-spacing: 2px;
+            }
+            
+            /* 手机上微调图表的内部高度，确保它有极高的透气感，绝对不溢出 */
+            .stats-grid {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            .stat-card {
+                padding: 10px 12px;
+            }
+            .stat-value {
+                font-size: 18px;
+            }
+            .chart-container {
+                height: calc(100% - 110px); /* 动态把剩余的高度全部完美的让给图表 */
             }
         }
     </style>
