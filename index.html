@@ -1,991 +1,1298 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title> Time Clock & Tracker</title>
-    <!-- 引入免费商用字体 Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- 更新为 zero_wing 设计的时间管理图标 -->
-<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/1584/1584858.png">
-    
-    <!-- 引入 html2canvas 和 Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        :root {
-            --bg-color-1: #0f2027;
-            --bg-color-2: #203a43;
-            --bg-color-3: #2c5364;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center;
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
-            background-size: 400% 400%;
-            transition: all 2s ease;
-            color: #fff;
-            padding: 20px;
-            overflow-x: hidden; 
-            overflow-y: auto;
-        }
-
-        /* 🎛️ 顶端全局页面切换器 */
-        .page-switcher {
-            display: flex;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 30px;
-            padding: 6px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            z-index: 10;
-        }
-
-        .page-tab {
-            padding: 10px 24px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            border-radius: 20px;
-            transition: background-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
-            color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .page-tab.active {
-            background: #ffffff;
-            color: #0f2027;
-            box-shadow: 0 4px 12px rgba(255,255,255,0.2);
-        }
-
-        /* 大容器 */
-        .main-container {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 60px;
-            width: 100%;
-            max-width: 1100px;
-        }
-
-        /* 页面切换：隐藏/显示 */
-        .page-view {
-            display: none;
-            justify-content: center;
-            gap: 60px;
-            width: 100%;
-        }
-
-        .page-view.active {
-            display: flex;
-        }
-
-        .control-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 474px; 
-            flex-shrink: 0;
-        }
-
-        /* 1x1 外部金色虚线框架 */
-        .capture-wrapper {
-            position: relative;
-            padding: 10px;
-            border: 2px dashed rgba(212, 175, 55, 0.4);
-            border-radius: 4px;
-            margin-bottom: 15px; 
-            width: 474px;
-            height: 474px;
-        }
-
-        /* 核心时钟区域 */
-        .clock-box {
-            width: 450px;
-            height: 450px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
-            border: 2px solid rgba(212, 175, 55, 0.8);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            color: #ffffff;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .time-display {
-            font-size: 76px;
-            font-weight: 700;
-            letter-spacing: -2px;
-            line-height: 1;
-            margin-bottom: 15px;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .date-display {
-            font-size: 16px;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            opacity: 0.9;
-            margin-bottom: 6px;
-        }
-
-        .timezone-display {
-            font-size: 12px;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            opacity: 0.6;
-        }
-
-        /* 核心图表与第二页看板 1x1 区域 */
-        .panel-box {
-            width: 450px;
-            height: 450px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 2px solid rgba(212, 175, 55, 0.8);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            padding: 30px 24px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* 按钮包装器 */
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            gap: 10px; 
-        }
-
-        .btn-row {
-            display: flex;
-            width: 85%;
-            max-width: 320px;
-            gap: 8px;
-        }
-
-        /* 统一按钮基础样式 */
-        .btn {
-            width: 85%;
-            max-width: 320px;
-            padding: 13px 28px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
-            text-align: center;
-        }
-
-        .btn-row .btn {
-            flex: 1;
-            padding: 11px 5px;
-            font-size: 10px;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        /* ✨ CAPTURE 按钮独立淡入淡出动画 */
-        .btn-capture {
-            color: #0f2027;
-            background-color: #ffffff;
-            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-        }
-        .btn-capture:hover {
-            transform: translateY(-2px);
-            background-color: #d4af37;
-            color: #fff;
-            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
-        }
-
-        /* 起床打卡按钮保持原样 */
-        .btn-checkin {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-checkin:hover {
-            transform: translateY(-2px);
-            background-color: #218838;
-            box-shadow: 0 12px 24px rgba(40, 167, 69, 0.4);
-        }
-        .btn-checkin.checked {
-            background-color: #dc3545;
-        }
-        .btn-checkin.checked:hover {
-            background-color: #c82333;
-            box-shadow: 0 12px 24px rgba(220, 53, 69, 0.4);
-        }
-
-        /* 🛑 统一的停止状态 */
-        .btn-stop { 
-            background-color: #dc3545 !important; 
-            color: white !important; 
-            border: none !important;
-        }
-        .btn-stop:hover { background-color: #c82333 !important; }
-
-        /* 🏋️‍♂️ 健身组（START & MANUAL 统一采用薄荷暗青色系） */
-        .btn-fit-theme {
-            background-color: rgba(32, 201, 151, 0.15); 
-            color: #20c997; 
-            border: 1px solid rgba(32, 201, 151, 0.4); 
-        }
-        .btn-fit-theme:hover {
-            background-color: rgba(32, 201, 151, 0.3); 
-            box-shadow: 0 6px 15px rgba(32, 201, 151, 0.2);
-        }
-
-        /* 📚 学习组（START & MANUAL 统一采用学院暗蓝色系） */
-        .btn-study-theme {
-            background-color: rgba(0, 123, 255, 0.15); 
-            color: #3395ff; 
-            border: 1px solid rgba(0, 123, 255, 0.4); 
-        }
-        .btn-study-theme:hover {
-            background-color: rgba(0, 123, 255, 0.3); 
-            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.2);
-        }
-
-        /* 排版 */
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            width: 100%;
-        }
-
-        .dashboard-title {
-            font-size: 15px; 
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            color: #fff;
-        }
-
-        .tabs {
-            display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 4px;
-        }
-
-        .tab {
-            padding: 5px 10px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-            opacity: 0.6;
-            color: #fff;
-        }
-
-        .tab.active {
-            background: rgba(255, 255, 255, 0.2);
-            opacity: 1;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        /* 📋 网格流 */
-        .tracker-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            flex-grow: 1;
-        }
-        .tracker-section {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .section-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.8);
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 14px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        /* 运行中的高亮呼吸灯状态 */
-        .stat-card.timing {
-            border-color: #28a745;
-            background: rgba(40, 167, 69, 0.08);
-            box-shadow: inset 0 0 10px rgba(40, 167, 69, 0.2);
-        }
-
-        .stat-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 6px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #d4af37;
-        }
-        
-        .stat-card.timing .stat-value,
-        .stat-card.timing .stat-sub-value {
-            color: #2cfc62 !important;
-        }
-
-        .stat-sub-value {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 4px;
-        }
-
-        .chart-container {
-            position: relative;
-            width: 100%;
-            flex-grow: 1;
-            height: 180px; 
-        }
-
-        /* 📱 响应式 */
-     @media (max-width: 980px) {
-
-    body {
-        padding: 20px 10px;
-        justify-content: flex-start;
-    }
-
-    /* 手机版保持竖排 */
-    .page-view {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .control-block {
-        margin-bottom: 24px;
-        width: 100%;
-        align-items: center;
-    }
-
-    .capture-wrapper {
-        width: 92vw;
-        height: 92vw;
-        max-width: 450px;
-        max-height: 450px;
-        padding: 8px;
-        margin-bottom: 10px;
-    }
-
-    .clock-box,
-    .panel-box {
-        width: 100%;
-        height: 100%;
-    }
-
-
-    /* 时间 */
-    .time-display {
-        font-size: 56px;
-        margin-bottom: 12px;
-    }
-
-    .date-display {
-        font-size: 14px;
-        letter-spacing: 3px;
-    }
-
-    .timezone-display {
-        font-size: 10px;
-    }
-
-    /* panel */
-    .panel-box {
-        padding: 22px 18px;
-    }
-
-    .dashboard-header {
-        margin-bottom: 18px;
-    }
-
-    .dashboard-title {
-        font-size: 14px;
-    }
-
-    /* tabs */
-    .tab {
-        font-size: 10px;
-        padding: 5px 9px;
-    }
-
-    /* stats */
-    .stats-grid {
-        gap: 12px;
-        margin-bottom: 16px;
-    }
-
-    .tracker-grid {
-        gap: 14px;
-    }
-
-    .tracker-section {
-        gap: 10px;
-    }
-
-    .section-title {
-        font-size: 11px;
-    }
-
-    .stat-card {
-        padding: 12px;
-    }
-
-    .stat-label {
-        font-size: 9px;
-    }
-
-    .stat-value {
-        font-size: 18px;
-    }
-
-    .stat-sub-value {
-        font-size: 10px;
-    }
-
-    /* 图表 */
-    .chart-container {
-        height: calc(100% - 100px);
-    }
-
-    /* 按钮 */
-    .btn-group {
-        gap: 8px;
-    }
-
-    .btn {
-        font-size: 11px;
-        padding: 11px 16px;
-    }
-
-    .btn-row {
-        width: 100%;
-        gap: 6px;
-    }
-
-    .btn-row .btn {
-        font-size: 9px;
-        padding: 9px 3px;
-    }
-
-    /* 顶部切换 */
-    .page-switcher {
-        margin-bottom: 20px;
-    }
-
-    .page-tab {
-        font-size: 11px;
-        padding: 9px 16px;
-    }
-}
-    </style>
-</head>
-<body>
-
-    <!-- 🎛️ 顶端页面翻页标签 -->
-    <div class="page-switcher">
-        <div class="page-tab active" id="tab-p1" onclick="switchPage(1)">🌅 Timeline</div>
-        <div class="page-tab" id="tab-p2" onclick="switchPage(2)">🏋️‍♂️ Life Balance</div>
-    </div>
-
-    <!-- 大容器外框 -->
-    <div class="main-container">
-
-        <!-- ==================== 【第一页：起床打卡线】 ==================== -->
-        <div class="page-view active" id="page1">
-            <div class="control-block">
-                <div class="capture-wrapper">
-                    <div class="clock-box" id="capture-area-p1">
-                        <div class="time-display" id="time-p1">00:00</div>
-                        <div class="date-display" id="date-p1">LOADING DATE</div>
-                        <div class="timezone-display">CURRENT TIME</div>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-capture" onclick="captureImage('capture-area-p1', 'Clock_P1')">CAPTURE 1x1 CLOCK</button>
-                    <button class="btn btn-checkin" id="checkin-btn" onclick="toggleCheckIn()">CONNECTING...</button>
-                </div>
-            </div>
-
-            <div class="control-block">
-                <div class="capture-wrapper">
-                    <div class="panel-box" id="chart-capture-area">
-                        <div class="dashboard-header">
-                            <div class="dashboard-title">Check-in Timeline</div>
-                            <div class="tabs" id="chart-tabs-container">
-                                <div class="tab active" onclick="switchView('week')">Week</div>
-                                <div class="tab" onclick="switchView('month')">Month</div>
-                                <div class="tab" onclick="switchView('halfYear')">6-M</div>
-                                <div class="tab" onclick="switchView('year')">Year</div>
-                            </div>
-                        </div>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-label">Completion Rate</div>
-                                <div class="stat-value" id="stat-rate">0%</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Avg. Check-in Time</div>
-                                <div class="stat-value" id="stat-avg">--:--</div>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="analyticsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-capture" onclick="captureChartImage()">CAPTURE 1x1 ANALYTICS</button>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- ==================== 【第二页：健身与学习】 ==================== -->
-        <div class="page-view" id="page2">
-            <div class="control-block">
-                <div class="capture-wrapper">
-                    <div class="clock-box" id="capture-area-p2">
-                        <div class="time-display" id="time-p2">00:00</div>
-                        <div class="date-display" id="date-p2">LOADING DATE</div>
-                        <div class="timezone-display">CURRENT TIME</div>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-capture" onclick="captureImage('capture-area-p2', 'Clock_P2')">CAPTURE 1x1 CLOCK</button>
-                </div>
-            </div>
-
-            <div class="control-block">
-                <div class="capture-wrapper">
-                    <div class="panel-box" id="tracker-capture-area">
-                        <div class="dashboard-header">
-                            <div class="dashboard-title">Life Balance Tracker</div>
-                        </div>
-                        
-                        <div class="tracker-grid">
-                            <!-- 🏋️‍♂️ 健身区 -->
-                            <div class="tracker-section">
-                                <div class="section-title">🏋️‍♂️ FITNESS</div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Total Days</div>
-                                    <div class="stat-value" id="fit-days">0 days</div>
-                                </div>
-                                <div class="stat-card" id="fit-duration-card">
-                                    <div class="stat-label">Total Duration</div>
-                                    <div class="stat-value" id="fit-hours">0.0 hrs</div>
-                                    <div class="stat-sub-value" id="fit-mins">0 mins</div>
-                                </div>
-                            </div>
-                            <!-- 📚 学习区 -->
-                            <div class="tracker-section">
-                                <div class="section-title">📚 STUDY</div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Total Days</div>
-                                    <div class="stat-value" id="study-days">0 days</div>
-                                </div>
-                                <div class="stat-card" id="study-duration-card">
-                                    <div class="stat-label">Total Duration</div>
-                                    <div class="stat-value" id="study-hours">0.0 hrs</div>
-                                    <div class="stat-sub-value" id="study-mins">0 mins</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="btn-group">
-                    <div class="btn-row">
-                        <!-- START 默认整合各自主题色 -->
-                        <button class="btn btn-fit-theme" id="btn-fit-toggle" onclick="toggleTimer('fitness')">START FIT</button>
-                        <button class="btn btn-fit-theme" onclick="logManualActivity('fitness')">MANUAL</button>
-                        <button class="btn btn-study-theme" id="btn-study-toggle" onclick="toggleTimer('study')">START STUDY</button>
-                        <button class="btn btn-study-theme" onclick="logManualActivity('study')">MANUAL</button>
-                    </div>
-                    <button class="btn btn-capture" onclick="captureImage('tracker-capture-area', 'Tracker_P2')">CAPTURE 1x1 TRACKER</button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        // ======= 【核心配置区：指向你的 Firebase 实时数据库】 =======
-        const FIREBASE_BASE_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/";
-        // =======================================================
-
-        let currentView = 'week';
-        let chartInstance = null;
-        let globalColors = [];
-        let globalHistoryData = {}; 
-        let globalTrackerData = { fitness: {}, study: {} };
-
-        let timers = {
-            fitness: { intervalId: null, startTime: null },
-            study: { intervalId: null, startTime: null }
-        };
-
-        function switchPage(pageNumber) {
-            document.getElementById('tab-p1').classList.toggle('active', pageNumber === 1);
-            document.getElementById('tab-p2').classList.toggle('active', pageNumber === 2);
-            
-            document.getElementById('page1').classList.toggle('active', pageNumber === 1);
-            document.getElementById('page2').classList.toggle('active', pageNumber === 2);
-
-            if (pageNumber === 1) {
-                renderChart(); 
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Time Clock & Tracker</title>
+        <!-- 引入免费商用字体 Inter -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/1584/1584858.png" />
+
+        <!-- 引入 html2canvas 和 Chart.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <style>
+            :root {
+                --bg-color-1: #0f2027;
+                --bg-color-2: #203a43;
+                --bg-color-3: #2c5364;
             }
-        }
 
-        function fetchCloudData() {
-            fetch(`${FIREBASE_BASE_URL}checkins.json`)
-                .then(res => res.json())
-                .then(data => {
-                    globalHistoryData = data ? data : {};
-                    updateCheckInButton();
-                    if(document.getElementById('page1').classList.contains('active')) {
-                        renderChart();
-                    }
-                }).catch(e => console.error(e));
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-            fetch(`${FIREBASE_BASE_URL}tracker.json`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data) {
-                        globalTrackerData.fitness = data.fitness || {};
-                        globalTrackerData.study = data.study || {};
-                    }
-                    renderTrackerStats();
-                }).catch(e => console.error(e));
-        }
+            body {
+                font-family: "Inter", sans-serif;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
+                background-size: 400% 400%;
+                transition: all 2s ease;
+                color: #fff;
+                padding: 20px;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
 
-        // ==================== [ 正计时 & 手动录入引擎 ] ====================
-        function toggleTimer(type) {
-            const timerObj = timers[type];
-            const card = document.getElementById(`${type === 'fitness' ? 'fit' : 'study'}-duration-card`);
-            const toggleBtn = document.getElementById(`btn-${type === 'fitness' ? 'fit' : 'study'}-toggle`);
-            const labelText = type === 'fitness' ? 'FIT' : 'STUDY';
+            /* 🎛️ 顶端全局页面切换器 */
+            .page-switcher {
+                display: flex;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 30px;
+                padding: 6px;
+                margin-bottom: 30px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                z-index: 10;
+            }
 
-            if (timerObj.intervalId === null) {
-                timerObj.startTime = new Date();
-                timerObj.intervalId = setInterval(() => {
-                    updateLiveTimerDisplay(type);
-                }, 1000);
+            .page-tab {
+                padding: 10px 24px;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                border-radius: 20px;
+                transition:
+                    background-color 0.35s ease,
+                    color 0.35s ease,
+                    box-shadow 0.35s ease;
+                color: rgba(255, 255, 255, 0.6);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
 
-                toggleBtn.innerText = `STOP ${labelText}`;
-                toggleBtn.className = "btn btn-stop"; // 激活时变成亮眼红色
-                card.classList.add('timing');
-            } else {
-                clearInterval(timerObj.intervalId);
-                timerObj.intervalId = null;
+            .page-tab.active {
+                background: #ffffff;
+                color: #0f2027;
+                box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+            }
 
-                const endTime = new Date();
-                const elapsedSeconds = Math.floor((endTime - timerObj.startTime) / 1000);
-                const elapsedMinutes = Math.round(elapsedSeconds / 60);
+            /* 大容器 */
+            .main-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 60px;
+                width: 100%;
+                max-width: 1100px;
+            }
 
-                if (elapsedMinutes >= 1) {
-                    const todayStr = new Date().toLocaleDateString('sv-SE');
-                    const currentMinutes = globalTrackerData[type][todayStr] || 0;
-                    globalTrackerData[type][todayStr] = currentMinutes + elapsedMinutes;
-                    
-                    fetch(`${FIREBASE_BASE_URL}tracker.json`, { method: 'PUT', body: JSON.stringify(globalTrackerData) })
-                        .then(() => fetchCloudData());
-                } else {
-                    alert("Duration too short (less than 1 minute). Not recorded.");
-                    renderTrackerStats();
+            /* 页面切换：隐藏/显示 */
+            .page-view {
+                display: none;
+                justify-content: center;
+                gap: 60px;
+                width: 100%;
+            }
+
+            .page-view.active {
+                display: flex;
+            }
+
+            .control-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 474px;
+                flex-shrink: 0;
+            }
+
+            /* 1x1 外部金色虚线框架 */
+            .capture-wrapper {
+                position: relative;
+                padding: 10px;
+                border: 2px dashed rgba(212, 175, 55, 0.4);
+                border-radius: 4px;
+                margin-bottom: 15px;
+                width: 474px;
+                height: 474px;
+            }
+
+            /* 核心时钟区域 */
+            .clock-box {
+                width: 450px;
+                height: 450px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
+                border: 2px solid rgba(212, 175, 55, 0.8);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+                color: #ffffff;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .time-display {
+                font-size: 76px;
+                font-weight: 700;
+                letter-spacing: -2px;
+                line-height: 1;
+                margin-bottom: 15px;
+                text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .date-display {
+                font-size: 16px;
+                font-weight: 400;
+                text-transform: uppercase;
+                letter-spacing: 4px;
+                opacity: 0.9;
+                margin-bottom: 6px;
+            }
+
+            .timezone-display {
+                font-size: 12px;
+                font-weight: 400;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                opacity: 0.6;
+            }
+
+            /* 核心图表与第二页看板 1x1 区域 */
+            .panel-box {
+                width: 450px;
+                height: 450px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                background: rgba(255, 255, 255, 0.08);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+                border: 2px solid rgba(212, 175, 55, 0.8);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+                padding: 30px 24px;
+                position: relative;
+                overflow: hidden;
+            }
+
+            /* 按钮包装器 */
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .btn-row {
+                display: flex;
+                width: 85%;
+                max-width: 320px;
+                gap: 8px;
+            }
+
+            /* 统一按钮基础样式 */
+            .btn {
+                width: 85%;
+                max-width: 320px;
+                padding: 13px 28px;
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 700;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+                letter-spacing: 0.5px;
+                text-align: center;
+            }
+
+            .btn-row .btn {
+                flex: 1;
+                padding: 11px 5px;
+                font-size: 10px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+            /* ✨ CAPTURE 按钮独立淡入淡出动画 */
+            .btn-capture {
+                color: #0f2027;
+                background-color: #ffffff;
+                transition:
+                    background-color 0.3s ease,
+                    color 0.3s ease,
+                    box-shadow 0.3s ease,
+                    transform 0.3s ease;
+            }
+            .btn-capture:hover {
+                transform: translateY(-2px);
+                background-color: #d4af37;
+                color: #fff;
+                box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+            }
+
+            /* 起床打卡按钮保持原样 */
+            .btn-checkin {
+                background-color: #28a745;
+                color: white;
+            }
+            .btn-checkin:hover {
+                transform: translateY(-2px);
+                background-color: #218838;
+                box-shadow: 0 12px 24px rgba(40, 167, 69, 0.4);
+            }
+            .btn-checkin.checked {
+                background-color: #dc3545;
+            }
+            .btn-checkin.checked:hover {
+                background-color: #c82333;
+                box-shadow: 0 12px 24px rgba(220, 53, 69, 0.4);
+            }
+
+            /* 🛑 统一的停止状态 */
+            .btn-stop {
+                background-color: #dc3545 !important;
+                color: white !important;
+                border: none !important;
+            }
+            .btn-stop:hover {
+                background-color: #c82333 !important;
+            }
+
+            /* 🏋️‍♂️ 健身组（START & MANUAL 统一采用薄荷暗青色系） */
+            .btn-fit-theme {
+                background-color: rgba(32, 201, 151, 0.15);
+                color: #20c997;
+                border: 1px solid rgba(32, 201, 151, 0.4);
+            }
+            .btn-fit-theme:hover {
+                background-color: rgba(32, 201, 151, 0.3);
+                box-shadow: 0 6px 15px rgba(32, 201, 151, 0.2);
+            }
+
+            /* 📚 学习组（START & MANUAL 统一采用学院暗蓝色系） */
+            .btn-study-theme {
+                background-color: rgba(0, 123, 255, 0.15);
+                color: #3395ff;
+                border: 1px solid rgba(0, 123, 255, 0.4);
+            }
+            .btn-study-theme:hover {
+                background-color: rgba(0, 123, 255, 0.3);
+                box-shadow: 0 6px 15px rgba(0, 123, 255, 0.2);
+            }
+
+            /* 排版 */
+            .dashboard-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+                width: 100%;
+            }
+
+            .dashboard-title {
+                font-size: 15px;
+                font-weight: 600;
+                letter-spacing: 0.3px;
+                color: #fff;
+            }
+
+            .tabs {
+                display: flex;
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 8px;
+                padding: 4px;
+            }
+
+            .tab {
+                padding: 5px 10px;
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 6px;
+                transition: all 0.2s;
+                opacity: 0.6;
+                color: #fff;
+            }
+
+            .tab.active {
+                background: rgba(255, 255, 255, 0.2);
+                opacity: 1;
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+
+            /* 📋 网格流 */
+            .tracker-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                flex-grow: 1;
+            }
+            .tracker-section {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .section-title {
+                font-size: 12px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.8);
+                letter-spacing: 0.5px;
+            }
+
+            .stat-card {
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 10px;
+                padding: 14px 16px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+            }
+
+            /* 运行中的高亮呼吸灯状态 */
+            .stat-card.timing {
+                border-color: #28a745;
+                background: rgba(40, 167, 69, 0.08);
+                box-shadow: inset 0 0 10px rgba(40, 167, 69, 0.2);
+            }
+
+            .stat-label {
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: rgba(255, 255, 255, 0.5);
+                margin-bottom: 6px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+                font-weight: 700;
+                color: #d4af37;
+            }
+
+            .stat-card.timing .stat-value,
+            .stat-card.timing .stat-sub-value {
+                color: #2cfc62 !important;
+            }
+
+            .stat-sub-value {
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.5);
+                margin-top: 4px;
+            }
+
+            .chart-container {
+                position: relative;
+                width: 100%;
+                flex-grow: 1;
+                height: 180px;
+            }
+
+            .today-card {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .mini-reset-btn {
+                opacity: 0;
+                pointer-events: none;
+
+                width: 24px;
+                height: 24px;
+
+                border: none;
+                border-radius: 999px;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                cursor: pointer;
+
+                background: rgba(255, 255, 255, 0.06);
+                color: rgba(255, 255, 255, 0.55);
+
+                font-size: 14px;
+                font-weight: 700;
+
+                transition:
+                    opacity 0.25s ease,
+                    background-color 0.25s ease,
+                    color 0.25s ease,
+                    transform 0.2s ease;
+            }
+
+.clickable-time-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.mini-edit-btn {
+    opacity: 0;
+    pointer-events: none;
+
+    width: 24px;
+    height: 24px;
+
+    border: none;
+    border-radius: 999px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.55);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition:
+        opacity 0.25s ease,
+        background-color 0.25s ease,
+        color 0.25s ease,
+        transform 0.2s ease;
+}
+
+.clickable-time-card:hover .mini-edit-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mini-edit-btn:hover {
+    background: rgba(212,175,55,0.18);
+    color: #d4af37;
+    transform: scale(1.08);
+}
+
+
+            .today-card:hover .mini-reset-btn {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .mini-reset-btn:hover {
+                background: rgba(220, 53, 69, 0.18);
+                color: #ff8a95;
+                transform: rotate(-25deg);
+            }
+            
+            /* 📱 Responsive */
+            @media (max-width: 980px) {
+                body {
+                    padding: 20px 10px;
+                    justify-content: flex-start;
                 }
 
-                // 还原回各自由 MANUAL 统一样式的颜色
-                toggleBtn.innerText = `START ${labelText}`;
-                toggleBtn.className = `btn btn-${type}-theme`;
-                card.classList.remove('timing');
+                /* 手机版保持竖排 */
+                .page-view {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .control-block {
+                    margin-bottom: 24px;
+                    width: 100%;
+                    align-items: center;
+                }
+
+                .capture-wrapper {
+                    width: 92vw;
+                    height: 92vw;
+                    max-width: 450px;
+                    max-height: 450px;
+                    padding: 8px;
+                    margin-bottom: 10px;
+                }
+
+                .clock-box,
+                .panel-box {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                /* 时间 */
+                .time-display {
+                    font-size: 56px;
+                    margin-bottom: 12px;
+                }
+
+                .date-display {
+                    font-size: 14px;
+                    letter-spacing: 3px;
+                }
+
+                .timezone-display {
+                    font-size: 10px;
+                }
+
+                /* panel */
+                .panel-box {
+                    padding: 22px 18px;
+                }
+
+                .dashboard-header {
+                    margin-bottom: 18px;
+                }
+
+                .dashboard-title {
+                    font-size: 14px;
+                }
+
+                /* tabs */
+                .tab {
+                    font-size: 10px;
+                    padding: 5px 9px;
+                }
+
+                /* stats */
+                .stats-grid {
+                    gap: 12px;
+                    margin-bottom: 16px;
+                }
+
+                .tracker-grid {
+                    gap: 14px;
+                }
+
+                .tracker-section {
+                    gap: 10px;
+                }
+
+                .section-title {
+                    font-size: 11px;
+                }
+
+                .stat-card {
+                    padding: 12px;
+                }
+
+                .stat-label {
+                    font-size: 9px;
+                }
+
+                .stat-value {
+                    font-size: 18px;
+                }
+
+                .stat-sub-value {
+                    font-size: 10px;
+                }
+
+                /* 图表 */
+                .chart-container {
+                    height: calc(100% - 100px);
+                }
+
+                /* 按钮 */
+                .btn-group {
+                    gap: 8px;
+                }
+
+                .btn {
+                    font-size: 11px;
+                    padding: 11px 16px;
+                }
+
+                .btn-row {
+                    width: 100%;
+                    gap: 6px;
+                }
+
+                .btn-row .btn {
+                    font-size: 9px;
+                    padding: 9px 3px;
+                }
+
+                /* 顶部切换 */
+                .page-switcher {
+                    margin-bottom: 20px;
+                }
+
+                .page-tab {
+                    font-size: 11px;
+                    padding: 9px 16px;
+                }
             }
-        }
+        </style>
+    </head>
+    <body>
+        <!-- 🎛️ 顶端页面翻页标签 -->
+        <div class="page-switcher">
+            <div class="page-tab active" id="tab-p1" onclick="switchPage(1)">🌅 Timeline</div>
+            <div class="page-tab" id="tab-p2" onclick="switchPage(2)">⚖️ Life Balance</div>
+        </div>
 
-        function updateLiveTimerDisplay(type) {
-            const timerObj = timers[type];
-            const elapsedSeconds = Math.floor((new Date() - timerObj.startTime) / 1000);
-            
-            const dataObj = globalTrackerData[type];
-            let staticMinutes = 0;
-            Object.keys(dataObj).forEach(d => staticMinutes += dataObj[d] || 0);
+        <!-- 大容器外框 -->
+        <div class="main-container">
+            <!-- ==================== 【第一页：起床打卡线】 ==================== -->
+            <div class="page-view active" id="page1">
+                <div class="control-block">
+                    <div class="capture-wrapper">
+                        <div class="clock-box" id="capture-area-p1">
+                            <div class="time-display" id="time-p1">00:00</div>
+                            <div class="date-display" id="date-p1">LOADING DATE</div>
+                            <div class="timezone-display">CURRENT TIME</div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-capture" onclick="captureImage('capture-area-p1', 'Clock_P1')">
+                            CAPTURE 1x1 CLOCK
+                        </button>
+                        <button class="btn btn-checkin" id="checkin-btn" onclick="toggleCheckIn()">
+                            CONNECTING...
+                        </button>
+                    </div>
+                </div>
 
-            const dynamicTotalSeconds = (staticMinutes * 60) + elapsedSeconds;
-            const liveHours = (dynamicTotalSeconds / 3600).toFixed(2);
-            const liveMinutes = Math.floor(dynamicTotalSeconds / 60);
+                <div class="control-block">
+                    <div class="capture-wrapper">
+                        <div class="panel-box" id="chart-capture-area">
+                            <div class="dashboard-header">
+                                <div class="dashboard-title">Check-in Timeline</div>
+                                <div class="tabs" id="chart-tabs-container">
+                                    <div class="tab active" onclick="switchView('week')">Week</div>
+                                    <div class="tab" onclick="switchView('month')">Month</div>
+                                    <div class="tab" onclick="switchView('halfYear')">6-M</div>
+                                    <div class="tab" onclick="switchView('year')">Year</div>
+                                </div>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-label">Completion Rate</div>
+                                    <div class="stat-value" id="stat-rate">0%</div>
+                                </div>
+<div class="stat-card clickable-time-card">
 
-            const prefix = type === 'fitness' ? 'fit' : 'study';
-            document.getElementById(`${prefix}-hours`).innerText = `${liveHours} hrs`;
-            document.getElementById(`${prefix}-mins`).innerText = `⚡ ${liveMinutes} mins`;
-        }
+    <div>
+        <div class="stat-label">Avg. Check-in Time</div>
+        <div class="stat-value" id="stat-avg">--:--</div>
+    </div>
 
-        function logManualActivity(type) {
-            if (timers[type].intervalId !== null) {
-                alert("Please stop the active timer before adding manual data.");
-                return;
+    <button
+        class="mini-edit-btn"
+        onclick="editTodayCheckInTime()"
+    >
+        ✎
+    </button>
+
+</div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="analyticsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-capture" onclick="captureChartImage()">CAPTURE 1x1 ANALYTICS</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 【第二页：健身与学习】 ==================== -->
+            <div class="page-view" id="page2">
+                <div class="control-block">
+                    <div class="capture-wrapper">
+                        <div class="clock-box" id="capture-area-p2">
+                            <div class="time-display" id="time-p2">00:00</div>
+                            <div class="date-display" id="date-p2">LOADING DATE</div>
+                            <div class="timezone-display">CURRENT TIME</div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-capture" onclick="captureImage('capture-area-p2', 'Clock_P2')">
+                            CAPTURE 1x1 CLOCK
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-block">
+                    <div class="capture-wrapper">
+                        <div class="panel-box" id="tracker-capture-area">
+                            <div class="dashboard-header">
+                                <div class="dashboard-title">Life Balance Tracker</div>
+                            </div>
+
+                            <div class="tracker-grid">
+                                <!-- 🏋️‍♂️ 健身区 -->
+                                <div class="tracker-section">
+                                    <div class="section-title">🏋️‍♂️ FITNESS</div>
+                                    <div class="stat-card today-card">
+                                        <div>
+                                            <div class="stat-label">Today</div>
+                                            <div class="stat-value" id="fit-today">0 mins</div>
+                                        </div>
+
+                                        <button class="mini-reset-btn" onclick="clearTodayActivity('fitness')">
+                                            ↺
+                                        </button>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Total Days</div>
+                                        <div class="stat-value" id="fit-days">0 days</div>
+                                    </div>
+                                    <div class="stat-card" id="fit-duration-card">
+                                        <div class="stat-label">Total Duration</div>
+                                        <div class="stat-value" id="fit-hours">0.0 hrs</div>
+                                        <div class="stat-sub-value" id="fit-mins">0 mins</div>
+                                    </div>
+                                </div>
+                                <!-- 📚 学习区 -->
+                                <div class="tracker-section">
+                                    <div class="section-title">📚 STUDY</div>
+                                    <div class="stat-card today-card">
+                                        <div>
+                                            <div class="stat-label">Today</div>
+                                            <div class="stat-value" id="study-today">0 mins</div>
+                                        </div>
+
+                                        <button class="mini-reset-btn" onclick="clearTodayActivity('study')">↺</button>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Total Days</div>
+                                        <div class="stat-value" id="study-days">0 days</div>
+                                    </div>
+                                    <div class="stat-card" id="study-duration-card">
+                                        <div class="stat-label">Total Duration</div>
+                                        <div class="stat-value" id="study-hours">0.0 hrs</div>
+                                        <div class="stat-sub-value" id="study-mins">0 mins</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <div class="btn-row">
+                            <!-- START 默认整合各自主题色 -->
+                            <button class="btn btn-fit-theme" id="btn-fit-toggle" onclick="toggleTimer('fitness')">
+                                START FIT
+                            </button>
+                            <button class="btn btn-fit-theme" onclick="resetTimer('fitness')">RESET</button>
+
+                            <button class="btn btn-study-theme" id="btn-study-toggle" onclick="toggleTimer('study')">
+                                START STUDY
+                            </button>
+                            <button class="btn btn-study-theme" onclick="resetTimer('study')">RESET</button>
+                        </div>
+                        <button class="btn btn-capture" onclick="captureImage('tracker-capture-area', 'Tracker_P2')">
+                            CAPTURE 1x1 TRACKER
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ======= 【核心配置区：指向你的 Firebase 实时数据库】 =======
+            const FIREBASE_BASE_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/";
+            // =======================================================
+
+            let currentView = "week";
+            let chartInstance = null;
+            let lastChartSignature = "";
+            let globalColors = [];
+            let globalHistoryData = {};
+            let globalTrackerData = { fitness: {}, study: {} };
+
+            let timers = {
+                fitness: { intervalId: null, startTime: null },
+                study: { intervalId: null, startTime: null },
+            };
+
+            function switchPage(pageNumber) {
+                document.getElementById("tab-p1").classList.toggle("active", pageNumber === 1);
+                document.getElementById("tab-p2").classList.toggle("active", pageNumber === 2);
+
+                document.getElementById("page1").classList.toggle("active", pageNumber === 1);
+                document.getElementById("page2").classList.toggle("active", pageNumber === 2);
+
+                if (pageNumber === 1) {
+                    renderChart();
+                }
             }
 
-            const minutesInput = prompt(`Enter manual ${type === 'fitness' ? 'Fitness' : 'Study'} duration in MINUTES:`, "60");
-            if (minutesInput === null) return;
-            const minutes = parseInt(minutesInput, 10);
-            if (isNaN(minutes) || minutes <= 0) return alert("Please enter a valid positive number.");
+            function fetchCloudData() {
+                fetch(`${FIREBASE_BASE_URL}checkins.json`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        globalHistoryData = data ? data : {};
+                        updateCheckInButton();
+                        if (document.getElementById("page1").classList.contains("active")) {
+                            renderChart();
+                        }
+                    })
+                    .catch((e) => console.error(e));
 
-            const todayStr = new Date().toLocaleDateString('sv-SE');
-            const currentMinutes = globalTrackerData[type][todayStr] || 0;
-            globalTrackerData[type][todayStr] = currentMinutes + minutes;
+                fetch(`${FIREBASE_BASE_URL}tracker.json`)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data) {
+                            globalTrackerData.fitness = data.fitness || {};
+                            globalTrackerData.study = data.study || {};
+                        }
+                        renderTrackerStats();
+                    })
+                    .catch((e) => console.error(e));
+            }
 
-            fetch(`${FIREBASE_BASE_URL}tracker.json`, { method: 'PUT', body: JSON.stringify(globalTrackerData) })
-                .then(() => fetchCloudData());
-        }
+            // ===== TRACKER ENGINE =====
+            function toggleTimer(type) {
+                const timerObj = timers[type];
+                const card = document.getElementById(`${type === "fitness" ? "fit" : "study"}-duration-card`);
+                const toggleBtn = document.getElementById(`btn-${type === "fitness" ? "fit" : "study"}-toggle`);
+                const labelText = type === "fitness" ? "FIT" : "STUDY";
 
-        function renderTrackerStats() {
-            ['fitness', 'study'].forEach(type => {
-                if (timers[type].intervalId !== null) return;
+                if (timerObj.intervalId === null) {
+                    // 记录开始时间
+                    timerObj.startTime = new Date();
+
+                    // 存到 localStorage
+                    localStorage.setItem(`${type}StartTime`, timerObj.startTime.getTime());
+
+                    timerObj.intervalId = setInterval(() => {
+                        updateLiveTimerDisplay(type);
+                    }, 1000);
+
+                    toggleBtn.innerText = `STOP ${labelText}`;
+                    toggleBtn.className = "btn btn-stop"; // 激活时变成亮眼红色
+                    card.classList.add("timing");
+                } else {
+                    clearInterval(timerObj.intervalId);
+                    timerObj.intervalId = null;
+                    localStorage.removeItem(`${type}StartTime`);
+
+                    const endTime = new Date();
+                    const elapsedSeconds = Math.floor((endTime - timerObj.startTime) / 1000);
+                    const elapsedMinutes = Math.round(elapsedSeconds / 60);
+
+                    if (elapsedMinutes >= 1) {
+                        const todayStr = new Date().toLocaleDateString("sv-SE");
+                        const currentMinutes = globalTrackerData[type][todayStr] || 0;
+                        globalTrackerData[type][todayStr] = currentMinutes + elapsedMinutes;
+
+                        fetch(`${FIREBASE_BASE_URL}tracker.json`, {
+                            method: "PUT",
+                            body: JSON.stringify(globalTrackerData),
+                        }).then(() => fetchCloudData());
+                    } else {
+                        alert("Duration too short (less than 1 minute). Not recorded.");
+                        renderTrackerStats();
+                    }
+
+                    // 还原回各自由 MANUAL 统一样式的颜色
+                    toggleBtn.innerText = `START ${labelText}`;
+                    toggleBtn.className = `btn btn-${type}-theme`;
+                    card.classList.remove("timing");
+                }
+            }
+
+            function updateLiveTimerDisplay(type) {
+                const timerObj = timers[type];
+                const elapsedSeconds = Math.floor((new Date() - timerObj.startTime) / 1000);
 
                 const dataObj = globalTrackerData[type];
-                const dates = Object.keys(dataObj);
-                const totalDays = dates.length;
-                let totalMinutes = 0;
-                dates.forEach(d => totalMinutes += dataObj[d] || 0);
-                const totalHours = (totalMinutes / 60).toFixed(1);
+                let staticMinutes = 0;
+                Object.keys(dataObj).forEach((d) => (staticMinutes += dataObj[d] || 0));
 
-                const prefix = type === 'fitness' ? 'fit' : 'study';
-                document.getElementById(`${prefix}-days`).innerText = `${totalDays} days`;
-                document.getElementById(`${prefix}-hours`).innerText = `${totalHours} hrs`;
-                document.getElementById(`${prefix}-mins`).innerText = `${totalMinutes} mins`;
-            });
-        }
+                const dynamicTotalSeconds = staticMinutes * 60 + elapsedSeconds;
+                const liveHours = (dynamicTotalSeconds / 3600).toFixed(2);
+                const liveMinutes = Math.floor(dynamicTotalSeconds / 60);
 
-        // ==================== [ 起床打卡线逻辑 ] ====================
-        function toggleCheckIn() {
-            const todayStr = new Date().toLocaleDateString('sv-SE');
-            if (globalHistoryData[todayStr]) {
-                delete globalHistoryData[todayStr];
-            } else {
+                const prefix = type === "fitness" ? "fit" : "study";
+                document.getElementById(`${prefix}-hours`).innerText = `${liveHours} hrs`;
+                document.getElementById(`${prefix}-mins`).innerText = `⚡ ${liveMinutes} mins`;
+            }
+
+            function editTodayActivity(type) {
+                if (timers[type].intervalId !== null) {
+                    alert("Please stop or reset the active timer before editing today's data.");
+                    return;
+                }
+
+                const todayStr = new Date().toLocaleDateString("sv-SE");
+                const currentMinutes = globalTrackerData[type][todayStr] || 0;
+
+                const minutesInput = prompt(
+                    `Enter today's ${type === "fitness" ? "Fitness" : "Study"} duration in MINUTES.\nEnter 0 to clear today's record:`,
+                    currentMinutes,
+                );
+
+                if (minutesInput === null) return;
+
+                const minutes = parseInt(minutesInput, 10);
+
+                if (isNaN(minutes) || minutes < 0) {
+                    alert("Please enter 0 or a positive number.");
+                    return;
+                }
+
+                if (minutes === 0) {
+                    delete globalTrackerData[type][todayStr];
+                } else {
+                    globalTrackerData[type][todayStr] = minutes;
+                }
+
+                fetch(`${FIREBASE_BASE_URL}tracker.json`, {
+                    method: "PUT",
+                    body: JSON.stringify(globalTrackerData),
+                }).then(() => fetchCloudData());
+            }
+
+            function resetTimer(type) {
+                const timerObj = timers[type];
+                const prefix = type === "fitness" ? "fit" : "study";
+                const labelText = type === "fitness" ? "FIT" : "STUDY";
+
+                if (timerObj.intervalId !== null) {
+                    clearInterval(timerObj.intervalId);
+                    timerObj.intervalId = null;
+                }
+
+                timerObj.startTime = null;
+                localStorage.removeItem(`${type}StartTime`);
+
+                const card = document.getElementById(`${prefix}-duration-card`);
+                const toggleBtn = document.getElementById(`btn-${prefix}-toggle`);
+
+                toggleBtn.innerText = `START ${labelText}`;
+                toggleBtn.className = `btn btn-${type}-theme`;
+
+                card.classList.remove("timing");
+
+                renderTrackerStats();
+            }
+
+            function clearTodayActivity(type) {
+                const todayStr = new Date().toLocaleDateString("sv-SE");
+
+                if (globalTrackerData[type][todayStr]) {
+                    delete globalTrackerData[type][todayStr];
+                }
+
+                fetch(`${FIREBASE_BASE_URL}tracker.json`, {
+                    method: "PUT",
+                    body: JSON.stringify(globalTrackerData),
+                }).then(() => fetchCloudData());
+            }
+
+            function renderTrackerStats() {
+                ["fitness", "study"].forEach((type) => {
+                    if (timers[type].intervalId !== null) return;
+
+                    const dataObj = globalTrackerData[type];
+                    const dates = Object.keys(dataObj);
+                    const totalDays = dates.length;
+                    let totalMinutes = 0;
+                    dates.forEach((d) => (totalMinutes += dataObj[d] || 0));
+                    const totalHours = (totalMinutes / 60).toFixed(1);
+
+                    const prefix = type === "fitness" ? "fit" : "study";
+                    document.getElementById(`${prefix}-days`).innerText = `${totalDays} days`;
+                    document.getElementById(`${prefix}-hours`).innerText = `${totalHours} hrs`;
+                    document.getElementById(`${prefix}-mins`).innerText = `${totalMinutes} mins`;
+                    const todayStr = new Date().toLocaleDateString("sv-SE");
+                    const todayMinutes = dataObj[todayStr] || 0;
+                    document.getElementById(`${prefix}-today`).innerText = `${todayMinutes} mins`;
+                });
+            }
+
+            // ===== CHECK-IN ENGINE =====
+            function toggleCheckIn() {
+                const todayStr = new Date().toLocaleDateString("sv-SE");
+                if (globalHistoryData[todayStr]) {
+                    delete globalHistoryData[todayStr];
+                } else {
+                    const now = new Date();
+                    globalHistoryData[todayStr] =
+                        `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+                }
+                fetch(`${FIREBASE_BASE_URL}checkins.json`, {
+                    method: "PUT",
+                    body: JSON.stringify(globalHistoryData),
+                }).then(() => fetchCloudData());
+            }
+
+            function updateCheckInButton() {
+                const todayStr = new Date().toLocaleDateString("sv-SE");
+                const btn = document.getElementById("checkin-btn");
+                if (globalHistoryData[todayStr]) {
+                    btn.innerText = "UNCHECK IN TODAY";
+                    btn.classList.add("checked");
+                } else {
+                    btn.innerText = "CHECK IN TODAY";
+                    btn.classList.remove("checked");
+                }
+            }
+
+            function editTodayCheckInTime() {
+                const todayStr = new Date().toLocaleDateString("sv-SE");
+                const currentTime = globalHistoryData[todayStr] || "";
+
+                const timeInput = prompt(
+                    "Enter today's check-in time in HH:MM format.\nExample: 07:15\nLeave blank to cancel.",
+                    currentTime,
+                );
+
+                if (timeInput === null) return;
+
+                const trimmed = timeInput.trim();
+
+                if (trimmed === "") return;
+
+                const isValidTime = /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed);
+
+                if (!isValidTime) {
+                    alert("Please enter a valid time in HH:MM format, e.g. 07:15.");
+                    return;
+                }
+
+                globalHistoryData[todayStr] = trimmed;
+
+                fetch(`${FIREBASE_BASE_URL}checkins.json`, {
+                    method: "PUT",
+                    body: JSON.stringify(globalHistoryData),
+                }).then(() => fetchCloudData());
+            }
+
+            // ===== ANALYTICS CHART =====
+            function switchView(view) {
+                currentView = view;
+                document.querySelectorAll("#chart-tabs-container .tab").forEach((t) => t.classList.remove("active"));
+                if (window.event) window.event.target.classList.add("active");
+                renderChart();
+            }
+
+            function timeStringToDecimal(timeStr) {
+                if (!timeStr) return null;
+                const [h, m] = timeStr.split(":").map(Number);
+                return parseFloat((h + m / 60).toFixed(2));
+            }
+
+            function decimalToTimeString(decimal) {
+                if (!decimal) return "--:--";
+                const h = Math.floor(decimal);
+                return `${String(h).padStart(2, "0")}:${String(Math.round((decimal - h) * 60)).padStart(2, "0")}`;
+            }
+
+            function renderChart() {
+                const canvas = document.getElementById("analyticsChart");
+                if (!canvas) return;
+                const ctx = canvas.getContext("2d");
                 const now = new Date();
-                globalHistoryData[todayStr] = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            }
-            fetch(`${FIREBASE_BASE_URL}checkins.json`, { method: 'PUT', body: JSON.stringify(globalHistoryData) })
-                .then(() => fetchCloudData());
-        }
+                let labels = [],
+                    chartData = [],
+                    totalDays = 0,
+                    count = 0,
+                    sum = 0;
 
-        function updateCheckInButton() {
-            const todayStr = new Date().toLocaleDateString('sv-SE');
-            const btn = document.getElementById('checkin-btn');
-            if (globalHistoryData[todayStr]) {
-                btn.innerText = "UNCHECK IN TODAY";
-                btn.classList.add('checked');
-            } else {
-                btn.innerText = "CHECK IN TODAY";
-                btn.classList.remove('checked');
-            }
-        }
-
-        // ==================== [ 图表逻辑 ] ====================
-        function switchView(view) {
-            currentView = view;
-            document.querySelectorAll('#chart-tabs-container .tab').forEach(t => t.classList.remove('active'));
-            if(window.event) window.event.target.classList.add('active');
-            renderChart();
-        }
-
-        function timeStringToDecimal(timeStr) {
-            if (!timeStr) return null;
-            const [h, m] = timeStr.split(':').map(Number);
-            return parseFloat((h + m / 60).toFixed(2));
-        }
-
-        function decimalToTimeString(decimal) {
-            if (!decimal) return '--:--';
-            const h = Math.floor(decimal);
-            return `${String(h).padStart(2, '0')}:${String(Math.round((decimal - h) * 60)).padStart(2, '0')}`;
-        }
-
-        function renderChart() {
-            const canvas = document.getElementById('analyticsChart');
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const now = new Date();
-            let labels = [], chartData = [], totalDays = 0, count = 0, sum = 0;
-
-            if (currentView === 'week') {
-                totalDays = 7;
-                for (let i = 6; i >= 0; i--) {
-                    const d = new Date(); d.setDate(now.getDate() - i);
-                    labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
-                    const dateStr = d.toLocaleDateString('sv-SE');
-                    if (globalHistoryData[dateStr]) {
-                        const dec = timeStringToDecimal(globalHistoryData[dateStr]);
-                        chartData.push(dec); count++; sum += dec;
-                    } else { chartData.push(0); }
-                }
-            } else if (currentView === 'month') {
-                totalDays = 30;
-                for (let i = 29; i >= 0; i--) {
-                    const d = new Date(); d.setDate(now.getDate() - i);
-                    const dateStr = d.toLocaleDateString('sv-SE');
-                    if (globalHistoryData[dateStr]) {
-                        labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                        const dec = timeStringToDecimal(globalHistoryData[dateStr]);
-                        chartData.push(dec); count++; sum += dec;
-                    }
-                }
-                if (!labels.length) { labels = ['No Data']; chartData = [0]; }
-            } else {
-                const months = currentView === 'halfYear' ? 6 : 12;
-                totalDays = months * 30;
-                for (let i = months - 1; i >= 0; i--) {
-                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                    const prefix = d.toLocaleDateString('sv-SE').substring(0, 7);
-                    labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
-                    let mSum = 0, mCount = 0;
-                    for (const [date, time] of Object.entries(globalHistoryData)) {
-                        if (date.startsWith(prefix)) {
-                            const dec = timeStringToDecimal(time);
-                            mSum += dec; mCount++; count++; sum += dec;
+                if (currentView === "week") {
+                    totalDays = 7;
+                    for (let i = 6; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(now.getDate() - i);
+                        labels.push(d.toLocaleDateString("en-US", { weekday: "short" }));
+                        const dateStr = d.toLocaleDateString("sv-SE");
+                        if (globalHistoryData[dateStr]) {
+                            const dec = timeStringToDecimal(globalHistoryData[dateStr]);
+                            chartData.push(dec);
+                            count++;
+                            sum += dec;
+                        } else {
+                            chartData.push(0);
                         }
                     }
-                    chartData.push(mCount > 0 ? parseFloat((mSum / mCount).toFixed(2)) : null);
-                }
-            }
-
-            document.getElementById('stat-rate').innerText = `${Math.min(totalDays > 0 ? Math.round((count / totalDays) * 100) : 0, 100)}%`;
-            document.getElementById('stat-avg').innerText = decimalToTimeString(count > 0 ? (sum / count) : null);
-
-            if (chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: chartData,
-                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
-                        borderColor: '#d4af37',
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        fill: true,
-                        tension: 0.3,
-                        spanGaps: true  
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { min: 0, max: 24, ticks: { color: 'rgba(255,255,255,0.6)', stepSize: 4, callback: v => v + ':00' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { ticks: { color: 'rgba(255,255,255,0.6)' }, grid: { display: false } }
+                } else if (currentView === "month") {
+                    totalDays = 30;
+                    for (let i = 29; i >= 0; i--) {
+                        const d = new Date();
+                        d.setDate(now.getDate() - i);
+                        const dateStr = d.toLocaleDateString("sv-SE");
+                        if (globalHistoryData[dateStr]) {
+                            labels.push(d.toLocaleDateString("en-US", { month: "short", day: "numeric" }));
+                            const dec = timeStringToDecimal(globalHistoryData[dateStr]);
+                            chartData.push(dec);
+                            count++;
+                            sum += dec;
+                        }
+                    }
+                    if (!labels.length) {
+                        labels = ["No Data"];
+                        chartData = [0];
+                    }
+                } else {
+                    const months = currentView === "halfYear" ? 6 : 12;
+                    totalDays = months * 30;
+                    for (let i = months - 1; i >= 0; i--) {
+                        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                        const prefix = d.toLocaleDateString("sv-SE").substring(0, 7);
+                        labels.push(d.toLocaleDateString("en-US", { month: "short" }));
+                        let mSum = 0,
+                            mCount = 0;
+                        for (const [date, time] of Object.entries(globalHistoryData)) {
+                            if (date.startsWith(prefix)) {
+                                const dec = timeStringToDecimal(time);
+                                mSum += dec;
+                                mCount++;
+                                count++;
+                                sum += dec;
+                            }
+                        }
+                        chartData.push(mCount > 0 ? parseFloat((mSum / mCount).toFixed(2)) : null);
                     }
                 }
-            });
-        }
 
-        function updateClockAndColors() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            
-            document.getElementById('time-p1').innerText = `${h}:${m}`;
-            document.getElementById('time-p2').innerText = `${h}:${m}`;
+                document.getElementById("stat-rate").innerText =
+                    `${Math.min(totalDays > 0 ? Math.round((count / totalDays) * 100) : 0, 100)}%`;
+                document.getElementById("stat-avg").innerText = decimalToTimeString(count > 0 ? sum / count : null);
 
-            const options = { weekday: 'long', month: 'short', day: 'numeric' };
-            const dateStr = now.toLocaleDateString('en-US', options).toUpperCase();
-            document.getElementById('date-p1').innerText = dateStr;
-            document.getElementById('date-p2').innerText = dateStr;
+                const chartSignature = JSON.stringify({
+                    view: currentView,
+                    labels: labels,
+                    data: chartData,
+                });
 
-            const hour = now.getHours();
-            if (hour >= 5 && hour < 8) globalColors = ['#ff9966', '#ff5e62', '#8a2387'];
-            else if (hour >= 8 && hour < 16) globalColors = ['#2b5876', '#4e4376', '#1e3c72'];
-            else if (hour >= 16 && hour < 19) globalColors = ['#1f4068', '#162447', '#e43f5a'];
-            else globalColors = ['#0f2027', '#203a43', '#2c5364'];
+                if (chartSignature === lastChartSignature && chartInstance) {
+                    return;
+                }
 
-            document.documentElement.style.setProperty('--bg-color-1', globalColors[0]);
-            document.documentElement.style.setProperty('--bg-color-2', globalColors[1]);
-            document.documentElement.style.setProperty('--bg-color-3', globalColors[2]);
-        }
+                lastChartSignature = chartSignature;
 
-        function captureImage(targetId, fileName) {
-            const target = document.getElementById(targetId);
-            const originalBg = target.style.background;
-            target.style.background = `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
+                if (chartInstance) chartInstance.destroy();
 
-            html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
-                target.style.background = originalBg;
-                const link = document.createElement('a');
-                link.download = `${fileName}_1x1.png`;
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-            });
-        }
+                chartInstance = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                data: chartData,
+                                backgroundColor: "rgba(212, 175, 55, 0.1)",
+                                borderColor: "#d4af37",
+                                borderWidth: 3,
+                                pointRadius: 4,
+                                fill: true,
+                                tension: 0.3,
+                                spanGaps: true,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 24,
+                                ticks: { color: "rgba(255,255,255,0.6)", stepSize: 4, callback: (v) => v + ":00" },
+                                grid: { color: "rgba(255,255,255,0.05)" },
+                            },
+                            x: { ticks: { color: "rgba(255,255,255,0.6)" }, grid: { display: false } },
+                        },
+                    },
+                });
+            }
 
-        function captureChartImage() {
-            const tabs = document.getElementById('chart-tabs-container');
-            tabs.style.visibility = 'hidden';
-            captureImage('chart-capture-area', 'Analytics_P1');
-            setTimeout(() => tabs.style.visibility = 'visible', 500);
-        }
+            function updateClockAndColors() {
+                const now = new Date();
+                const h = String(now.getHours()).padStart(2, "0");
+                const m = String(now.getMinutes()).padStart(2, "0");
 
-        function startTool() {
-            updateClockAndColors();
-            fetchCloudData();
-            setInterval(fetchCloudData, 5000);
-            setInterval(updateClockAndColors, 1000);
-        }
+                document.getElementById("time-p1").innerText = `${h}:${m}`;
+                document.getElementById("time-p2").innerText = `${h}:${m}`;
 
-        startTool();
-    </script>
-</body>
+                const options = { weekday: "long", month: "short", day: "numeric" };
+                const dateStr = now.toLocaleDateString("en-US", options).toUpperCase();
+                document.getElementById("date-p1").innerText = dateStr;
+                document.getElementById("date-p2").innerText = dateStr;
+
+                const hour = now.getHours();
+                if (hour >= 5 && hour < 8) globalColors = ["#ff9966", "#ff5e62", "#8a2387"];
+                else if (hour >= 8 && hour < 16) globalColors = ["#2b5876", "#4e4376", "#1e3c72"];
+                else if (hour >= 16 && hour < 19) globalColors = ["#1f4068", "#162447", "#e43f5a"];
+                else globalColors = ["#0f2027", "#203a43", "#2c5364"];
+
+                document.documentElement.style.setProperty("--bg-color-1", globalColors[0]);
+                document.documentElement.style.setProperty("--bg-color-2", globalColors[1]);
+                document.documentElement.style.setProperty("--bg-color-3", globalColors[2]);
+            }
+
+            function captureImage(targetId, fileName) {
+                const target = document.getElementById(targetId);
+                const originalBg = target.style.background;
+                target.style.background = `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
+
+                html2canvas(target, { scale: 2, useCORS: true }).then((canvas) => {
+                    target.style.background = originalBg;
+                    const link = document.createElement("a");
+                    link.download = `${fileName}_1x1.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                });
+            }
+
+            function captureChartImage() {
+                const tabs = document.getElementById("chart-tabs-container");
+                tabs.style.visibility = "hidden";
+                captureImage("chart-capture-area", "Analytics_P1");
+                setTimeout(() => (tabs.style.visibility = "visible"), 500);
+            }
+
+            function restoreTimers() {
+                ["fitness", "study"].forEach((type) => {
+                    const saved = localStorage.getItem(`${type}StartTime`);
+
+                    if (!saved) return;
+
+                    const timerObj = timers[type];
+
+                    timerObj.startTime = new Date(parseInt(saved));
+
+                    timerObj.intervalId = setInterval(() => {
+                        updateLiveTimerDisplay(type);
+                    }, 1000);
+
+                    const card = document.getElementById(`${type === "fitness" ? "fit" : "study"}-duration-card`);
+
+                    const toggleBtn = document.getElementById(`btn-${type === "fitness" ? "fit" : "study"}-toggle`);
+
+                    const labelText = type === "fitness" ? "FIT" : "STUDY";
+
+                    toggleBtn.innerText = `STOP ${labelText}`;
+                    toggleBtn.className = "btn btn-stop";
+
+                    card.classList.add("timing");
+                });
+            }
+
+            function startTool() {
+                updateClockAndColors();
+                fetchCloudData();
+                setInterval(fetchCloudData, 5000);
+                setInterval(updateClockAndColors, 1000);
+            }
+
+            restoreTimers();
+            startTool();
+        </script>
+    </body>
 </html>
