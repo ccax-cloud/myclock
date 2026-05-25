@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Sync Time Clock & Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-color-1: #0f2027;
+            --bg-color-2: #203a43;
+            --bg-color-3: #2c5364;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
+            background-size: 400% 400%;
+            transition: all 2s ease;
+            color: #fff;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        /* 1x1 外部金色虚线框架（时钟与图表通用） */
+        .capture-wrapper {
+            position: relative;
+            padding: 10px;
+            border: 2px dashed rgba(212, 175, 55, 0.4);
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        /* 核心时钟 1x1 区域 */
+        #capture-area {
+            width: 450px;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
+            border: 2px solid rgba(212, 175, 55, 0.8);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            color: #ffffff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .time-display {
+            font-size: 76px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .date-display {
+            font-size: 16px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            opacity: 0.9;
+            margin-bottom: 6px;
+        }
+
+        .timezone-display {
+            font-size: 12px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.6;
+        }
+
+        /* 核心图表 1x1 区域 */
+        #chart-capture-area {
+            width: 450px;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(212, 175, 55, 0.8);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            padding: 30px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 按钮与控制外壳（居中对齐） */
+        .control-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .btn-capture {
+            color: #0f2027;
+            background-color: #ffffff;
+        }
+        .btn-capture:hover {
+            transform: translateY(-2px);
+            background-color: #d4af37;
+            color: #fff;
+            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-checkin {
+            background-color: #28a745;
+            color: white;
+            margin-top: 15px;
+        }
+        .btn-checkin:hover {
+            transform: translateY(-2px);
+            background-color: #218838;
+            box-shadow: 0 12px 24px rgba(40, 167, 69, 0.4);
+        }
+        .btn-checkin.checked {
+            background-color: #dc3545;
+        }
+        .btn-checkin.checked:hover {
+            background-color: #c82333;
+            box-shadow: 0 12px 24px rgba(220, 53, 69, 0.4);
+        }
+
+        /* 数据图表内部版面排版 */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+
+        .dashboard-title {
+            font-size: 15px; 
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: #fff;
+            white-space: nowrap; 
+        }
+
+        /* 维度切换标签 */
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 4px;
+            flex-shrink: 0; 
+        }
+
+        .tab {
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            opacity: 0.6;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            opacity: 1;
+        }
+
+        /* 数据网格卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #d4af37;
+            white-space: nowrap;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            height: 180px; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="control-block">
+        <div class="capture-wrapper">
+            <div id="capture-area">
+                <div class="time-display" id="time">00:00</div>
+                <div class="date-display" id="date">LOADING DATE</div>
+                <div class="timezone-display" id="timezone">GMT+8</div>
+            </div>
+        </div>
+        <button class="btn btn-capture" onclick="captureClockImage()">CAPTURE 1x1 CLOCK</button>
+        <button class="btn btn-checkin" id="checkin-btn" onclick="toggleCheckIn()">CONNECTING...</button>
+    </div>
+
+    <div class="control-block">
+        <div class="capture-wrapper">
+            <div id="chart-capture-area">
+                <div class="dashboard-header">
+                    <div class="dashboard-title">Check-in Timeline</div>
+                    <div class="tabs" id="chart-tabs-container">
+                        <div class="tab active" onclick="switchView('week')">Week</div>
+                        <div class="tab" onclick="switchView('month')">Month</div>
+                        <div class="tab" onclick="switchView('halfYear')">6-M</div>
+                        <div class="tab" onclick="switchView('year')">Year</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Completion Rate</div>
+                        <div class="stat-value" id="stat-rate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Avg. Check-in Time</div>
+                        <div class="stat-value" id="stat-avg">--:--</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-capture" onclick="captureChartImage()">CAPTURE 1x1 ANALYTICS</button>
+    </div>
+
+    <script>
+        // ======= 【核心配置区】 =======
+        // 请在此处粘贴你在第一步中获取的 Firebase 数据库网址 (记得保留末尾的斜杠和数据节点名称)
+        const FIREBASE_DB_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/checkins.json"; 
+        // ==============================
+
+        let currentView = 'week';
+        let chartInstance = null;
+        let globalColors = [];
+        let globalHistoryData = {}; // 存放从云端拉取下来的实时打卡数据
+
+        // 从云端实时获取数据
+        function fetchCloudData() {
+            fetch(FIREBASE_DB_URL)
+                .then(response => response.json())
+                .then(data => {
+                    globalHistoryData = data ? data : {};
+                    updateCheckInButton();
+                    renderChart();
+                })
+                .catch(error => console.error("Firebase fetch error:", error));
+        }
+
+        // 将打卡状态同步写入云端数据库
+        function syncToCloud(data) {
+            fetch(FIREBASE_DB_URL, {
+                method: 'PUT',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(() => {
+                fetchCloudData(); // 写入成功后触发全局刷新
+            })
+            .catch(error => console.error("Firebase sync error:", error));
+        }
+
+        // 建立长轮询机制，每 5 秒自动检查一次云端，实现跨设备“半自动实时刷新”
+        function startRealtimeSyncListener() {
+            fetchCloudData();
+            setInterval(fetchCloudData, 5000); 
+        }
+
+        function toggleCheckIn() {
+            const todayStr = new Date().toLocaleDateString('sv-SE');
+            
+            if (globalHistoryData[todayStr]) {
+                delete globalHistoryData[todayStr];
+            } else {
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                globalHistoryData[todayStr] = timeStr;
+            }
+            
+            syncToCloud(globalHistoryData);
+        }
+
+        function updateCheckInButton() {
+            const todayStr = new Date().toLocaleDateString('sv-SE');
+            const btn = document.getElementById('checkin-btn');
+            const checked = !!globalHistoryData[todayStr];
+
+            if (checked) {
+                btn.innerText = "UNCHECK IN TODAY";
+                btn.classList.add('checked');
+            } else {
+                btn.innerText = "CHECK IN TODAY";
+                btn.classList.remove('checked');
+            }
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            renderChart();
+        }
+
+        function timeStringToDecimal(timeStr) {
+            if (!timeStr) return null;
+            const [partsHour, partsMinute] = timeStr.split(':').map(Number);
+            return parseFloat((partsHour + partsMinute / 60).toFixed(2));
+        }
+
+        function decimalToTimeString(decimal) {
+            if (decimal === null || isNaN(decimal) || decimal === 0) return '--:--';
+            const hours = Math.floor(decimal);
+            const minutes = Math.round((decimal - hours) * 60);
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            const now = new Date();
+
+            let labels = [];
+            let chartData = [];
+            let labelTitle = 'Check-in Time (Hour)';
+
+            let totalDaysInPeriod = 0;
+            let checkInCount = 0;
+            let timeSum = 0;
+
+            if (currentView === 'week') {
+                totalDaysInPeriod = 7;
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(now.getDate() - i);
+                    labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+                    
+                    const dateStr = d.toLocaleDateString('sv-SE');
+                    if (globalHistoryData[dateStr]) {
+                        const dec = timeStringToDecimal(globalHistoryData[dateStr]);
+                        chartData.push(dec);
+                        checkInCount++;
+                        timeSum += dec;
+                    } else {
+                        chartData.push(0);
+                    }
+                }
+            } 
+            else if (currentView === 'month') {
+                totalDaysInPeriod = 30;
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(now.getDate() - i);
+                    const dateStr = d.toLocaleDateString('sv-SE');
+                    
+                    if (globalHistoryData[dateStr]) {
+                        labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                        const dec = timeStringToDecimal(globalHistoryData[dateStr]);
+                        chartData.push(dec);
+                        checkInCount++;
+                        timeSum += dec;
+                    }
+                }
+                if (labels.length === 0) { labels = ['No Data']; chartData = [0]; }
+            } 
+            else if (currentView === 'halfYear' || currentView === 'year') {
+                const monthsCount = currentView === 'halfYear' ? 6 : 12;
+                totalDaysInPeriod = monthsCount * 30; 
+                
+                for (let i = monthsCount - 1; i >= 0; i--) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const monthPrefix = d.toLocaleDateString('sv-SE').substring(0, 7);
+                    labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+                    
+                    let monthSum = 0;
+                    let monthCount = 0;
+                    for (const [date, time] of Object.entries(globalHistoryData)) {
+                        if (date.startsWith(monthPrefix)) {
+                            const dec = timeStringToDecimal(time);
+                            monthSum += dec;
+                            monthCount++;
+                            checkInCount++;
+                            timeSum += dec;
+                        }
+                    }
+                    chartData.push(monthCount > 0 ? parseFloat((monthSum / monthCount).toFixed(2)) : null);
+                }
+            }
+
+            const ratePercentage = totalDaysInPeriod > 0 ? Math.round((checkInCount / totalDaysInPeriod) * 100) : 0;
+            document.getElementById('stat-rate').innerText = `${Math.min(ratePercentage, 100)}%`;
+            
+            const avgTimeDecimal = checkInCount > 0 ? (timeSum / checkInCount) : null;
+            document.getElementById('stat-avg').innerText = decimalToTimeString(avgTimeDecimal);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelTitle,
+                        data: chartData,
+                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                        borderColor: '#d4af37',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#d4af37',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.3,
+                        spanGaps: true  
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Time: ${decimalToTimeString(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 24, 
+                            ticks: {
+                                color: 'rgba(255,255,255,0.6)',
+                                stepSize: 4,
+                                callback: function(value) { return value + ':00'; }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        x: {
+                            ticks: { color: 'rgba(255,255,255,0.6)' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateGradientBasedOnTime() {
+            const now = new Date();
+            const hour = now.getHours();
+
+            if (hour >= 5 && hour < 8) {
+                globalColors = ['#ff9966', '#ff5e62', '#8a2387'];
+            } else if (hour >= 8 && hour < 16) {
+                globalColors = ['#2b5876', '#4e4376', '#1e3c72'];
+            } else if (hour >= 16 && hour < 19) {
+                globalColors = ['#1f4068', '#162447', '#e43f5a'];
+            } else {
+                globalColors = ['#0f2027', '#203a43', '#2c5364'];
+            }
+
+            document.documentElement.style.setProperty('--bg-color-1', globalColors[0]);
+            document.documentElement.style.setProperty('--bg-color-2', globalColors[1]);
+            document.documentElement.style.setProperty('--bg-color-3', globalColors[2]);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('time').innerText = `${hours}:${minutes}`;
+
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            document.getElementById('date').innerText = now.toLocaleDateString('en-US', options).toUpperCase();
+
+            const shortTz = now.toLocaleDateString('en-US', {day:'numeric', timeZoneName:'short'}).split(', ')[1] || "PST";
+            document.getElementById('timezone').innerText = `CURRENT TIME (${shortTz})`;
+        }
+
+        function captureClockImage() {
+            const target = document.getElementById('capture-area');
+            html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                const now = new Date();
+                link.download = `Clock_1x1_${now.getHours()}${now.getMinutes()}.png`;
+                link.href = image;
+                link.click();
+            });
+        }
+
+        function captureChartImage() {
+            const target = document.getElementById('chart-capture-area');
+            const tabsContainer = document.getElementById('chart-tabs-container');
+            
+            const originalBackground = target.style.background;
+            tabsContainer.style.visibility = 'hidden';
+            
+            target.style.background = `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
+
+            html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
+                target.style.background = originalBackground;
+                tabsContainer.style.visibility = 'visible';
+
+                const image = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                const now = new Date();
+                link.download = `Analytics_1x1_${now.getHours()}${now.getMinutes()}.png`;
+                link.href = image;
+                link.click();
+            });
+        }
+
+        function startTool() {
+            updateGradientBasedOnTime();
+            updateClock();
+            startRealtimeSyncListener(); // 激活云端实时同步监听
+            setInterval(updateClock, 1000);
+            setInterval(updateGradientBasedOnTime, 300000); 
+        }
+
+        startTool();
+    </script>
+</body>
+</html>
