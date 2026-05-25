@@ -35,33 +35,31 @@
             background-size: 400% 400%;
             transition: all 2s ease;
             color: #fff;
-            padding: 25px 10px;
+            padding: 30px 10px;
             overflow-x: hidden; /* 严禁手机端左右滑动 */
             overflow-y: auto;
         }
 
-        /* 外部大外壳 */
+        /* 📦 核心改变：把卡片和按钮捆绑成一个固定的标准 474px 宽度的整体大盒子 */
         .control-block {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%;
-            max-width: 474px; 
-            margin-bottom: 50px; /* 大幅拉开【时钟组】与【图表组】之间的物理距离 */
-        }
-        
-        .control-block:last-child {
-            margin-bottom: 20px;
+            width: 474px; 
+            margin-bottom: 40px; /* 两组之间在电脑端的标准间距 */
+            transform-origin: top center; /* 以顶部中心为锚点进行整体无缝缩放 */
+            flex-shrink: 0;
         }
 
-        /* 1x1 外部金色虚线框架（时钟与图表通用） */
+        /* 1x1 外部金色虚线框架 */
         .capture-wrapper {
             position: relative;
             padding: 10px;
             border: 2px dashed rgba(212, 175, 55, 0.4);
             border-radius: 4px;
-            margin-bottom: 12px; /* 进一步压缩卡片与下方按钮的初始间距，使其靠得更近 */
-            transform-origin: top center; 
+            margin-bottom: 15px; /* 卡片和自己下方的按钮保持 15px 紧凑距离 */
+            width: 474px;
+            height: 474px;
         }
 
         /* 核心时钟 1x1 区域 */
@@ -131,7 +129,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            gap: 10px; /* 缩小打卡和截图按钮之间的上下间距 */
+            gap: 12px; /* 两个按钮之间紧凑排列 */
         }
 
         /* 按钮样式优化 */
@@ -261,11 +259,16 @@
             height: 180px; 
         }
 
-        /* 📱 核心响应式缩放机制 */
+        /* 📱 绝妙的移动端整体缩放机制：再也不会产生多余的“隐形空白” */
         @media (max-width: 480px) {
-            .capture-wrapper {
+            body {
+                padding: 20px 0; /* 压缩顶部间距 */
+            }
+            .control-block {
+                /* 让一整组（卡片+对应的控制按钮）做纯净的整体缩放 */
                 transform: scale(calc((window.innerWidth - 20) / 474)); 
-                margin-bottom: 0; 
+                /* 关键修复：用 margin-bottom 负值吞掉缩放产生的多余隐形高度，并精确留出 60px 的清爽外间距 */
+                margin-bottom: calc(-474px * (1 - (window.innerWidth - 20) / 474) + 60px); 
             }
         }
     </style>
@@ -322,7 +325,6 @@
 
     <script>
         // ======= 【核心配置区】 =======
-        // 已经自动为您保留了专属的 Firebase 数据库网址
         const FIREBASE_DB_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/checkins.json"; 
         // ==============================
 
@@ -330,29 +332,6 @@
         let chartInstance = null;
         let globalColors = [];
         let globalHistoryData = {}; 
-
-        // 动态计算缩放，确保按钮和上方的卡片紧凑贴合，同时推开下方的其他区块
-        function handleResponsiveScale() {
-            const width = window.innerWidth;
-            const wrappers = document.querySelectorAll('.capture-wrapper');
-            const blocks = document.querySelectorAll('.control-block');
-            
-            if (width < 480) {
-                const scaleFactor = (width - 20) / 474;
-                wrappers.forEach(w => {
-                    w.style.transform = `scale(${scaleFactor})`;
-                });
-                
-                const renderedHeight = 474 * scaleFactor;
-                
-                // 压缩按钮盒子的上部空白，使其在手机端紧贴 1x1 卡片边界（只留 12 像素间隙）
-                blocks[0].style.height = `${renderedHeight + 115}px`;
-                blocks[1].style.height = `${renderedHeight + 55}px`;
-            } else {
-                wrappers.forEach(w => w.style.transform = 'none');
-                blocks.forEach(b => b.style.height = 'auto');
-            }
-        }
 
         function fetchCloudData() {
             fetch(FIREBASE_DB_URL)
@@ -634,9 +613,7 @@
             updateGradientBasedOnTime();
             updateClock();
             startRealtimeSyncListener(); 
-            handleResponsiveScale();
             
-            window.addEventListener('resize', handleResponsiveScale);
             setInterval(updateClock, 1000);
             setInterval(updateGradientBasedOnTime, 300000); 
         }
