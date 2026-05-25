@@ -29,7 +29,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* 电脑端居中对齐 */
+            justify-content: center; 
             align-items: center;
             background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
             background-size: 400% 400%;
@@ -40,18 +40,17 @@
             overflow-y: auto;
         }
 
-        /* 🗺️ 核心改变：大容器在电脑端变成 flex-row（横向并排） */
+        /* 大容器在电脑端保持横向并排 */
         .main-container {
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: flex-start;
-            gap: 60px; /* 时钟组和 Timeline 组之间的左右横向间距 */
+            gap: 60px; 
             width: 100%;
             max-width: 1100px;
         }
 
-        /* 每一组独立垂直（卡片在上，按钮在下） */
         .control-block {
             display: flex;
             flex-direction: column;
@@ -66,7 +65,7 @@
             padding: 10px;
             border: 2px dashed rgba(212, 175, 55, 0.4);
             border-radius: 4px;
-            margin-bottom: 15px; /* 卡片跟自己下方的按钮保持紧凑的 15px */
+            margin-bottom: 15px; 
             width: 474px;
             height: 474px;
         }
@@ -268,7 +267,7 @@
             height: 180px; 
         }
 
-        /* 📱 响应式媒体查询：当屏幕宽度小于 980px（比如平板或手机）时，自动切回纵向排列 */
+        /* 📱 响应式：移动端自动切回纵向 */
         @media (max-width: 980px) {
             body {
                 padding: 30px 10px;
@@ -276,17 +275,16 @@
             }
             
             .main-container {
-                flex-direction: column; /* 切回垂直流 */
+                flex-direction: column; 
                 align-items: center;
-                gap: 0; /* 清空横向间距 */
+                gap: 0; 
             }
 
             .control-block {
-                margin-bottom: 55px; /* 完美保留上一版调试好的 55px 手机端空隙 */
+                margin-bottom: 55px; 
                 width: 100%;
             }
 
-            /* 手机原生无损缩放比例 */
             .capture-wrapper {
                 width: 92vw;
                 height: 92vw;
@@ -358,6 +356,7 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-label">Completion Rate</div>
+                            <div class="stat-value" id="stat-rate">0%</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-label">Avg. Check-in Time</div>
