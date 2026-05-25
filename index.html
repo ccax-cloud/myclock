@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cloud Sync Time Clock & Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,8 +35,19 @@
             background-size: 400% 400%;
             transition: all 2s ease;
             color: #fff;
-            padding: 40px 20px;
+            padding: 20px 10px;
+            overflow-x: hidden; /* 严禁手机端左右滑动 */
             overflow-y: auto;
+        }
+
+        /* 外部大外壳：负责控制在手机端的缩放响应 */
+        .control-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 474px; /* 450px + 24px padding */
         }
 
         /* 1x1 外部金色虚线框架（时钟与图表通用） */
@@ -46,9 +57,10 @@
             border: 2px dashed rgba(212, 175, 55, 0.4);
             border-radius: 4px;
             margin-bottom: 15px;
+            transform-origin: top center; /* 以顶部中心为基准缩放 */
         }
 
-        /* 核心时钟 1x1 区域 */
+        /* 核心时钟 1x1 区域 - 坚守 450x450 分辨率 */
         #capture-area {
             width: 450px;
             height: 450px;
@@ -91,7 +103,7 @@
             opacity: 0.6;
         }
 
-        /* 核心图表 1x1 区域 */
+        /* 核心图表 1x1 区域 - 坚守 450x450 分辨率 */
         #chart-capture-area {
             width: 450px;
             height: 450px;
@@ -109,18 +121,13 @@
             overflow: hidden;
         }
 
-        /* 按钮与控制外壳（居中对齐） */
-        .control-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 35px;
-        }
-
+        /* 按钮样式优化：宽度自适应屏幕 */
         .btn {
-            padding: 12px 28px;
+            width: 90%;
+            max-width: 320px;
+            padding: 14px 28px;
             font-family: 'Inter', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             border: none;
             border-radius: 50px;
@@ -128,6 +135,7 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
             letter-spacing: 1px;
+            text-align: center;
         }
 
         .btn-capture {
@@ -240,12 +248,29 @@
             flex-grow: 1;
             height: 180px; 
         }
+
+        /* 📱 核心自适应逻辑：当手机屏幕宽度小于 1x1 盒子时，自动无损等比例缩放 */
+        @media (max-width: 480px) {
+            .capture-wrapper {
+                /* 利用 CSS 变量动态计算缩放比例，保证刚好填满手机宽度 */
+                transform: scale(calc((window.innerWidth || 360) / 480)); 
+                margin-bottom: 0; /* 缩放后消除底层塌陷 */
+            }
+            .control-block {
+                /* 根据动态缩放调整外部容器高度，防止按钮重叠 */
+                height: calc(474px * (100vw / 480) + 90px); 
+            }
+            /* 如果是第二个控制块（带有两个按钮），预留更多高度 */
+            .control-block:has(#checkin-btn) {
+                height: calc(474px * (100vw / 480) + 160px); 
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="control-block">
-        <div class="capture-wrapper">
+        <div class="capture-wrapper" id="wrapper-clock">
             <div id="capture-area">
                 <div class="time-display" id="time">00:00</div>
                 <div class="date-display" id="date">LOADING DATE</div>
@@ -257,7 +282,7 @@
     </div>
 
     <div class="control-block">
-        <div class="capture-wrapper">
+        <div class="capture-wrapper" id="wrapper-chart">
             <div id="chart-capture-area">
                 <div class="dashboard-header">
                     <div class="dashboard-title">Check-in Timeline</div>
@@ -290,16 +315,37 @@
 
     <script>
         // ======= 【核心配置区】 =======
-        // 请在此处粘贴你在第一步中获取的 Firebase 数据库网址 (记得保留末尾的斜杠和数据节点名称)
-        const FIREBASE_DB_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/checkins.json"; 
+        // 请记得把这一行换成你的 Firebase 数据库网址 
+        const FIREBASE_DB_URL = "YOUR_DATABASE_URL/checkins.json"; 
         // ==============================
 
         let currentView = 'week';
         let chartInstance = null;
         let globalColors = [];
-        let globalHistoryData = {}; // 存放从云端拉取下来的实时打卡数据
+        let globalHistoryData = {}; 
 
-        // 从云端实时获取数据
+        // 动态计算手机端缩放比例的 JS 补丁
+        function handleResponsiveScale() {
+            const width = window.innerWidth;
+            if (width < 480) {
+                const scaleFactor = (width - 20) / 474; // 减去两侧边距
+                const wrappers = document.querySelectorAll('.capture-wrapper');
+                wrappers.forEach(w => {
+                    w.style.transform = `scale(${scaleFactor})`;
+                });
+                
+                // 动态调整外层大壳子的高度，防止缩放后下方出现大片空白或叠层
+                const blocks = document.querySelectorAll('.control-block');
+                blocks[0].style.height = `${474 * scaleFactor + 140}px`;
+                blocks[1].style.height = `${474 * scaleFactor + 80}px`;
+            } else {
+                const wrappers = document.querySelectorAll('.capture-wrapper');
+                wrappers.forEach(w => w.style.transform = 'none');
+                const blocks = document.querySelectorAll('.control-block');
+                blocks.forEach(b => b.style.height = 'auto');
+            }
+        }
+
         function fetchCloudData() {
             fetch(FIREBASE_DB_URL)
                 .then(response => response.json())
@@ -311,7 +357,6 @@
                 .catch(error => console.error("Firebase fetch error:", error));
         }
 
-        // 将打卡状态同步写入云端数据库
         function syncToCloud(data) {
             fetch(FIREBASE_DB_URL, {
                 method: 'PUT',
@@ -319,12 +364,11 @@
                 headers: { 'Content-Type': 'application/json' }
             })
             .then(() => {
-                fetchCloudData(); // 写入成功后触发全局刷新
+                fetchCloudData(); 
             })
             .catch(error => console.error("Firebase sync error:", error));
         }
 
-        // 建立长轮询机制，每 5 秒自动检查一次云端，实现跨设备“半自动实时刷新”
         function startRealtimeSyncListener() {
             fetchCloudData();
             setInterval(fetchCloudData, 5000); 
@@ -579,7 +623,11 @@
         function startTool() {
             updateGradientBasedOnTime();
             updateClock();
-            startRealtimeSyncListener(); // 激活云端实时同步监听
+            startRealtimeSyncListener(); 
+            handleResponsiveScale();
+            
+            // 监听屏幕尺寸和旋转，随时调整缩放
+            window.addEventListener('resize', handleResponsiveScale);
             setInterval(updateClock, 1000);
             setInterval(updateGradientBasedOnTime, 300000); 
         }
