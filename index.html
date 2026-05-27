@@ -863,14 +863,10 @@
                     border-radius: 22px;
                 }
 
-.clock-box {
-    padding: 22px;
-
-    justify-content: center;
-
-    padding-top: 42px;
-    padding-bottom: 28px;
-}
+                .clock-box {
+                    padding: 42px 22px 28px;
+                    justify-content: center;
+                }
 
                 .time-display {
                     font-size: clamp(52px, 16vw, 68px);
@@ -1001,7 +997,8 @@
                 }
 
                 .clock-box {
-                    padding: 18px;
+                    padding: 34px 18px 24px;
+                    justify-content: center;
                 }
 
                 .panel-box {
@@ -1770,15 +1767,16 @@
                     .catch(() => updateWeatherDisplay());
             }
 
+            // Default fallback weather location: Tianjin, China
             function fetchWeather() {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (pos) => fetchWeatherByLocation(pos.coords.latitude, pos.coords.longitude),
-                        () => fetchWeatherByLocation(1.3521, 103.8198),
+                        () => fetchWeatherByLocation(39.3434, 117.3616),
                         { timeout: 5000 },
                     );
                 } else {
-                    fetchWeatherByLocation(1.3521, 103.8198);
+                    fetchWeatherByLocation(39.3434, 117.3616);
                 }
             }
 
