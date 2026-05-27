@@ -16,9 +16,17 @@
 
         <style>
             :root {
-                --bg-color-1: #0f2027;
-                --bg-color-2: #203a43;
-                --bg-color-3: #2c5364;
+                --bg-color-1: #b9d4e2;
+                --bg-color-2: #dfe9ef;
+                --bg-color-3: #f2ebe4;
+
+                --text-main: #74889a;
+                --text-title: #7d92a3;
+                --text-body: rgba(72,88,102,0.78);
+                --text-muted: rgba(72,88,102,0.60);
+                --glass-bg: rgba(255,255,255,0.14);
+                --glass-border: rgba(255,255,255,0.18);
+                --gold-soft: rgba(212,175,55,0.55);
             }
 
             * {
@@ -37,7 +45,7 @@
                 background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
                 background-size: 400% 400%;
                 transition: all 2s ease;
-                color: #fff;
+                color: var(--text-body);
                 padding: 20px;
                 overflow-x: hidden;
                 overflow-y: auto;
@@ -46,12 +54,14 @@
             /* 🎛️ 顶端全局页面切换器 */
             .page-switcher {
                 display: flex;
-                background: rgba(0, 0, 0, 0.4);
+                background: rgba(255,255,255,0.12);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
                 border-radius: 30px;
                 padding: 6px;
                 margin-bottom: 30px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(255,255,255,0.18);
+                box-shadow: 0 12px 30px rgba(0,0,0,0.10);
                 z-index: 10;
             }
 
@@ -65,15 +75,17 @@
                     background-color 0.35s ease,
                     color 0.35s ease,
                     box-shadow 0.35s ease;
-                color: rgba(255, 255, 255, 0.6);
+                color: rgba(72,88,102,0.62);
                 letter-spacing: 1px;
                 text-transform: uppercase;
             }
 
             .page-tab.active {
-                background: #ffffff;
-                color: #0f2027;
-                box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+                background: rgba(255,255,255,0.68);
+                color: #5f7486;
+                box-shadow:
+                    0 4px 14px rgba(0,0,0,0.08),
+                    inset 0 1px 0 rgba(255,255,255,0.35);
             }
 
             /* 大容器 */
@@ -111,8 +123,8 @@
             .capture-wrapper {
                 position: relative;
                 padding: 10px;
-                border: 2px dashed rgba(212, 175, 55, 0.4);
-                border-radius: 4px;
+                border: 1px solid rgba(255,255,255,0.10);
+                border-radius: 8px;
                 margin-bottom: 15px;
                 width: 474px;
                 height: 474px;
@@ -127,9 +139,12 @@
                 justify-content: center;
                 align-items: center;
                 background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
-                border: 2px solid rgba(212, 175, 55, 0.8);
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-                color: #ffffff;
+                border: 1px solid rgba(255,255,255,0.18);
+                border-radius: 0;
+                box-shadow:
+                    0 20px 50px rgba(0,0,0,0.10),
+                    inset 0 1px 0 rgba(255,255,255,0.20);
+                color: var(--text-body);
                 text-align: center;
                 position: relative;
                 overflow: hidden;
@@ -141,7 +156,10 @@
                 letter-spacing: -2px;
                 line-height: 1;
                 margin-bottom: 15px;
-                text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                color: var(--text-main);
+                text-shadow:
+                    0 1px 0 rgba(255,255,255,0.35),
+                    0 2px 10px rgba(0,0,0,0.08);
             }
 
             .date-display {
@@ -149,7 +167,7 @@
                 font-weight: 400;
                 text-transform: uppercase;
                 letter-spacing: 4px;
-                opacity: 0.9;
+                color: rgba(72,88,102,0.72);
                 margin-bottom: 6px;
             }
 
@@ -158,7 +176,25 @@
                 font-weight: 400;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                opacity: 0.6;
+                color: rgba(72,88,102,0.52);
+            }
+
+            .weather-display {
+                margin-top: 14px;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 1.4px;
+                color: rgba(72,88,102,0.66);
+                text-transform: uppercase;
+            }
+
+            .sun-display {
+                margin-top: 5px;
+                font-size: 10px;
+                font-weight: 400;
+                letter-spacing: 1.2px;
+                color: rgba(72,88,102,0.54);
+                text-transform: uppercase;
             }
 
             /* 核心图表与第二页看板 1x1 区域 */
@@ -169,11 +205,13 @@
                 flex-direction: column;
                 justify-content: flex-start;
                 align-items: stretch;
-                background: rgba(255, 255, 255, 0.08);
-                backdrop-filter: blur(15px);
-                -webkit-backdrop-filter: blur(15px);
-                border: 2px solid rgba(212, 175, 55, 0.8);
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+                background: rgba(255,255,255,0.14);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255,255,255,0.18);
+                box-shadow:
+                    0 20px 50px rgba(0,0,0,0.10),
+                    inset 0 1px 0 rgba(255,255,255,0.20);
                 padding: 30px 24px;
                 position: relative;
                 overflow: hidden;
@@ -206,7 +244,7 @@
                 border: none;
                 border-radius: 50px;
                 cursor: pointer;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.10);
                 transition: all 0.3s ease;
                 letter-spacing: 0.5px;
                 text-align: center;
@@ -222,8 +260,11 @@
 
             /* ✨ CAPTURE 按钮独立淡入淡出动画 */
             .btn-capture {
-                color: #0f2027;
-                background-color: #ffffff;
+                color: #657b8d;
+                background: rgba(255,255,255,0.62);
+                border: 1px solid rgba(255,255,255,0.30);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
                 transition:
                     background-color 0.3s ease,
                     color 0.3s ease,
@@ -232,59 +273,64 @@
             }
             .btn-capture:hover {
                 transform: translateY(-2px);
-                background-color: #d4af37;
-                color: #fff;
-                box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+                background: rgba(255,255,255,0.78);
+                color: #5a7083;
+                box-shadow: 0 12px 24px rgba(0,0,0,0.10);
             }
 
             /* 起床打卡按钮保持原样 */
             .btn-checkin {
-                background-color: #28a745;
-                color: white;
+                background: rgba(255,255,255,0.14);
+                color: rgba(72,88,102,0.72);
+                border: 1px solid rgba(255,255,255,0.18);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
             }
             .btn-checkin:hover {
                 transform: translateY(-2px);
-                background-color: #218838;
-                box-shadow: 0 12px 24px rgba(40, 167, 69, 0.4);
+                background: rgba(255,255,255,0.24);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             }
             .btn-checkin.checked {
-                background-color: #dc3545;
+                background: rgba(125,146,163,0.14);
+                color: #74889a;
+                border: 1px solid rgba(125,146,163,0.24);
             }
             .btn-checkin.checked:hover {
-                background-color: #c82333;
-                box-shadow: 0 12px 24px rgba(220, 53, 69, 0.4);
+                background: rgba(125,146,163,0.20);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             }
 
             /* 🛑 统一的停止状态 */
             .btn-stop {
-                background-color: #dc3545 !important;
-                color: white !important;
-                border: none !important;
+                background-color: rgba(180, 96, 96, 0.18) !important;
+                color: #a85f5f !important;
+                border: 1px solid rgba(180, 96, 96, 0.26) !important;
             }
             .btn-stop:hover {
-                background-color: #c82333 !important;
+                background-color: rgba(180, 96, 96, 0.26) !important;
             }
 
             /* 🏋️‍♂️ 健身组（START & MANUAL 统一采用薄荷暗青色系） */
             .btn-fit-theme {
-                background-color: rgba(32, 201, 151, 0.15);
-                color: #20c997;
-                border: 1px solid rgba(32, 201, 151, 0.4);
+                background-color: rgba(32, 201, 151, 0.10);
+                color: #4f9f8c;
+                border: 1px solid rgba(32, 201, 151, 0.22);
             }
             .btn-fit-theme:hover {
-                background-color: rgba(32, 201, 151, 0.3);
-                box-shadow: 0 6px 15px rgba(32, 201, 151, 0.2);
+                background-color: rgba(32, 201, 151, 0.18);
+                box-shadow: 0 6px 15px rgba(32, 201, 151, 0.12);
             }
 
             /* 📚 学习组（START & MANUAL 统一采用学院暗蓝色系） */
             .btn-study-theme {
-                background-color: rgba(0, 123, 255, 0.15);
-                color: #3395ff;
-                border: 1px solid rgba(0, 123, 255, 0.4);
+                background-color: rgba(86, 145, 190, 0.12);
+                color: #5f8ead;
+                border: 1px solid rgba(86, 145, 190, 0.24);
             }
             .btn-study-theme:hover {
-                background-color: rgba(0, 123, 255, 0.3);
-                box-shadow: 0 6px 15px rgba(0, 123, 255, 0.2);
+                background-color: rgba(86, 145, 190, 0.20);
+                box-shadow: 0 6px 15px rgba(86, 145, 190, 0.12);
             }
 
             /* 排版 */
@@ -296,18 +342,21 @@
                 width: 100%;
             }
 
-            .dashboard-title {
+.dashboard-title {
                 font-size: 15px;
-                font-weight: 600;
-                letter-spacing: 0.3px;
-                color: #fff;
+                font-weight: 700;
+                letter-spacing: 0.4px;
+                color: var(--text-title);
             }
 
             .tabs {
                 display: flex;
-                background: rgba(0, 0, 0, 0.3);
+                background: rgba(255,255,255,0.14);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
                 border-radius: 8px;
                 padding: 4px;
+                border: 1px solid rgba(255,255,255,0.14);
             }
 
             .tab {
@@ -317,13 +366,12 @@
                 cursor: pointer;
                 border-radius: 6px;
                 transition: all 0.2s;
-                opacity: 0.6;
-                color: #fff;
+                color: rgba(72,88,102,0.56);
             }
 
             .tab.active {
-                background: rgba(255, 255, 255, 0.2);
-                opacity: 1;
+                background: rgba(255,255,255,0.42);
+                color: rgba(72,88,102,0.86);
             }
 
             .stats-grid {
@@ -347,16 +395,18 @@
             }
             .section-title {
                 font-size: 12px;
-                font-weight: 600;
-                color: rgba(255, 255, 255, 0.8);
+                font-weight: 700;
+                color: rgba(72,88,102,0.72);
                 letter-spacing: 0.5px;
             }
 
             .stat-card {
-                background: rgba(0, 0, 0, 0.2);
-                border-radius: 10px;
+                background: rgba(255,255,255,0.14);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-radius: 14px;
                 padding: 14px 16px;
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255,255,255,0.18);
                 transition: all 0.3s ease;
             }
 
@@ -371,24 +421,26 @@
                 font-size: 10px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                color: rgba(255, 255, 255, 0.5);
+                color: rgba(72,88,102,0.56);
                 margin-bottom: 6px;
             }
 
             .stat-value {
                 font-size: 20px;
                 font-weight: 700;
-                color: #d4af37;
+                color: #7d92a3;
             }
 
             .stat-card.timing .stat-value,
             .stat-card.timing .stat-sub-value {
-                color: #2cfc62 !important;
+                font-size: 11px;
+                color: rgba(72,88,102,0.58);
+                margin-top: 4px;
             }
 
             .stat-sub-value {
                 font-size: 11px;
-                color: rgba(255, 255, 255, 0.5);
+                color: rgba(72,88,102,0.58);
                 margin-top: 4px;
             }
 
@@ -422,8 +474,8 @@
 
                 cursor: pointer;
 
-                background: rgba(255, 255, 255, 0.06);
-                color: rgba(255, 255, 255, 0.55);
+                background: rgba(255,255,255,0.12);
+                color: rgba(72,88,102,0.50);
 
                 font-size: 14px;
                 font-weight: 700;
@@ -458,8 +510,8 @@
 
     cursor: pointer;
 
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.12);
+    color: rgba(72,88,102,0.50);
 
     font-size: 13px;
     font-weight: 700;
@@ -477,8 +529,8 @@
 }
 
 .mini-edit-btn:hover {
-    background: rgba(212,175,55,0.18);
-    color: #d4af37;
+    background: rgba(125,146,163,0.16);
+    color: #74889a;
     transform: scale(1.08);
 }
 
@@ -489,8 +541,8 @@
             }
 
             .mini-reset-btn:hover {
-                background: rgba(220, 53, 69, 0.18);
-                color: #ff8a95;
+                background: rgba(125,146,163,0.16);
+                color: #74889a;
                 transform: rotate(-25deg);
             }
             
@@ -515,53 +567,124 @@
                 }
 
                 .capture-wrapper {
-                    width: 92vw;
-                    height: 92vw;
-                    max-width: 450px;
-                    max-height: 450px;
-                    padding: 8px;
-                    margin-bottom: 10px;
-                }
+                position: relative;
+                padding: 10px;
+                border: 2px dashed rgba(212, 175, 55, 0.24);
+                border-radius: 8px;
+                margin-bottom: 15px;
+                width: 474px;
+                height: 474px;
+            }
 
                 .clock-box,
                 .panel-box {
-                    width: 100%;
-                    height: 100%;
-                }
+                width: 450px;
+                height: 450px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                background: rgba(255,255,255,0.14);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255,255,255,0.18);
+                box-shadow:
+                    0 20px 50px rgba(0,0,0,0.10),
+                    inset 0 1px 0 rgba(255,255,255,0.20);
+                padding: 30px 24px;
+                position: relative;
+                overflow: hidden;
+            }
 
                 /* 时间 */
                 .time-display {
-                    font-size: 56px;
-                    margin-bottom: 12px;
-                }
+                font-size: 76px;
+                font-weight: 700;
+                letter-spacing: -2px;
+                line-height: 1;
+                margin-bottom: 15px;
+                color: var(--text-main);
+                text-shadow:
+                    0 1px 0 rgba(255,255,255,0.35),
+                    0 2px 10px rgba(0,0,0,0.08);
+            }
 
                 .date-display {
-                    font-size: 14px;
-                    letter-spacing: 3px;
-                }
+                font-size: 16px;
+                font-weight: 400;
+                text-transform: uppercase;
+                letter-spacing: 4px;
+                color: rgba(72,88,102,0.72);
+                margin-bottom: 6px;
+            }
 
                 .timezone-display {
-                    font-size: 10px;
-                }
+                font-size: 12px;
+                font-weight: 400;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                color: rgba(72,88,102,0.52);
+            }
+
+                .weather-display {
+                margin-top: 14px;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 1.4px;
+                color: rgba(72,88,102,0.66);
+                text-transform: uppercase;
+            }
+
+                .sun-display {
+                margin-top: 5px;
+                font-size: 10px;
+                font-weight: 400;
+                letter-spacing: 1.2px;
+                color: rgba(72,88,102,0.54);
+                text-transform: uppercase;
+            }
 
                 /* panel */
                 .panel-box {
-                    padding: 22px 18px;
-                }
+                width: 450px;
+                height: 450px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                background: rgba(255,255,255,0.14);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255,255,255,0.18);
+                box-shadow:
+                    0 20px 50px rgba(0,0,0,0.10),
+                    inset 0 1px 0 rgba(255,255,255,0.20);
+                padding: 30px 24px;
+                position: relative;
+                overflow: hidden;
+            }
 
                 .dashboard-header {
                     margin-bottom: 18px;
                 }
 
                 .dashboard-title {
-                    font-size: 14px;
-                }
+                font-size: 15px;
+                font-weight: 700;
+                letter-spacing: 0.4px;
+                color: var(--text-title);
+            }
 
                 /* tabs */
                 .tab {
-                    font-size: 10px;
-                    padding: 5px 9px;
-                }
+                padding: 5px 10px;
+                font-size: 11px;
+                font-weight: 600;
+                cursor: pointer;
+                border-radius: 6px;
+                transition: all 0.2s;
+                color: rgba(72,88,102,0.56);
+            }
 
                 /* stats */
                 .stats-grid {
@@ -578,24 +701,41 @@
                 }
 
                 .section-title {
-                    font-size: 11px;
-                }
+                font-size: 12px;
+                font-weight: 700;
+                color: rgba(72,88,102,0.72);
+                letter-spacing: 0.5px;
+            }
 
                 .stat-card {
-                    padding: 12px;
-                }
+                background: rgba(255,255,255,0.14);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-radius: 14px;
+                padding: 14px 16px;
+                border: 1px solid rgba(255,255,255,0.18);
+                transition: all 0.3s ease;
+            }
 
                 .stat-label {
-                    font-size: 9px;
-                }
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: rgba(72,88,102,0.56);
+                margin-bottom: 6px;
+            }
 
                 .stat-value {
-                    font-size: 18px;
-                }
+                font-size: 20px;
+                font-weight: 700;
+                color: #7d92a3;
+            }
 
                 .stat-sub-value {
-                    font-size: 10px;
-                }
+                font-size: 11px;
+                color: rgba(72,88,102,0.58);
+                margin-top: 4px;
+            }
 
                 /* 图表 */
                 .chart-container {
@@ -608,9 +748,20 @@
                 }
 
                 .btn {
-                    font-size: 11px;
-                    padding: 11px 16px;
-                }
+                width: 85%;
+                max-width: 320px;
+                padding: 13px 28px;
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 700;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+                transition: all 0.3s ease;
+                letter-spacing: 0.5px;
+                text-align: center;
+            }
 
                 .btn-row {
                     width: 100%;
@@ -618,19 +769,49 @@
                 }
 
                 .btn-row .btn {
-                    font-size: 9px;
-                    padding: 9px 3px;
-                }
+                width: 85%;
+                max-width: 320px;
+                padding: 13px 28px;
+                font-family: "Inter", sans-serif;
+                font-size: 14px;
+                font-weight: 700;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+                transition: all 0.3s ease;
+                letter-spacing: 0.5px;
+                text-align: center;
+            }
 
                 /* 顶部切换 */
                 .page-switcher {
-                    margin-bottom: 20px;
-                }
+                display: flex;
+                background: rgba(255,255,255,0.12);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-radius: 30px;
+                padding: 6px;
+                margin-bottom: 30px;
+                border: 1px solid rgba(255,255,255,0.18);
+                box-shadow: 0 12px 30px rgba(0,0,0,0.10);
+                z-index: 10;
+            }
 
                 .page-tab {
-                    font-size: 11px;
-                    padding: 9px 16px;
-                }
+                padding: 10px 24px;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                border-radius: 20px;
+                transition:
+                    background-color 0.35s ease,
+                    color 0.35s ease,
+                    box-shadow 0.35s ease;
+                color: rgba(72,88,102,0.62);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
             }
         </style>
     </head>
@@ -651,15 +832,22 @@
                             <div class="time-display" id="time-p1">00:00</div>
                             <div class="date-display" id="date-p1">LOADING DATE</div>
                             <div class="timezone-display">CURRENT TIME</div>
+                            <div class="weather-display" id="weather-p1">WEATHER LOADING</div>
+                            <div class="sun-display" id="sun-p1">SUNRISE --:-- · SUNSET --:--</div>
                         </div>
                     </div>
                     <div class="btn-group">
                         <button class="btn btn-capture" onclick="captureImage('capture-area-p1', 'Clock_P1')">
                             CAPTURE 1x1 CLOCK
                         </button>
-                        <button class="btn btn-checkin" id="checkin-btn" onclick="toggleCheckIn()">
-                            CONNECTING...
-                        </button>
+                        <div class="btn-row">
+                            <button class="btn btn-checkin" id="wake-btn" onclick="toggleWakeCheckIn()">
+                                CONNECTING...
+                            </button>
+                            <button class="btn btn-checkin" id="sleep-btn" onclick="toggleSleepCheckIn()">
+                                CONNECTING...
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -677,24 +865,24 @@
                             </div>
                             <div class="stats-grid">
                                 <div class="stat-card">
-                                    <div class="stat-label">Completion Rate</div>
+                                    <div class="stat-label">Wake Completion</div>
                                     <div class="stat-value" id="stat-rate">0%</div>
                                 </div>
-<div class="stat-card clickable-time-card">
-
-    <div>
-        <div class="stat-label">Avg. Check-in Time</div>
-        <div class="stat-value" id="stat-avg">--:--</div>
-    </div>
-
-    <button
-        class="mini-edit-btn"
-        onclick="editTodayCheckInTime()"
-    >
-        ✎
-    </button>
-
-</div>
+                                <div class="stat-card clickable-time-card">
+                                    <div>
+                                        <div class="stat-label">Morning Avg</div>
+                                        <div class="stat-value" id="stat-wake-avg">--:--</div>
+                                    </div>
+                                    <button class="mini-edit-btn" onclick="editTodaySleepRecord()">✎</button>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Night Avg</div>
+                                    <div class="stat-value" id="stat-sleep-avg">--:--</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Avg Sleep Duration</div>
+                                    <div class="stat-value" id="stat-sleep-duration">--h --m</div>
+                                </div>
                             </div>
                             <div class="chart-container">
                                 <canvas id="analyticsChart"></canvas>
@@ -715,6 +903,8 @@
                             <div class="time-display" id="time-p2">00:00</div>
                             <div class="date-display" id="date-p2">LOADING DATE</div>
                             <div class="timezone-display">CURRENT TIME</div>
+                            <div class="weather-display" id="weather-p2">WEATHER LOADING</div>
+                            <div class="sun-display" id="sun-p2">SUNRISE --:-- · SUNSET --:--</div>
                         </div>
                     </div>
                     <div class="btn-group">
@@ -781,21 +971,21 @@
                     </div>
 
                     <div class="btn-group">
-                        <div class="btn-row">
-                            <!-- START 默认整合各自主题色 -->
+                        <button class="btn btn-capture" onclick="captureImage('tracker-capture-area', 'Tracker_P2')">
+                            CAPTURE 1x1 TRACKER
+                        </button>
+
+                        <div class="btn-row" style="margin-top:6px;">
                             <button class="btn btn-fit-theme" id="btn-fit-toggle" onclick="toggleTimer('fitness')">
-                                START FIT
+                                FIT
                             </button>
                             <button class="btn btn-fit-theme" onclick="resetTimer('fitness')">RESET</button>
 
                             <button class="btn btn-study-theme" id="btn-study-toggle" onclick="toggleTimer('study')">
-                                START STUDY
+                                STUDY
                             </button>
                             <button class="btn btn-study-theme" onclick="resetTimer('study')">RESET</button>
                         </div>
-                        <button class="btn btn-capture" onclick="captureImage('tracker-capture-area', 'Tracker_P2')">
-                            CAPTURE 1x1 TRACKER
-                        </button>
                     </div>
                 </div>
             </div>
@@ -811,7 +1001,9 @@
             let lastChartSignature = "";
             let globalColors = [];
             let globalHistoryData = {};
+            let globalSleepData = {};
             let globalTrackerData = { fitness: {}, study: {} };
+            let weatherInfo = null;
 
             let timers = {
                 fitness: { intervalId: null, startTime: null },
@@ -831,11 +1023,15 @@
             }
 
             function fetchCloudData() {
-                fetch(`${FIREBASE_BASE_URL}checkins.json`)
-                    .then((res) => res.json())
-                    .then((data) => {
-                        globalHistoryData = data ? data : {};
-                        updateCheckInButton();
+                Promise.all([
+                    fetch(`${FIREBASE_BASE_URL}checkins.json`).then((res) => res.json()).catch(() => null),
+                    fetch(`${FIREBASE_BASE_URL}sleepRecords.json`).then((res) => res.json()).catch(() => null),
+                ])
+                    .then(([legacyCheckins, sleepRecords]) => {
+                        globalHistoryData = legacyCheckins ? legacyCheckins : {};
+                        globalSleepData = sleepRecords ? sleepRecords : {};
+                        migrateLegacyWakeData();
+                        updateSleepButtons();
                         if (document.getElementById("page1").classList.contains("active")) {
                             renderChart();
                         }
@@ -1015,62 +1211,129 @@
                 });
             }
 
-            // ===== CHECK-IN ENGINE =====
-            function toggleCheckIn() {
-                const todayStr = new Date().toLocaleDateString("sv-SE");
-                if (globalHistoryData[todayStr]) {
-                    delete globalHistoryData[todayStr];
-                } else {
-                    const now = new Date();
-                    globalHistoryData[todayStr] =
-                        `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-                }
-                fetch(`${FIREBASE_BASE_URL}checkins.json`, {
+            // ===== SLEEP / WAKE CHECK-IN ENGINE =====
+            function getDateString(dateObj) {
+                return dateObj.toLocaleDateString("sv-SE");
+            }
+
+            function getTimeString(dateObj) {
+                return `${String(dateObj.getHours()).padStart(2, "0")}:${String(dateObj.getMinutes()).padStart(2, "0")}`;
+            }
+
+            function getSleepTargetDate() {
+                const d = new Date();
+                // Bedtime after 18:00 belongs to the next wake-up day.
+                if (d.getHours() >= 18) d.setDate(d.getDate() + 1);
+                return getDateString(d);
+            }
+
+            function migrateLegacyWakeData() {
+                Object.entries(globalHistoryData || {}).forEach(([date, wakeTime]) => {
+                    if (!globalSleepData[date]) globalSleepData[date] = {};
+                    if (typeof wakeTime === "string" && !globalSleepData[date].wake) {
+                        globalSleepData[date].wake = wakeTime;
+                    }
+                });
+            }
+
+            function saveSleepData() {
+                return fetch(`${FIREBASE_BASE_URL}sleepRecords.json`, {
                     method: "PUT",
-                    body: JSON.stringify(globalHistoryData),
+                    body: JSON.stringify(globalSleepData),
                 }).then(() => fetchCloudData());
             }
 
-            function updateCheckInButton() {
-                const todayStr = new Date().toLocaleDateString("sv-SE");
-                const btn = document.getElementById("checkin-btn");
-                if (globalHistoryData[todayStr]) {
-                    btn.innerText = "UNCHECK IN TODAY";
-                    btn.classList.add("checked");
+            function toggleWakeCheckIn() {
+                const todayStr = getDateString(new Date());
+                if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+                if (globalSleepData[todayStr].wake) {
+                    delete globalSleepData[todayStr].wake;
                 } else {
-                    btn.innerText = "CHECK IN TODAY";
-                    btn.classList.remove("checked");
+                    globalSleepData[todayStr].wake = getTimeString(new Date());
                 }
+
+                saveSleepData();
             }
 
-            function editTodayCheckInTime() {
-                const todayStr = new Date().toLocaleDateString("sv-SE");
-                const currentTime = globalHistoryData[todayStr] || "";
+            function toggleSleepCheckIn() {
+                const targetDate = getSleepTargetDate();
+                if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
 
-                const timeInput = prompt(
-                    "Enter today's check-in time in HH:MM format.\nExample: 07:15\nLeave blank to cancel.",
-                    currentTime,
+                if (globalSleepData[targetDate].sleep) {
+                    delete globalSleepData[targetDate].sleep;
+                } else {
+                    globalSleepData[targetDate].sleep = getTimeString(new Date());
+                }
+
+                saveSleepData();
+            }
+
+            function updateSleepButtons() {
+                const todayStr = getDateString(new Date());
+                const sleepTargetDate = getSleepTargetDate();
+                const wakeBtn = document.getElementById("wake-btn");
+                const sleepBtn = document.getElementById("sleep-btn");
+
+                const todayWake = globalSleepData[todayStr]?.wake;
+                wakeBtn.innerText = todayWake ? `WK ${todayWake}` : "WAKE";
+                wakeBtn.classList.toggle("checked", Boolean(todayWake));
+
+                const targetSleep = globalSleepData[sleepTargetDate]?.sleep;
+                sleepBtn.innerText = targetSleep ? `SLP ${targetSleep}` : "SLEEP";
+                sleepBtn.classList.toggle("checked", Boolean(targetSleep));
+            }
+
+            function editTodaySleepRecord() {
+                const todayStr = getDateString(new Date());
+                if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+                const currentWake = globalSleepData[todayStr].wake || "";
+                const currentSleep = globalSleepData[todayStr].sleep || "";
+
+                const wakeInput = prompt(
+                    "Enter today's WAKE time in HH:MM format. Leave blank to clear wake time.",
+                    currentWake,
                 );
+                if (wakeInput === null) return;
 
-                if (timeInput === null) return;
+                const sleepInput = prompt(
+                    "Enter the SLEEP time before this wake-up in HH:MM format. Leave blank to clear sleep time.",
+                    currentSleep,
+                );
+                if (sleepInput === null) return;
 
-                const trimmed = timeInput.trim();
+                const isValidOrBlank = (value) => value.trim() === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(value.trim());
 
-                if (trimmed === "") return;
-
-                const isValidTime = /^([01]\d|2[0-3]):([0-5]\d)$/.test(trimmed);
-
-                if (!isValidTime) {
-                    alert("Please enter a valid time in HH:MM format, e.g. 07:15.");
+                if (!isValidOrBlank(wakeInput) || !isValidOrBlank(sleepInput)) {
+                    alert("Please enter time as HH:MM, e.g. 23:40 or 07:15.");
                     return;
                 }
 
-                globalHistoryData[todayStr] = trimmed;
+                if (wakeInput.trim()) globalSleepData[todayStr].wake = wakeInput.trim();
+                else delete globalSleepData[todayStr].wake;
 
-                fetch(`${FIREBASE_BASE_URL}checkins.json`, {
-                    method: "PUT",
-                    body: JSON.stringify(globalHistoryData),
-                }).then(() => fetchCloudData());
+                if (sleepInput.trim()) globalSleepData[todayStr].sleep = sleepInput.trim();
+                else delete globalSleepData[todayStr].sleep;
+
+                saveSleepData();
+            }
+
+            function sleepDurationMinutes(sleepTime, wakeTime) {
+                if (!sleepTime || !wakeTime) return null;
+                const sleep = timeStringToDecimal(sleepTime);
+                const wake = timeStringToDecimal(wakeTime);
+                if (sleep === null || wake === null) return null;
+                let duration = wake - sleep;
+                if (duration <= 0) duration += 24;
+                return Math.round(duration * 60);
+            }
+
+            function minutesToDurationString(totalMinutes) {
+                if (totalMinutes === null || isNaN(totalMinutes)) return "--h --m";
+                const h = Math.floor(totalMinutes / 60);
+                const m = totalMinutes % 60;
+                return `${h}h ${String(m).padStart(2, "0")}m`;
             }
 
             // ===== ANALYTICS CHART =====
@@ -1111,8 +1374,8 @@
                         d.setDate(now.getDate() - i);
                         labels.push(d.toLocaleDateString("en-US", { weekday: "short" }));
                         const dateStr = d.toLocaleDateString("sv-SE");
-                        if (globalHistoryData[dateStr]) {
-                            const dec = timeStringToDecimal(globalHistoryData[dateStr]);
+                        if (globalSleepData[dateStr]?.wake) {
+                            const dec = timeStringToDecimal(globalSleepData[dateStr]?.wake);
                             chartData.push(dec);
                             count++;
                             sum += dec;
@@ -1126,9 +1389,9 @@
                         const d = new Date();
                         d.setDate(now.getDate() - i);
                         const dateStr = d.toLocaleDateString("sv-SE");
-                        if (globalHistoryData[dateStr]) {
+                        if (globalSleepData[dateStr]?.wake) {
                             labels.push(d.toLocaleDateString("en-US", { month: "short", day: "numeric" }));
-                            const dec = timeStringToDecimal(globalHistoryData[dateStr]);
+                            const dec = timeStringToDecimal(globalSleepData[dateStr]?.wake);
                             chartData.push(dec);
                             count++;
                             sum += dec;
@@ -1147,9 +1410,9 @@
                         labels.push(d.toLocaleDateString("en-US", { month: "short" }));
                         let mSum = 0,
                             mCount = 0;
-                        for (const [date, time] of Object.entries(globalHistoryData)) {
-                            if (date.startsWith(prefix)) {
-                                const dec = timeStringToDecimal(time);
+                        for (const [date, record] of Object.entries(globalSleepData)) {
+                            if (date.startsWith(prefix) && record?.wake) {
+                                const dec = timeStringToDecimal(record.wake);
                                 mSum += dec;
                                 mCount++;
                                 count++;
@@ -1162,7 +1425,32 @@
 
                 document.getElementById("stat-rate").innerText =
                     `${Math.min(totalDays > 0 ? Math.round((count / totalDays) * 100) : 0, 100)}%`;
-                document.getElementById("stat-avg").innerText = decimalToTimeString(count > 0 ? sum / count : null);
+                document.getElementById("stat-wake-avg").innerText = decimalToTimeString(count > 0 ? sum / count : null);
+
+                let sleepCount = 0;
+                let sleepSum = 0;
+                let durationCount = 0;
+                let durationSum = 0;
+                Object.values(globalSleepData).forEach((record) => {
+                    if (record?.sleep) {
+                        const sleepDec = timeStringToDecimal(record.sleep);
+                        if (sleepDec !== null) {
+                            sleepSum += sleepDec;
+                            sleepCount++;
+                        }
+                    }
+                    const duration = sleepDurationMinutes(record?.sleep, record?.wake);
+                    if (duration !== null) {
+                        durationSum += duration;
+                        durationCount++;
+                    }
+                });
+                document.getElementById("stat-sleep-avg").innerText = decimalToTimeString(
+                    sleepCount > 0 ? sleepSum / sleepCount : null,
+                );
+                document.getElementById("stat-sleep-duration").innerText = minutesToDurationString(
+                    durationCount > 0 ? Math.round(durationSum / durationCount) : null,
+                );
 
                 const chartSignature = JSON.stringify({
                     view: currentView,
@@ -1185,8 +1473,8 @@
                         datasets: [
                             {
                                 data: chartData,
-                                backgroundColor: "rgba(212, 175, 55, 0.1)",
-                                borderColor: "#d4af37",
+                                backgroundColor: "rgba(125,146,163,0.10)",
+                                borderColor: "#7d92a3",
                                 borderWidth: 3,
                                 pointRadius: 4,
                                 fill: true,
@@ -1203,13 +1491,122 @@
                             y: {
                                 min: 0,
                                 max: 24,
-                                ticks: { color: "rgba(255,255,255,0.6)", stepSize: 4, callback: (v) => v + ":00" },
-                                grid: { color: "rgba(255,255,255,0.05)" },
+                                ticks: { color: "rgba(72,88,102,0.55)", stepSize: 4, callback: (v) => v + ":00" },
+                                grid: { color: "rgba(72,88,102,0.08)" },
                             },
-                            x: { ticks: { color: "rgba(255,255,255,0.6)" }, grid: { display: false } },
+                            x: { ticks: { color: "rgba(72,88,102,0.55)" }, grid: { display: false } },
                         },
                     },
                 });
+            }
+
+            function weatherCodeToText(code) {
+                const map = {
+                    0: "Clear", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Cloudy",
+                    45: "Fog", 48: "Rime Fog", 51: "Light Drizzle", 53: "Drizzle", 55: "Heavy Drizzle",
+                    61: "Light Rain", 63: "Rain", 65: "Heavy Rain", 80: "Rain Showers", 81: "Rain Showers", 82: "Heavy Showers",
+                    95: "Thunderstorm", 96: "Thunderstorm", 99: "Thunderstorm",
+                };
+                return map[code] || "Weather";
+            }
+
+            function updateWeatherDisplay() {
+                const weatherText = weatherInfo
+                    ? `${Math.round(weatherInfo.temperature)}°C · ${weatherCodeToText(weatherInfo.code)}`
+                    : "WEATHER UNAVAILABLE";
+                const sunText = weatherInfo
+                    ? `SUNRISE ${weatherInfo.sunriseText} · SUNSET ${weatherInfo.sunsetText}`
+                    : "SUNRISE --:-- · SUNSET --:--";
+
+                ["p1", "p2"].forEach((page) => {
+                    document.getElementById(`weather-${page}`).innerText = weatherText;
+                    document.getElementById(`sun-${page}`).innerText = sunText;
+                });
+            }
+
+            function fetchWeatherByLocation(latitude, longitude) {
+                const url =
+                    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
+                    `&current=temperature_2m,weather_code&daily=sunrise,sunset&timezone=auto&forecast_days=1`;
+
+                fetch(url)
+                    .then((res) => res.json())
+                    .then((data) => {
+                        const sunrise = new Date(data.daily.sunrise[0]);
+                        const sunset = new Date(data.daily.sunset[0]);
+                        weatherInfo = {
+                            temperature: data.current.temperature_2m,
+                            code: data.current.weather_code,
+                            sunrise,
+                            sunset,
+                            sunriseText: getTimeString(sunrise),
+                            sunsetText: getTimeString(sunset),
+                        };
+                        updateWeatherDisplay();
+                        updateClockAndColors();
+                    })
+                    .catch(() => updateWeatherDisplay());
+            }
+
+            function fetchWeather() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => fetchWeatherByLocation(pos.coords.latitude, pos.coords.longitude),
+                        () => fetchWeatherByLocation(1.3521, 103.8198),
+                        { timeout: 5000 },
+                    );
+                } else {
+                    fetchWeatherByLocation(1.3521, 103.8198);
+                }
+            }
+
+            function pickSunGradient(now) {
+                const hour = now.getHours();
+
+                // Fallback when sunrise/sunset data is not available yet.
+                if (!weatherInfo?.sunrise || !weatherInfo?.sunset) {
+                    if (hour >= 5 && hour < 7) return ["#ffb37a", "#ff8c6b", "#c86b98"];
+                    if (hour >= 7 && hour < 12) return ["#b9d4e2", "#dfe9ef", "#f2ebe4"];
+                    if (hour >= 12 && hour < 16) return ["#89a7b8", "#a8c0cc", "#d7e3ea"];
+                    if (hour >= 16 && hour < 19) return ["#6f7f92", "#7b6d86", "#b57b8a"];
+                    if (hour >= 19 && hour < 22) return ["#3d566e", "#4b5d73", "#5e6f82"];
+                    return ["#0f2027", "#203a43", "#2c5364"];
+                }
+
+                const sunrise = weatherInfo.sunrise;
+                const sunset = weatherInfo.sunset;
+                const sunriseStart = new Date(sunrise.getTime() - 45 * 60000);
+                const sunriseEnd = new Date(sunrise.getTime() + 90 * 60000);
+                const noonStart = new Date(now);
+                noonStart.setHours(12, 0, 0, 0);
+                const lateAfternoon = new Date(now);
+                lateAfternoon.setHours(16, 0, 0, 0);
+                const eveningEnd = new Date(now);
+                eveningEnd.setHours(22, 0, 0, 0);
+                const sunsetStart = new Date(sunset.getTime() - 90 * 60000);
+                const sunsetEnd = new Date(sunset.getTime() + 45 * 60000);
+
+                if (now >= sunriseStart && now <= sunriseEnd) {
+                    return ["#ffb37a", "#ff8c6b", "#c86b98"];
+                }
+
+                if (now > sunriseEnd && now < noonStart) {
+                    return ["#b9d4e2", "#dfe9ef", "#f2ebe4"];
+                }
+
+                if (now >= noonStart && now < lateAfternoon) {
+                    return ["#89a7b8", "#a8c0cc", "#d7e3ea"];
+                }
+
+                if (now >= sunsetStart && now <= sunsetEnd) {
+                    return ["#6f7f92", "#7b6d86", "#b57b8a"];
+                }
+
+                if (now > sunsetEnd && now < eveningEnd) {
+                    return ["#3d566e", "#4b5d73", "#5e6f82"];
+                }
+
+                return ["#0f2027", "#203a43", "#2c5364"];
             }
 
             function updateClockAndColors() {
@@ -1225,11 +1622,7 @@
                 document.getElementById("date-p1").innerText = dateStr;
                 document.getElementById("date-p2").innerText = dateStr;
 
-                const hour = now.getHours();
-                if (hour >= 5 && hour < 8) globalColors = ["#ff9966", "#ff5e62", "#8a2387"];
-                else if (hour >= 8 && hour < 16) globalColors = ["#2b5876", "#4e4376", "#1e3c72"];
-                else if (hour >= 16 && hour < 19) globalColors = ["#1f4068", "#162447", "#e43f5a"];
-                else globalColors = ["#0f2027", "#203a43", "#2c5364"];
+                globalColors = pickSunGradient(now);
 
                 document.documentElement.style.setProperty("--bg-color-1", globalColors[0]);
                 document.documentElement.style.setProperty("--bg-color-2", globalColors[1]);
@@ -1286,9 +1679,12 @@
 
             function startTool() {
                 updateClockAndColors();
+                updateWeatherDisplay();
+                fetchWeather();
                 fetchCloudData();
                 setInterval(fetchCloudData, 5000);
                 setInterval(updateClockAndColors, 1000);
+                setInterval(fetchWeather, 30 * 60 * 1000);
             }
 
             restoreTimers();
