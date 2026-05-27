@@ -1032,6 +1032,20 @@
                 }
             }
 
+        
+            /* 📸 Capture stability */
+            .clock-box,
+            .panel-box,
+            .stat-card,
+            .btn,
+            .tabs,
+            .page-switcher {
+                -webkit-transform: translateZ(0);
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+            }
+
         </style>
     </head>
     <body>
@@ -1270,6 +1284,23 @@
             }
 
             // ===== TRACKER ENGINE =====
+            function restoreTimerButtonTheme(type) {
+                const prefix = type === "fitness" ? "fit" : "study";
+                const toggleBtn = document.getElementById(`btn-${prefix}-toggle`);
+                const labelText = type === "fitness" ? "FIT" : "STUDY";
+
+                toggleBtn.innerText = labelText;
+                toggleBtn.classList.remove("btn-stop");
+                toggleBtn.classList.remove("btn-fit-theme");
+                toggleBtn.classList.remove("btn-study-theme");
+
+                if (type === "fitness") {
+                    toggleBtn.classList.add("btn-fit-theme");
+                } else {
+                    toggleBtn.classList.add("btn-study-theme");
+                }
+            }
+
             function toggleTimer(type) {
                 const timerObj = timers[type];
                 const card = document.getElementById(`${type === "fitness" ? "fit" : "study"}-duration-card`);
@@ -1313,9 +1344,8 @@
                         renderTrackerStats();
                     }
 
-                    // 还原回各自由 MANUAL 统一样式的颜色
-                    toggleBtn.innerText = `START ${labelText}`;
-                    toggleBtn.className = `btn btn-${type}-theme`;
+                    // Restore each timer button to its theme color.
+                    restoreTimerButtonTheme(type);
                     card.classList.remove("timing");
                 }
             }
@@ -1388,8 +1418,17 @@
                 const card = document.getElementById(`${prefix}-duration-card`);
                 const toggleBtn = document.getElementById(`btn-${prefix}-toggle`);
 
-                toggleBtn.innerText = `START ${labelText}`;
-                toggleBtn.className = `btn btn-${type}-theme`;
+                toggleBtn.innerText = labelText;
+
+                toggleBtn.classList.remove("btn-stop");
+                toggleBtn.classList.remove("btn-fit-theme");
+                toggleBtn.classList.remove("btn-study-theme");
+
+                if (type === "fitness") {
+                    toggleBtn.classList.add("btn-fit-theme");
+                } else {
+                    toggleBtn.classList.add("btn-study-theme");
+                }
 
                 card.classList.remove("timing");
 
@@ -1787,7 +1826,7 @@
                 if (!weatherInfo?.sunrise || !weatherInfo?.sunset) {
                     if (hour >= 5 && hour < 7) return ["#ffb37a", "#ff8c6b", "#c86b98"];
                     if (hour >= 7 && hour < 12) return ["#b9d4e2", "#dfe9ef", "#f2ebe4"];
-                    if (hour >= 12 && hour < 16) return ["#89a7b8", "#a8c0cc", "#d7e3ea"];
+                    if (hour >= 12 && hour < 16) return ["#a7c1d0", "#c6d7df", "#e4edf1"];
                     if (hour >= 16 && hour < 19) return ["#6f7f92", "#7b6d86", "#b57b8a"];
                     if (hour >= 19 && hour < 22) return ["#3d566e", "#4b5d73", "#5e6f82"];
                     return ["#0f2027", "#203a43", "#2c5364"];
@@ -1800,7 +1839,7 @@
                 const noonStart = new Date(now);
                 noonStart.setHours(12, 0, 0, 0);
                 const lateAfternoon = new Date(now);
-                lateAfternoon.setHours(16, 0, 0, 0);
+                lateAfternoon.setHours(17, 30, 0, 0);
                 const eveningEnd = new Date(now);
                 eveningEnd.setHours(22, 0, 0, 0);
                 const sunsetStart = new Date(sunset.getTime() - 90 * 60000);
@@ -1815,7 +1854,7 @@
                 }
 
                 if (now >= noonStart && now < lateAfternoon) {
-                    return ["#89a7b8", "#a8c0cc", "#d7e3ea"];
+                    return ["#a7c1d0", "#c6d7df", "#e4edf1"];
                 }
 
                 if (now >= sunsetStart && now <= sunsetEnd) {
@@ -1851,11 +1890,33 @@
 
             function captureImage(targetId, fileName) {
                 const target = document.getElementById(targetId);
-                const originalBg = target.style.background;
-                target.style.background = `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
 
-                html2canvas(target, { scale: 2, useCORS: true }).then((canvas) => {
-                    target.style.background = originalBg;
+                html2canvas(target, {
+                    scale: Math.min(2, window.devicePixelRatio || 2),
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false,
+                    onclone: (clonedDoc) => {
+                        const clonedTarget = clonedDoc.getElementById(targetId);
+
+                        if (!clonedTarget) return;
+
+                        clonedTarget.style.background =
+                            `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
+
+                        // Mobile Safari / Chrome can render backdrop-filter as white flashes or color blocks.
+                        // Disable blur only inside the cloned capture tree, not on the live page.
+                        clonedTarget.querySelectorAll("*").forEach((el) => {
+                            el.style.transition = "none";
+                            el.style.animation = "none";
+                            el.style.backdropFilter = "none";
+                            el.style.webkitBackdropFilter = "none";
+                        });
+
+                        clonedTarget.style.backdropFilter = "none";
+                        clonedTarget.style.webkitBackdropFilter = "none";
+                    },
+                }).then((canvas) => {
                     const link = document.createElement("a");
                     link.download = `${fileName}_1x1.png`;
                     link.href = canvas.toDataURL("image/png");
