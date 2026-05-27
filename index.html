@@ -123,8 +123,8 @@
             .capture-wrapper {
                 position: relative;
                 padding: 10px;
-                border: 1px solid rgba(255,255,255,0.10);
-                border-radius: 8px;
+                border: none;
+                border-radius: 24px;
                 margin-bottom: 15px;
                 width: 474px;
                 height: 474px;
@@ -140,7 +140,7 @@
                 align-items: center;
                 background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2), var(--bg-color-3));
                 border: 1px solid rgba(255,255,255,0.18);
-                border-radius: 0;
+                border-radius: 24px;
                 box-shadow:
                     0 20px 50px rgba(0,0,0,0.10),
                     inset 0 1px 0 rgba(255,255,255,0.20);
@@ -148,15 +148,16 @@
                 text-align: center;
                 position: relative;
                 overflow: hidden;
+                padding: 36px;
             }
 
             .time-display {
                 font-size: 76px;
                 font-weight: 700;
-                letter-spacing: -2px;
+                letter-spacing: -3px;
                 line-height: 1;
                 margin-bottom: 15px;
-                color: var(--text-main);
+                color: #74889a;
                 text-shadow:
                     0 1px 0 rgba(255,255,255,0.35),
                     0 2px 10px rgba(0,0,0,0.08);
@@ -180,11 +181,11 @@
             }
 
             .weather-display {
-                margin-top: 14px;
-                font-size: 13px;
+                margin-top: 18px;
+                font-size: 14px;
                 font-weight: 600;
-                letter-spacing: 1.4px;
-                color: rgba(72,88,102,0.66);
+                letter-spacing: 1px;
+                color: rgba(72,88,102,0.60);
                 text-transform: uppercase;
             }
 
@@ -193,7 +194,7 @@
                 font-size: 10px;
                 font-weight: 400;
                 letter-spacing: 1.2px;
-                color: rgba(72,88,102,0.54);
+                color: rgba(72,88,102,0.52);
                 text-transform: uppercase;
             }
 
@@ -209,6 +210,7 @@
                 backdrop-filter: blur(24px);
                 -webkit-backdrop-filter: blur(24px);
                 border: 1px solid rgba(255,255,255,0.18);
+                border-radius: 24px;
                 box-shadow:
                     0 20px 50px rgba(0,0,0,0.10),
                     inset 0 1px 0 rgba(255,255,255,0.20);
@@ -345,18 +347,18 @@
 .dashboard-title {
                 font-size: 15px;
                 font-weight: 700;
-                letter-spacing: 0.4px;
-                color: var(--text-title);
+                letter-spacing: 0.3px;
+                color: #7d92a3;
             }
 
             .tabs {
                 display: flex;
                 background: rgba(255,255,255,0.14);
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
                 border-radius: 8px;
                 padding: 4px;
-                border: 1px solid rgba(255,255,255,0.14);
+                border: 1px solid rgba(255,255,255,0.18);
             }
 
             .tab {
@@ -396,7 +398,7 @@
             .section-title {
                 font-size: 12px;
                 font-weight: 700;
-                color: rgba(72,88,102,0.72);
+                color: #7d92a3;
                 letter-spacing: 0.5px;
             }
 
@@ -404,7 +406,7 @@
                 background: rgba(255,255,255,0.14);
                 backdrop-filter: blur(18px);
                 -webkit-backdrop-filter: blur(18px);
-                border-radius: 14px;
+                border-radius: 18px;
                 padding: 14px 16px;
                 border: 1px solid rgba(255,255,255,0.18);
                 transition: all 0.3s ease;
@@ -1046,6 +1048,80 @@
                 -webkit-backface-visibility: hidden;
             }
 
+        
+            /* 📍 Clock hover location */
+            .clock-box {
+                position: relative;
+            }
+
+            .clock-box::after {
+                content: attr(data-location);
+
+                position: absolute;
+
+                bottom: 18px;
+                left: 50%;
+
+                transform: translateX(-50%);
+
+                padding: 6px 10px;
+
+                border-radius: 999px;
+
+                background: rgba(18, 28, 38, 0.78);
+
+                color: rgba(240,248,255,0.82);
+
+                font-size: 10px;
+                letter-spacing: 0.8px;
+
+                opacity: 0;
+
+                transition: opacity 0.2s ease;
+
+                pointer-events: none;
+
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+
+                white-space: nowrap;
+            }
+
+            .clock-box:hover::after {
+                opacity: 1;
+            }
+
+        
+            /* 🎨 Preview-style final visual override */
+            @media (max-width: 520px) {
+                .capture-wrapper {
+                    border: none;
+                    border-radius: 24px;
+                    padding: 0;
+                }
+
+                .clock-box,
+                .panel-box {
+                    border-radius: 24px;
+                }
+
+                .clock-box {
+                    padding: 36px 22px 28px;
+                }
+
+                .time-display {
+                    letter-spacing: -3px;
+                }
+
+                .weather-display {
+                    margin-top: 18px;
+                }
+
+                .stat-card {
+                    border-radius: 18px;
+                }
+            }
+
         </style>
     </head>
     <body>
@@ -1061,7 +1137,7 @@
             <div class="page-view active" id="page1">
                 <div class="control-block">
                     <div class="capture-wrapper">
-                        <div class="clock-box" id="capture-area-p1">
+                        <div class="clock-box" id="capture-area-p1" ondblclick="promptSetCity()" title="Double-click to change city">
                             <div class="time-display" id="time-p1">00:00</div>
                             <div class="date-display" id="date-p1">LOADING DATE</div>
                             <div class="timezone-display">CURRENT TIME</div>
@@ -1132,7 +1208,7 @@
             <div class="page-view" id="page2">
                 <div class="control-block">
                     <div class="capture-wrapper">
-                        <div class="clock-box" id="capture-area-p2">
+                        <div class="clock-box" id="capture-area-p2" ondblclick="promptSetCity()" title="Double-click to change city">
                             <div class="time-display" id="time-p2">00:00</div>
                             <div class="date-display" id="date-p2">LOADING DATE</div>
                             <div class="timezone-display">CURRENT TIME</div>
@@ -1229,6 +1305,17 @@
             const FIREBASE_BASE_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/";
             // =======================================================
 
+
+            // ===== THEME / COLOR CONFIG =====
+            const GRADIENTS = {
+                sunrise: ["#ffb37a", "#ff8c6b", "#c86b98"],
+                morning: ["#b9d4e2", "#dfe9ef", "#f2ebe4"],
+                afternoon: ["#b9d4e2", "#dfe9ef", "#f2ebe4"],
+                sunset: ["#8fa4b6", "#b8b8c5", "#e7d0c4"],
+                evening: ["#5f7486", "#6f8291", "#9baab4"],
+                night: ["#0f2027", "#203a43", "#2c5364"],
+            };
+
             let currentView = "week";
             let chartInstance = null;
             let lastChartSignature = "";
@@ -1284,70 +1371,68 @@
             }
 
             // ===== TRACKER ENGINE =====
-            function restoreTimerButtonTheme(type) {
+            function setTimerButtonState(type, state) {
                 const prefix = type === "fitness" ? "fit" : "study";
-                const toggleBtn = document.getElementById(`btn-${prefix}-toggle`);
                 const labelText = type === "fitness" ? "FIT" : "STUDY";
+                const toggleBtn = document.getElementById(`btn-${prefix}-toggle`);
+                const card = document.getElementById(`${prefix}-duration-card`);
 
-                toggleBtn.innerText = labelText;
+                if (!toggleBtn || !card) return;
+
                 toggleBtn.classList.remove("btn-stop");
                 toggleBtn.classList.remove("btn-fit-theme");
                 toggleBtn.classList.remove("btn-study-theme");
 
-                if (type === "fitness") {
-                    toggleBtn.classList.add("btn-fit-theme");
-                } else {
-                    toggleBtn.classList.add("btn-study-theme");
+                if (state === "running") {
+                    toggleBtn.innerText = `STOP ${labelText}`;
+                    toggleBtn.classList.add("btn-stop");
+                    card.classList.add("timing");
+                    return;
                 }
+
+                toggleBtn.innerText = labelText;
+                toggleBtn.classList.add(type === "fitness" ? "btn-fit-theme" : "btn-study-theme");
+                card.classList.remove("timing");
             }
 
             function toggleTimer(type) {
                 const timerObj = timers[type];
-                const card = document.getElementById(`${type === "fitness" ? "fit" : "study"}-duration-card`);
-                const toggleBtn = document.getElementById(`btn-${type === "fitness" ? "fit" : "study"}-toggle`);
-                const labelText = type === "fitness" ? "FIT" : "STUDY";
 
                 if (timerObj.intervalId === null) {
-                    // 记录开始时间
                     timerObj.startTime = new Date();
-
-                    // 存到 localStorage
                     localStorage.setItem(`${type}StartTime`, timerObj.startTime.getTime());
 
                     timerObj.intervalId = setInterval(() => {
                         updateLiveTimerDisplay(type);
                     }, 1000);
 
-                    toggleBtn.innerText = `STOP ${labelText}`;
-                    toggleBtn.className = "btn btn-stop"; // 激活时变成亮眼红色
-                    card.classList.add("timing");
-                } else {
-                    clearInterval(timerObj.intervalId);
-                    timerObj.intervalId = null;
-                    localStorage.removeItem(`${type}StartTime`);
-
-                    const endTime = new Date();
-                    const elapsedSeconds = Math.floor((endTime - timerObj.startTime) / 1000);
-                    const elapsedMinutes = Math.round(elapsedSeconds / 60);
-
-                    if (elapsedMinutes >= 1) {
-                        const todayStr = new Date().toLocaleDateString("sv-SE");
-                        const currentMinutes = globalTrackerData[type][todayStr] || 0;
-                        globalTrackerData[type][todayStr] = currentMinutes + elapsedMinutes;
-
-                        fetch(`${FIREBASE_BASE_URL}tracker.json`, {
-                            method: "PUT",
-                            body: JSON.stringify(globalTrackerData),
-                        }).then(() => fetchCloudData());
-                    } else {
-                        alert("Duration too short (less than 1 minute). Not recorded.");
-                        renderTrackerStats();
-                    }
-
-                    // Restore each timer button to its theme color.
-                    restoreTimerButtonTheme(type);
-                    card.classList.remove("timing");
+                    setTimerButtonState(type, "running");
+                    return;
                 }
+
+                clearInterval(timerObj.intervalId);
+                timerObj.intervalId = null;
+                localStorage.removeItem(`${type}StartTime`);
+
+                const endTime = new Date();
+                const elapsedSeconds = Math.floor((endTime - timerObj.startTime) / 1000);
+                const elapsedMinutes = Math.round(elapsedSeconds / 60);
+
+                if (elapsedMinutes >= 1) {
+                    const todayStr = new Date().toLocaleDateString("sv-SE");
+                    const currentMinutes = globalTrackerData[type][todayStr] || 0;
+                    globalTrackerData[type][todayStr] = currentMinutes + elapsedMinutes;
+
+                    fetch(`${FIREBASE_BASE_URL}tracker.json`, {
+                        method: "PUT",
+                        body: JSON.stringify(globalTrackerData),
+                    }).then(() => fetchCloudData());
+                } else {
+                    alert("Duration too short (less than 1 minute). Not recorded.");
+                    renderTrackerStats();
+                }
+
+                setTimerButtonState(type, "idle");
             }
 
             function updateLiveTimerDisplay(type) {
@@ -1404,8 +1489,6 @@
 
             function resetTimer(type) {
                 const timerObj = timers[type];
-                const prefix = type === "fitness" ? "fit" : "study";
-                const labelText = type === "fitness" ? "FIT" : "STUDY";
 
                 if (timerObj.intervalId !== null) {
                     clearInterval(timerObj.intervalId);
@@ -1415,23 +1498,7 @@
                 timerObj.startTime = null;
                 localStorage.removeItem(`${type}StartTime`);
 
-                const card = document.getElementById(`${prefix}-duration-card`);
-                const toggleBtn = document.getElementById(`btn-${prefix}-toggle`);
-
-                toggleBtn.innerText = labelText;
-
-                toggleBtn.classList.remove("btn-stop");
-                toggleBtn.classList.remove("btn-fit-theme");
-                toggleBtn.classList.remove("btn-study-theme");
-
-                if (type === "fitness") {
-                    toggleBtn.classList.add("btn-fit-theme");
-                } else {
-                    toggleBtn.classList.add("btn-study-theme");
-                }
-
-                card.classList.remove("timing");
-
+                setTimerButtonState(type, "idle");
                 renderTrackerStats();
             }
 
@@ -1758,6 +1825,79 @@
                 });
             }
 
+            // ===== LOCATION ENGINE =====
+            const DEFAULT_CITY = "Tianjin";
+            const DEFAULT_COUNTRY = "China";
+
+            let currentCity =
+                localStorage.getItem("clockCityName") || DEFAULT_CITY;
+
+            let currentCountry =
+                localStorage.getItem("clockCountryName") || DEFAULT_COUNTRY;
+
+            let currentLocationName =
+                localStorage.getItem("clockLocationDisplay") || `${DEFAULT_CITY} · ${DEFAULT_COUNTRY}`;
+
+            function updateClockLocationLabel() {
+                document.querySelectorAll(".clock-box").forEach((box) => {
+                    box.setAttribute("data-location", currentLocationName);
+                });
+            }
+
+            async function geocodeCity(city) {
+                const url =
+                    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}` +
+                    `&count=1&language=en&format=json`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.results || !data.results.length) {
+                    throw new Error("City not found");
+                }
+
+                return data.results[0];
+            }
+
+            async function setCity(cityInput) {
+                const trimmed = String(cityInput || "").trim();
+
+                if (!trimmed) return;
+
+                try {
+                    const place = await geocodeCity(trimmed);
+
+                    currentCity = place.name;
+                    currentCountry = place.country || "";
+                    currentLocationName = currentCountry
+                        ? `${currentCity} · ${currentCountry}`
+                        : currentCity;
+
+                    localStorage.setItem("clockCityName", currentCity);
+                    localStorage.setItem("clockCountryName", currentCountry);
+                    localStorage.setItem("clockLocationDisplay", currentLocationName);
+
+                    updateClockLocationLabel();
+
+                    await fetchWeatherByLocation(place.latitude, place.longitude);
+                } catch (e) {
+                    console.error(e);
+                    alert("City not found. Please try another city name, e.g. Tianjin, Tokyo, Singapore.");
+                }
+            }
+
+            function promptSetCity() {
+                const cityInput = prompt(
+                    "Enter city name for weather / sunrise / sunset.\nExample: Tianjin, Tokyo, Singapore",
+                    currentCity,
+                );
+
+                if (cityInput === null) return;
+
+                setCity(cityInput);
+            }
+
+
             function weatherCodeToText(code) {
                 const map = {
                     0: "Clear", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Cloudy",
@@ -1769,16 +1909,22 @@
             }
 
             function updateWeatherDisplay() {
-                const weatherText = weatherInfo
-                    ? `${Math.round(weatherInfo.temperature)}°C · ${weatherCodeToText(weatherInfo.code)}`
+                const hasWeather = Boolean(weatherInfo);
+
+                const weatherText = hasWeather
+                    ? `${Number.isFinite(weatherInfo.temperature) ? Math.round(weatherInfo.temperature) + "°C" : "--°C"} · ${weatherCodeToText(weatherInfo.code)}`
                     : "WEATHER UNAVAILABLE";
-                const sunText = weatherInfo
+
+                const sunText = hasWeather
                     ? `SUNRISE ${weatherInfo.sunriseText} · SUNSET ${weatherInfo.sunsetText}`
                     : "SUNRISE --:-- · SUNSET --:--";
 
                 ["p1", "p2"].forEach((page) => {
-                    document.getElementById(`weather-${page}`).innerText = weatherText;
-                    document.getElementById(`sun-${page}`).innerText = sunText;
+                    const weatherEl = document.getElementById(`weather-${page}`);
+                    const sunEl = document.getElementById(`sun-${page}`);
+
+                    if (weatherEl) weatherEl.innerText = weatherText;
+                    if (sunEl) sunEl.innerText = sunText;
                 });
             }
 
@@ -1787,36 +1933,72 @@
                     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
                     `&current=temperature_2m,weather_code&daily=sunrise,sunset&timezone=auto&forecast_days=1`;
 
-                fetch(url)
+                return fetch(url)
                     .then((res) => res.json())
                     .then((data) => {
+                        if (!data?.daily?.sunrise?.[0] || !data?.daily?.sunset?.[0]) {
+                            throw new Error("Sunrise/sunset data unavailable");
+                        }
+
                         const sunrise = new Date(data.daily.sunrise[0]);
                         const sunset = new Date(data.daily.sunset[0]);
+
                         weatherInfo = {
-                            temperature: data.current.temperature_2m,
-                            code: data.current.weather_code,
+                            temperature: data?.current?.temperature_2m,
+                            code: data?.current?.weather_code,
                             sunrise,
                             sunset,
                             sunriseText: getTimeString(sunrise),
                             sunsetText: getTimeString(sunset),
                         };
+
                         updateWeatherDisplay();
                         updateClockAndColors();
+
+                        return weatherInfo;
                     })
-                    .catch(() => updateWeatherDisplay());
+                    .catch((e) => {
+                        console.error(e);
+                        weatherInfo = null;
+                        updateWeatherDisplay();
+                    });
             }
 
-            // Default fallback weather location: Tianjin, China
             function fetchWeather() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => fetchWeatherByLocation(pos.coords.latitude, pos.coords.longitude),
-                        () => fetchWeatherByLocation(39.3434, 117.3616),
-                        { timeout: 5000 },
-                    );
-                } else {
-                    fetchWeatherByLocation(39.3434, 117.3616);
-                }
+                updateClockLocationLabel();
+
+                return geocodeCity(currentCity)
+                    .then((place) => {
+                        currentCity = place.name;
+                        currentCountry = place.country || currentCountry || "";
+                        currentLocationName = currentCountry
+                            ? `${currentCity} · ${currentCountry}`
+                            : currentCity;
+
+                        localStorage.setItem("clockCityName", currentCity);
+                        localStorage.setItem("clockCountryName", currentCountry);
+                        localStorage.setItem("clockLocationDisplay", currentLocationName);
+
+                        updateClockLocationLabel();
+
+                        return fetchWeatherByLocation(place.latitude, place.longitude);
+                    })
+                    .catch((e) => {
+                        console.error(e);
+
+                        // Fallback to Tianjin if saved city cannot be resolved.
+                        currentCity = DEFAULT_CITY;
+                        currentCountry = DEFAULT_COUNTRY;
+                        currentLocationName = `${DEFAULT_CITY} · ${DEFAULT_COUNTRY}`;
+
+                        localStorage.setItem("clockCityName", currentCity);
+                        localStorage.setItem("clockCountryName", currentCountry);
+                        localStorage.setItem("clockLocationDisplay", currentLocationName);
+
+                        updateClockLocationLabel();
+
+                        return fetchWeatherByLocation(39.3434, 117.3616);
+                    });
             }
 
             function pickSunGradient(now) {
@@ -1824,48 +2006,38 @@
 
                 // Fallback when sunrise/sunset data is not available yet.
                 if (!weatherInfo?.sunrise || !weatherInfo?.sunset) {
-                    if (hour >= 5 && hour < 7) return ["#ffb37a", "#ff8c6b", "#c86b98"];
-                    if (hour >= 7 && hour < 12) return ["#b9d4e2", "#dfe9ef", "#f2ebe4"];
-                    if (hour >= 12 && hour < 16) return ["#a7c1d0", "#c6d7df", "#e4edf1"];
-                    if (hour >= 16 && hour < 19) return ["#6f7f92", "#7b6d86", "#b57b8a"];
-                    if (hour >= 19 && hour < 22) return ["#3d566e", "#4b5d73", "#5e6f82"];
-                    return ["#0f2027", "#203a43", "#2c5364"];
+                    if (hour >= 5 && hour < 7) return GRADIENTS.sunrise;
+                    if (hour >= 7 && hour < 12) return GRADIENTS.morning;
+                    if (hour >= 12 && hour < 17) return GRADIENTS.afternoon;
+                    if (hour >= 17 && hour < 19) return GRADIENTS.sunset;
+                    if (hour >= 19 && hour < 22) return GRADIENTS.evening;
+                    return GRADIENTS.night;
                 }
 
                 const sunrise = weatherInfo.sunrise;
                 const sunset = weatherInfo.sunset;
                 const sunriseStart = new Date(sunrise.getTime() - 45 * 60000);
                 const sunriseEnd = new Date(sunrise.getTime() + 90 * 60000);
+
                 const noonStart = new Date(now);
                 noonStart.setHours(12, 0, 0, 0);
+
                 const lateAfternoon = new Date(now);
                 lateAfternoon.setHours(17, 30, 0, 0);
+
                 const eveningEnd = new Date(now);
                 eveningEnd.setHours(22, 0, 0, 0);
+
                 const sunsetStart = new Date(sunset.getTime() - 90 * 60000);
                 const sunsetEnd = new Date(sunset.getTime() + 45 * 60000);
 
-                if (now >= sunriseStart && now <= sunriseEnd) {
-                    return ["#ffb37a", "#ff8c6b", "#c86b98"];
-                }
+                if (now >= sunriseStart && now <= sunriseEnd) return GRADIENTS.sunrise;
+                if (now > sunriseEnd && now < noonStart) return GRADIENTS.morning;
+                if (now >= noonStart && now < lateAfternoon) return GRADIENTS.afternoon;
+                if (now >= sunsetStart && now <= sunsetEnd) return GRADIENTS.sunset;
+                if (now > sunsetEnd && now < eveningEnd) return GRADIENTS.evening;
 
-                if (now > sunriseEnd && now < noonStart) {
-                    return ["#b9d4e2", "#dfe9ef", "#f2ebe4"];
-                }
-
-                if (now >= noonStart && now < lateAfternoon) {
-                    return ["#a7c1d0", "#c6d7df", "#e4edf1"];
-                }
-
-                if (now >= sunsetStart && now <= sunsetEnd) {
-                    return ["#6f7f92", "#7b6d86", "#b57b8a"];
-                }
-
-                if (now > sunsetEnd && now < eveningEnd) {
-                    return ["#3d566e", "#4b5d73", "#5e6f82"];
-                }
-
-                return ["#0f2027", "#203a43", "#2c5364"];
+                return GRADIENTS.night;
             }
 
             function updateClockAndColors() {
@@ -1888,6 +2060,25 @@
                 document.documentElement.style.setProperty("--bg-color-3", globalColors[2]);
             }
 
+            function prepareCaptureClone(clonedTarget) {
+                if (!clonedTarget) return;
+
+                clonedTarget.style.background =
+                    `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
+
+                // Mobile Safari / Chrome can render backdrop-filter as white flashes or color blocks.
+                // Disable blur only inside the cloned capture tree, not on the live page.
+                clonedTarget.querySelectorAll("*").forEach((el) => {
+                    el.style.transition = "none";
+                    el.style.animation = "none";
+                    el.style.backdropFilter = "none";
+                    el.style.webkitBackdropFilter = "none";
+                });
+
+                clonedTarget.style.backdropFilter = "none";
+                clonedTarget.style.webkitBackdropFilter = "none";
+            }
+
             function captureImage(targetId, fileName) {
                 const target = document.getElementById(targetId);
 
@@ -1897,24 +2088,7 @@
                     backgroundColor: null,
                     logging: false,
                     onclone: (clonedDoc) => {
-                        const clonedTarget = clonedDoc.getElementById(targetId);
-
-                        if (!clonedTarget) return;
-
-                        clonedTarget.style.background =
-                            `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
-
-                        // Mobile Safari / Chrome can render backdrop-filter as white flashes or color blocks.
-                        // Disable blur only inside the cloned capture tree, not on the live page.
-                        clonedTarget.querySelectorAll("*").forEach((el) => {
-                            el.style.transition = "none";
-                            el.style.animation = "none";
-                            el.style.backdropFilter = "none";
-                            el.style.webkitBackdropFilter = "none";
-                        });
-
-                        clonedTarget.style.backdropFilter = "none";
-                        clonedTarget.style.webkitBackdropFilter = "none";
+                        prepareCaptureClone(clonedDoc.getElementById(targetId));
                     },
                 }).then((canvas) => {
                     const link = document.createElement("a");
@@ -1935,35 +2109,29 @@
                 ["fitness", "study"].forEach((type) => {
                     const saved = localStorage.getItem(`${type}StartTime`);
 
-                    if (!saved) return;
+                    if (!saved) {
+                        setTimerButtonState(type, "idle");
+                        return;
+                    }
 
                     const timerObj = timers[type];
-
-                    timerObj.startTime = new Date(parseInt(saved));
+                    timerObj.startTime = new Date(parseInt(saved, 10));
 
                     timerObj.intervalId = setInterval(() => {
                         updateLiveTimerDisplay(type);
                     }, 1000);
 
-                    const card = document.getElementById(`${type === "fitness" ? "fit" : "study"}-duration-card`);
-
-                    const toggleBtn = document.getElementById(`btn-${type === "fitness" ? "fit" : "study"}-toggle`);
-
-                    const labelText = type === "fitness" ? "FIT" : "STUDY";
-
-                    toggleBtn.innerText = `STOP ${labelText}`;
-                    toggleBtn.className = "btn btn-stop";
-
-                    card.classList.add("timing");
+                    setTimerButtonState(type, "running");
                 });
             }
 
             function startTool() {
+                updateClockLocationLabel();
                 updateClockAndColors();
                 updateWeatherDisplay();
                 fetchWeather();
                 fetchCloudData();
-                setInterval(fetchCloudData, 5000);
+                setInterval(fetchCloudData, 60 * 1000);
                 setInterval(updateClockAndColors, 1000);
                 setInterval(fetchWeather, 30 * 60 * 1000);
             }
