@@ -1346,10 +1346,10 @@
 
             // ===== THEME / COLOR CONFIG =====
             const GRADIENTS = {
-                sunrise: ["#ffb37a", "#ff8c6b", "#c86b98"],
-                morning: ["#b9d4e2", "#dfe9ef", "#f2ebe4"],
-                afternoon: ["#b9d4e2", "#dfe9ef", "#f2ebe4"],
-                sunset: ["#8fa4b6", "#b8b8c5", "#e7d0c4"],
+                sunrise: ["#f8ddd2", "#ece2e7", "#d9e0ea"],
+                morning: ["#c8dfeb", "#e8f1f5", "#f5f0eb"],
+                afternoon: ["#d7e8f1", "#f2f7fa", "#faf6f2"],
+                sunset: ["#8c7b91", "#b59db0", "#e4c6ba"],
                 evening: ["#5f7486", "#6f8291", "#9baab4"],
                 night: ["#0f2027", "#203a43", "#2c5364"],
             };
@@ -2042,7 +2042,6 @@
             function pickSunGradient(now) {
                 const hour = now.getHours();
 
-                // Fallback when sunrise/sunset data is not available yet.
                 if (!weatherInfo?.sunrise || !weatherInfo?.sunset) {
                     if (hour >= 5 && hour < 7) return GRADIENTS.sunrise;
                     if (hour >= 7 && hour < 12) return GRADIENTS.morning;
@@ -2054,19 +2053,20 @@
 
                 const sunrise = weatherInfo.sunrise;
                 const sunset = weatherInfo.sunset;
-                const sunriseStart = new Date(sunrise.getTime() - 45 * 60000);
-                const sunriseEnd = new Date(sunrise.getTime() + 90 * 60000);
 
-                const noonStart = new Date(now);
-                noonStart.setHours(12, 0, 0, 0);
+                const sunriseStart = new Date(sunrise.getTime() - 60 * 60000);
+                const sunriseEnd = new Date(sunrise.getTime() + 45 * 60000);
 
-                const lateAfternoon = new Date(now);
-                lateAfternoon.setHours(17, 30, 0, 0);
+                const noonStart = new Date();
+                noonStart.setHours(11, 30, 0, 0);
 
-                const eveningEnd = new Date(now);
+                const lateAfternoon = new Date();
+                lateAfternoon.setHours(16, 30, 0, 0);
+
+                const eveningEnd = new Date();
                 eveningEnd.setHours(22, 0, 0, 0);
 
-                const sunsetStart = new Date(sunset.getTime() - 90 * 60000);
+                const sunsetStart = new Date(sunset.getTime() - 75 * 60000);
                 const sunsetEnd = new Date(sunset.getTime() + 45 * 60000);
 
                 if (now >= sunriseStart && now <= sunriseEnd) return GRADIENTS.sunrise;
