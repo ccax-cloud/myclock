@@ -20,8 +20,8 @@
                 --bg-color-2: #dfe9ef;
                 --bg-color-3: #f2ebe4;
 
-                --text-main: #74889a;
-                --text-title: #7d92a3;
+                --text-main: #9187a6;
+                --text-title: #8f88a0;
                 --text-body: rgba(72,88,102,0.78);
                 --text-muted: rgba(72,88,102,0.60);
                 --glass-bg: rgba(255,255,255,0.14);
@@ -157,10 +157,10 @@
                 letter-spacing: -3px;
                 line-height: 1;
                 margin-bottom: 15px;
-                color: #74889a;
+                color: var(--text-main);
                 text-shadow:
-                    0 1px 0 rgba(255,255,255,0.35),
-                    0 2px 10px rgba(0,0,0,0.08);
+                    0 1px 0 rgba(255,255,255,0.30),
+                    0 2px 6px rgba(0,0,0,0.05);
             }
 
             .date-display {
@@ -350,7 +350,7 @@
 
                 letter-spacing: 0.3px;
 
-                color: rgba(235,242,248,0.82);
+                color: rgba(242,235,245,0.92);
             }
 
             .tabs {
@@ -408,17 +408,17 @@
                 transform: translateY(-1px);
 
                 background:
-                    rgba(105,128,148,0.24);
+                    rgba(255,255,255,0.16);
             }
 
             .stat-card {
                 padding: 14px 15px;
 
                 background:
-                    rgba(92,118,138,0.20);
+                    rgba(255,255,255,0.10);
 
                 border:
-                    1px solid rgba(255,255,255,0.075);
+                    1px solid rgba(255,255,255,0.12);
 
                 backdrop-filter: blur(18px);
                 -webkit-backdrop-filter: blur(18px);
@@ -441,7 +441,7 @@
                 letter-spacing: 1px;
 
                 color:
-                    rgba(214,229,239,0.42);
+                    rgba(235,222,235,0.58);
 
                 margin-bottom: 6px;
             }
@@ -452,10 +452,10 @@
                 font-size: 20px;
                 font-weight: 700;
 
-                color: rgba(208,222,234,0.78);
+                color: rgba(232,223,234,0.92);
 
                 text-shadow:
-                    0 1px 10px rgba(0,0,0,0.14);
+                    0 1px 8px rgba(0,0,0,0.08);
             }
 
             .stat-card.timing .stat-value,
@@ -748,14 +748,14 @@
                 font-size: 10px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
-                color: rgba(72,88,102,0.56);
+                color: rgba(96,86,108,0.58);
                 margin-bottom: 6px;
             }
 
                 .stat-value {
                 font-size: 20px;
                 font-weight: 700;
-                color: #7d92a3;
+                color: #9187a6;
             }
 
                 .stat-sub-value {
@@ -1176,16 +1176,66 @@
             .capture-mode .tabs,
             .capture-mode .btn,
             .capture-mode .page-switcher {
-                background: rgba(255,255,255,0.18) !important;
-                border: 1px solid rgba(255,255,255,0.20) !important;
-                box-shadow: 0 8px 18px rgba(0,0,0,0.08) !important;
+                background: rgba(255,255,255,0.16) !important;
+                border: 1px solid rgba(255,255,255,0.18) !important;
+                box-shadow: 0 8px 18px rgba(0,0,0,0.06) !important;
             }
 
             .capture-mode .tab.active {
                 background: rgba(255,255,255,0.42) !important;
             }
 
+
+            /* 🪻 Lavender glass refinement */
+            .time-display {
+                color: var(--text-main);
+                text-shadow:
+                    0 1px 0 rgba(255,255,255,0.30),
+                    0 2px 6px rgba(0,0,0,0.05);
+            }
+
+            .dashboard-title {
+                color: rgba(242,235,245,0.92);
+            }
+
+            .stat-card {
+                background: rgba(255,255,255,0.10);
+                border: 1px solid rgba(255,255,255,0.12);
+            }
+
+            .stat-card:hover {
+                background: rgba(255,255,255,0.16);
+            }
+
+            .stat-label {
+                color: rgba(235,222,235,0.58);
+            }
+
+            .stat-value {
+                color: rgba(232,223,234,0.92);
+                text-shadow: 0 1px 8px rgba(0,0,0,0.08);
+            }
+
+            .stat-sub-value {
+                color: rgba(232,223,234,0.66);
+            }
+
         </style>
+        <script>
+            (function restoreLastGradientBeforePaint() {
+                try {
+                    const savedColors = JSON.parse(localStorage.getItem("lastGradientColors"));
+
+                    if (Array.isArray(savedColors) && savedColors.length === 3) {
+                        document.documentElement.style.setProperty("--bg-color-1", savedColors[0]);
+                        document.documentElement.style.setProperty("--bg-color-2", savedColors[1]);
+                        document.documentElement.style.setProperty("--bg-color-3", savedColors[2]);
+                    }
+                } catch (e) {
+                    console.warn("Saved gradient unavailable", e);
+                }
+            })();
+        </script>
     </head>
     <body>
         <!-- 🎛️ 顶端页面翻页标签 -->
@@ -1245,11 +1295,14 @@
                                         <div class="stat-label">Morning Avg</div>
                                         <div class="stat-value" id="stat-wake-avg">--:--</div>
                                     </div>
-                                    <button class="mini-edit-btn" onclick="editTodaySleepRecord()">✎</button>
+                                    <button class="mini-edit-btn" onclick="editTodayWakeRecord()">✎</button>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Night Avg</div>
-                                    <div class="stat-value" id="stat-sleep-avg">--:--</div>
+                                <div class="stat-card clickable-time-card">
+                                    <div>
+                                        <div class="stat-label">Night Avg</div>
+                                        <div class="stat-value" id="stat-sleep-avg">--:--</div>
+                                    </div>
+                                    <button class="mini-edit-btn" onclick="editTodaySleepOnlyRecord()">✎</button>
                                 </div>
                                 <div class="stat-card">
                                     <div class="stat-label">Avg Sleep Duration</div>
@@ -1677,37 +1730,58 @@
                 sleepBtn.classList.toggle("checked", Boolean(targetSleep));
             }
 
-            function editTodaySleepRecord() {
+            function isValidTimeOrBlank(value) {
+                return value.trim() === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(value.trim());
+            }
+
+            function editTodayWakeRecord() {
                 const todayStr = getDateString(new Date());
                 if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
 
                 const currentWake = globalSleepData[todayStr].wake || "";
-                const currentSleep = globalSleepData[todayStr].sleep || "";
 
                 const wakeInput = prompt(
                     "Enter today's WAKE time in HH:MM format. Leave blank to clear wake time.",
                     currentWake,
                 );
+
                 if (wakeInput === null) return;
 
-                const sleepInput = prompt(
-                    "Enter the SLEEP time before this wake-up in HH:MM format. Leave blank to clear sleep time.",
-                    currentSleep,
-                );
-                if (sleepInput === null) return;
-
-                const isValidOrBlank = (value) => value.trim() === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(value.trim());
-
-                if (!isValidOrBlank(wakeInput) || !isValidOrBlank(sleepInput)) {
-                    alert("Please enter time as HH:MM, e.g. 23:40 or 07:15.");
+                if (!isValidTimeOrBlank(wakeInput)) {
+                    alert("Please enter time as HH:MM, e.g. 07:15.");
                     return;
                 }
 
-                if (wakeInput.trim()) globalSleepData[todayStr].wake = wakeInput.trim();
+                const value = wakeInput.trim();
+
+                if (value) globalSleepData[todayStr].wake = value;
                 else delete globalSleepData[todayStr].wake;
 
-                if (sleepInput.trim()) globalSleepData[todayStr].sleep = sleepInput.trim();
-                else delete globalSleepData[todayStr].sleep;
+                saveSleepData();
+            }
+
+            function editTodaySleepOnlyRecord() {
+                const targetDate = getSleepTargetDate();
+                if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+
+                const currentSleep = globalSleepData[targetDate].sleep || "";
+
+                const sleepInput = prompt(
+                    "Enter SLEEP time in HH:MM format. Leave blank to clear sleep time.",
+                    currentSleep,
+                );
+
+                if (sleepInput === null) return;
+
+                if (!isValidTimeOrBlank(sleepInput)) {
+                    alert("Please enter time as HH:MM, e.g. 23:40.");
+                    return;
+                }
+
+                const value = sleepInput.trim();
+
+                if (value) globalSleepData[targetDate].sleep = value;
+                else delete globalSleepData[targetDate].sleep;
 
                 saveSleepData();
             }
@@ -1866,8 +1940,8 @@
                         datasets: [
                             {
                                 data: chartData,
-                                backgroundColor: "rgba(125,146,163,0.10)",
-                                borderColor: "#7d92a3",
+                                backgroundColor: "rgba(156,134,166,0.10)",
+                                borderColor: "#9c86a6",
                                 borderWidth: 3,
                                 pointRadius: 4,
                                 fill: true,
@@ -1884,10 +1958,10 @@
                             y: {
                                 min: 0,
                                 max: 24,
-                                ticks: { color: "rgba(72,88,102,0.55)", stepSize: 4, callback: (v) => v + ":00" },
-                                grid: { color: "rgba(72,88,102,0.08)" },
+                                ticks: { color: "rgba(102,92,112,0.58)", stepSize: 4, callback: (v) => v + ":00" },
+                                grid: { color: "rgba(110,92,120,0.08)" },
                             },
-                            x: { ticks: { color: "rgba(72,88,102,0.55)" }, grid: { display: false } },
+                            x: { ticks: { color: "rgba(102,92,112,0.58)" }, grid: { display: false } },
                         },
                     },
                 });
@@ -2069,15 +2143,43 @@
                     });
             }
 
+            function applyGradientColors(colors, shouldSave = true) {
+                if (!colors || colors.length !== 3) return;
+
+                globalColors = colors;
+
+                document.documentElement.style.setProperty("--bg-color-1", colors[0]);
+                document.documentElement.style.setProperty("--bg-color-2", colors[1]);
+                document.documentElement.style.setProperty("--bg-color-3", colors[2]);
+
+                if (shouldSave) {
+                    localStorage.setItem("lastGradientColors", JSON.stringify(colors));
+                }
+            }
+
+            function applySavedGradientBeforeUpdate() {
+                try {
+                    const savedColors = JSON.parse(localStorage.getItem("lastGradientColors"));
+
+                    if (Array.isArray(savedColors) && savedColors.length === 3) {
+                        applyGradientColors(savedColors, false);
+                    }
+                } catch (e) {
+                    console.warn("Saved gradient unavailable", e);
+                }
+            }
+
             function pickSunGradient(now) {
                 const hour = now.getHours();
 
+                // Weather failed / still loading: use a stable fallback by hour.
+                // This keeps the soft purple sunset palette through 16:00-20:00.
                 if (!weatherInfo?.sunrise || !weatherInfo?.sunset) {
                     if (hour >= 5 && hour < 7) return GRADIENTS.sunrise;
                     if (hour >= 7 && hour < 12) return GRADIENTS.morning;
-                    if (hour >= 12 && hour < 17) return GRADIENTS.afternoon;
-                    if (hour >= 17 && hour < 19) return GRADIENTS.sunset;
-                    if (hour >= 19 && hour < 22) return GRADIENTS.evening;
+                    if (hour >= 12 && hour < 16) return GRADIENTS.afternoon;
+                    if (hour >= 16 && hour < 20) return GRADIENTS.sunset;
+                    if (hour >= 20 && hour < 22) return GRADIENTS.evening;
                     return GRADIENTS.night;
                 }
 
@@ -2091,13 +2193,13 @@
                 noonStart.setHours(11, 30, 0, 0);
 
                 const lateAfternoon = new Date();
-                lateAfternoon.setHours(16, 30, 0, 0);
+                lateAfternoon.setHours(16, 0, 0, 0);
+
+                const sunsetStart = new Date(sunset.getTime() - 120 * 60000);
+                const sunsetEnd = new Date(sunset.getTime() + 90 * 60000);
 
                 const eveningEnd = new Date();
                 eveningEnd.setHours(22, 0, 0, 0);
-
-                const sunsetStart = new Date(sunset.getTime() - 75 * 60000);
-                const sunsetEnd = new Date(sunset.getTime() + 45 * 60000);
 
                 if (now >= sunriseStart && now <= sunriseEnd) return GRADIENTS.sunrise;
                 if (now > sunriseEnd && now < noonStart) return GRADIENTS.morning;
@@ -2121,11 +2223,8 @@
                 document.getElementById("date-p1").innerText = dateStr;
                 document.getElementById("date-p2").innerText = dateStr;
 
-                globalColors = pickSunGradient(now);
-
-                document.documentElement.style.setProperty("--bg-color-1", globalColors[0]);
-                document.documentElement.style.setProperty("--bg-color-2", globalColors[1]);
-                document.documentElement.style.setProperty("--bg-color-3", globalColors[2]);
+                const pickedColors = pickSunGradient(now);
+                applyGradientColors(pickedColors, true);
             }
 
             function copyCanvasContentToClone(originalTarget, clonedTarget) {
