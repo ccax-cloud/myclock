@@ -1903,18 +1903,111 @@
 
             // ===== THEME / COLOR CONFIG =====
             const GRADIENTS = {
-                sunrise: ["#f8ddd2", "#ece2e7", "#d9e0ea"],
+                sunrise: ["#f4cfc6", "#eadce7", "#d6e0ea"],
 
-                morning: ["#c8dfeb", "#e8f1f5", "#f5f0eb"],
+                morning: ["#b7d7e8", "#dcecf4", "#f2eee8"],
 
-                afternoon: ["#d7e8f1", "#f2f7fa", "#faf6f2"],
+                afternoon: ["#cfe6dd", "#eef4e8", "#f6ead8"],
 
-                sunset: ["#8c7b91", "#b59db0", "#e4c6ba"],
+                sunset: ["#8f7898", "#bd93a3", "#e7b8a6"],
 
-                evening: ["#5f7486", "#6f8291", "#9baab4"],
+                evening: ["#425c74", "#61788c", "#8c9eac"],
 
-                night: ["#0f2027", "#203a43", "#2c5364"],
+                night: ["#0c1723", "#172a3a", "#243f55"],
             };
+
+            const THEME_PROFILES = {
+                sunrise: {
+                    textStrong: "#8c6477",
+                    textMain: "#a46f83",
+                    textBody: "rgba(96,72,86,0.88)",
+                    textMuted: "rgba(96,72,86,0.68)",
+                    cardBg: "rgba(255,238,238,0.34)",
+                    cardBorder: "rgba(255,248,248,0.42)",
+                    tabBg: "rgba(255,244,244,0.58)",
+                    shadow: "rgba(118,76,88,0.12)",
+                    chartLine: "#8c6477",
+                    chartFill: "rgba(140,100,119,0.16)",
+                    chartAxis: "rgba(96,72,86,0.74)",
+                    chartGrid: "rgba(96,72,86,0.16)",
+                },
+                morning: {
+                    textStrong: "#4d6f86",
+                    textMain: "#5a7c93",
+                    textBody: "rgba(54,76,92,0.88)",
+                    textMuted: "rgba(54,76,92,0.68)",
+                    cardBg: "rgba(221,240,248,0.34)",
+                    cardBorder: "rgba(246,252,255,0.44)",
+                    tabBg: "rgba(238,249,253,0.62)",
+                    shadow: "rgba(54,88,110,0.12)",
+                    chartLine: "#4d6f86",
+                    chartFill: "rgba(77,111,134,0.16)",
+                    chartAxis: "rgba(54,76,92,0.74)",
+                    chartGrid: "rgba(54,76,92,0.16)",
+                },
+                afternoon: {
+                    textStrong: "#647762",
+                    textMain: "#758565",
+                    textBody: "rgba(72,82,66,0.88)",
+                    textMuted: "rgba(72,82,66,0.68)",
+                    cardBg: "rgba(250,241,222,0.36)",
+                    cardBorder: "rgba(255,250,238,0.46)",
+                    tabBg: "rgba(255,248,232,0.64)",
+                    shadow: "rgba(116,98,62,0.12)",
+                    chartLine: "#647762",
+                    chartFill: "rgba(100,119,98,0.16)",
+                    chartAxis: "rgba(72,82,66,0.74)",
+                    chartGrid: "rgba(72,82,66,0.16)",
+                },
+                sunset: {
+                    textStrong: "#765a82",
+                    textMain: "#86618a",
+                    textBody: "rgba(70,55,84,0.88)",
+                    textMuted: "rgba(70,55,84,0.70)",
+                    cardBg: "rgba(244,211,211,0.30)",
+                    cardBorder: "rgba(255,235,230,0.38)",
+                    tabBg: "rgba(247,220,220,0.46)",
+                    shadow: "rgba(58,38,68,0.18)",
+                    chartLine: "#765a82",
+                    chartFill: "rgba(118,90,130,0.18)",
+                    chartAxis: "rgba(70,55,84,0.76)",
+                    chartGrid: "rgba(70,55,84,0.18)",
+                },
+                evening: {
+                    textStrong: "rgba(232,240,246,0.94)",
+                    textMain: "rgba(214,226,236,0.96)",
+                    textBody: "rgba(232,240,246,0.88)",
+                    textMuted: "rgba(232,240,246,0.72)",
+                    cardBg: "rgba(210,226,238,0.18)",
+                    cardBorder: "rgba(235,245,252,0.24)",
+                    tabBg: "rgba(226,238,246,0.24)",
+                    shadow: "rgba(0,0,0,0.24)",
+                    chartLine: "rgba(232,240,246,0.94)",
+                    chartFill: "rgba(232,240,246,0.16)",
+                    chartAxis: "rgba(232,240,246,0.74)",
+                    chartGrid: "rgba(232,240,246,0.18)",
+                },
+                night: {
+                    textStrong: "rgba(235,241,248,0.96)",
+                    textMain: "rgba(201,215,230,0.96)",
+                    textBody: "rgba(235,241,248,0.88)",
+                    textMuted: "rgba(235,241,248,0.70)",
+                    cardBg: "rgba(210,226,244,0.12)",
+                    cardBorder: "rgba(235,245,255,0.18)",
+                    tabBg: "rgba(230,240,255,0.18)",
+                    shadow: "rgba(0,0,0,0.30)",
+                    chartLine: "rgba(235,241,248,0.94)",
+                    chartFill: "rgba(235,241,248,0.14)",
+                    chartAxis: "rgba(235,241,248,0.72)",
+                    chartGrid: "rgba(235,241,248,0.16)",
+                },
+            };
+
+            function getThemeNameFromColors(colors) {
+                const signature = JSON.stringify(colors);
+                return Object.keys(GRADIENTS).find((key) => JSON.stringify(GRADIENTS[key]) === signature) || "morning";
+            }
+
 
             let currentView = "week";
             let chartInstance = null;
@@ -1924,6 +2017,11 @@
             let globalSleepData = {};
             let globalTrackerData = { fitness: {}, study: {} };
             let weatherInfo = null;
+            const THEME_VERSION = "distinct-6-v2";
+            if (localStorage.getItem("themeVersion") !== THEME_VERSION) {
+                localStorage.removeItem("lastGradientColors");
+                localStorage.setItem("themeVersion", THEME_VERSION);
+            }
 
             let timers = {
                 fitness: { intervalId: null, startTime: null },
@@ -2732,41 +2830,23 @@
             }
 
             function applyReadableTextColors(colors) {
-                const rgbs = colors.map(hexToRgb);
-                const avgLum = rgbs.reduce((sum, rgb) => sum + relativeLuminance(rgb), 0) / rgbs.length;
+                const themeName = getThemeNameFromColors(colors);
+                const profile = THEME_PROFILES[themeName] || THEME_PROFILES.morning;
                 const root = document.documentElement;
 
-                if (avgLum < 0.32) {
-                    // Night / evening: light readable text.
-                    root.style.setProperty("--adaptive-text-strong", "rgba(246,241,248,0.94)");
-                    root.style.setProperty("--adaptive-text-main", "rgba(225,214,236,0.96)");
-                    root.style.setProperty("--adaptive-text-body", "rgba(238,244,248,0.88)");
-                    root.style.setProperty("--adaptive-text-muted", "rgba(238,244,248,0.76)");
-                    root.style.setProperty("--adaptive-text-soft", "rgba(238,244,248,0.62)");
-                    root.style.setProperty("--adaptive-card-bg", "rgba(255,255,255,0.13)");
-                    root.style.setProperty("--adaptive-card-border", "rgba(255,255,255,0.20)");
-                    root.style.setProperty("--adaptive-tab-bg", "rgba(255,255,255,0.20)");
-                    root.style.setProperty("--adaptive-shadow", "rgba(0,0,0,0.22)");
-                    root.style.setProperty("--chart-line", "rgba(238,244,248,0.92)");
-                    root.style.setProperty("--chart-fill", "rgba(238,244,248,0.18)");
-                    root.style.setProperty("--chart-axis", "rgba(238,244,248,0.76)");
-                    root.style.setProperty("--chart-grid", "rgba(238,244,248,0.18)");
-                } else {
-                    // Day / sunrise: deeper misty blue-purple text.
-                    root.style.setProperty("--adaptive-text-strong", "#506577");
-                    root.style.setProperty("--adaptive-text-main", "#506577");
-                    root.style.setProperty("--adaptive-text-body", "rgba(58,73,88,0.88)");
-                    root.style.setProperty("--adaptive-text-muted", "rgba(58,73,88,0.72)");
-                    root.style.setProperty("--adaptive-text-soft", "rgba(58,73,88,0.60)");
-                    root.style.setProperty("--adaptive-card-bg", "rgba(255,255,255,0.22)");
-                    root.style.setProperty("--adaptive-card-border", "rgba(255,255,255,0.28)");
-                    root.style.setProperty("--adaptive-tab-bg", "rgba(255,255,255,0.58)");
-                    root.style.setProperty("--adaptive-shadow", "rgba(0,0,0,0.10)");
-                    root.style.setProperty("--chart-line", "#506577");
-                    root.style.setProperty("--chart-fill", "rgba(80,101,119,0.16)");
-                    root.style.setProperty("--chart-axis", "rgba(58,73,88,0.76)");
-                    root.style.setProperty("--chart-grid", "rgba(58,73,88,0.16)");
-                }
+                root.style.setProperty("--adaptive-text-strong", profile.textStrong);
+                root.style.setProperty("--adaptive-text-main", profile.textMain);
+                root.style.setProperty("--adaptive-text-body", profile.textBody);
+                root.style.setProperty("--adaptive-text-muted", profile.textMuted);
+                root.style.setProperty("--adaptive-text-soft", profile.textMuted);
+                root.style.setProperty("--adaptive-card-bg", profile.cardBg);
+                root.style.setProperty("--adaptive-card-border", profile.cardBorder);
+                root.style.setProperty("--adaptive-tab-bg", profile.tabBg);
+                root.style.setProperty("--adaptive-shadow", profile.shadow);
+                root.style.setProperty("--chart-line", profile.chartLine);
+                root.style.setProperty("--chart-fill", profile.chartFill);
+                root.style.setProperty("--chart-axis", profile.chartAxis);
+                root.style.setProperty("--chart-grid", profile.chartGrid);
 
                 lastChartSignature = "";
                 if (document.getElementById("page1")?.classList.contains("active")) {
@@ -2988,42 +3068,5 @@
     color: var(--adaptive-text-strong) !important;
 }
 </style>
-
-
-<script>
-const TIME_GRADIENTS = {
-    sunrise:   ["#f8ddd2", "#ece2e7", "#d9e0ea"],
-    morning:   ["#c8dfeb", "#e8f1f5", "#f5f0eb"],
-    afternoon: ["#d7e8f1", "#f2f7fa", "#faf6f2"],
-    sunset:    ["#8c7b91", "#b59db0", "#e4c6ba"],
-    evening:   ["#5f7486", "#6f8291", "#9baab4"],
-    night:     ["#0f2027", "#203a43", "#2c5364"]
-};
-
-function applyTimeGradient(currentHour){
-    let gradient = [];
-    if(currentHour >= 5 && currentHour < 8){
-        gradient = TIME_GRADIENTS.sunrise;
-    }else if(currentHour >= 8 && currentHour < 12){
-        gradient = TIME_GRADIENTS.morning;
-    }else if(currentHour >= 12 && currentHour < 17){
-        gradient = TIME_GRADIENTS.afternoon;
-    }else if(currentHour >= 17 && currentHour < 19){
-        gradient = TIME_GRADIENTS.sunset;
-    }else if(currentHour >= 19 && currentHour < 22){
-        gradient = TIME_GRADIENTS.evening;
-    }else{
-        gradient = TIME_GRADIENTS.night;
-    }
-    document.body.style.background = `linear-gradient(to bottom, ${gradient.join(", ")})`;
-}
-
-// 自动更新背景
-setInterval(()=>{
-    const now = new Date();
-    applyTimeGradient(now.getHours());
-}, 30000);
-</script>
-
 </body>
 </html>
