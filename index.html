@@ -1677,7 +1677,25 @@
                 }
             }
 
-        </style>
+
+            /* v15 Wake Completion subnote smaller font */
+            .stats-grid-classic .completion-card .target-note {
+                font-size: 8px !important;
+                line-height: 1.1 !important;
+                color: var(--adaptive-text-muted) !important;
+            }
+
+        
+.target-note{
+    margin-top:4px;
+    font-size:8px !important;
+    line-height:1.0;
+    opacity:0.75;
+    letter-spacing:0.2px;
+    color: var(--adaptive-text-muted) !important;
+}
+
+</style>
         <script>
             (function restoreLastGradientBeforePaint() {
                 try {
@@ -1746,6 +1764,7 @@
                                 <div class="stat-card completion-card">
                                     <div class="stat-label" id="wake-target-label">Wake Completion</div>
                                     <div class="stat-value" id="stat-rate">0%</div>
+                                    <div class="target-note">W≤7:10 · WE≤8:00</div>
                                 </div>
 
                                 <div class="stat-card clickable-time-card">
@@ -2969,6 +2988,42 @@
     color: var(--adaptive-text-strong) !important;
 }
 </style>
+
+
+<script>
+const TIME_GRADIENTS = {
+    sunrise:   ["#f8ddd2", "#ece2e7", "#d9e0ea"],
+    morning:   ["#c8dfeb", "#e8f1f5", "#f5f0eb"],
+    afternoon: ["#d7e8f1", "#f2f7fa", "#faf6f2"],
+    sunset:    ["#8c7b91", "#b59db0", "#e4c6ba"],
+    evening:   ["#5f7486", "#6f8291", "#9baab4"],
+    night:     ["#0f2027", "#203a43", "#2c5364"]
+};
+
+function applyTimeGradient(currentHour){
+    let gradient = [];
+    if(currentHour >= 5 && currentHour < 8){
+        gradient = TIME_GRADIENTS.sunrise;
+    }else if(currentHour >= 8 && currentHour < 12){
+        gradient = TIME_GRADIENTS.morning;
+    }else if(currentHour >= 12 && currentHour < 17){
+        gradient = TIME_GRADIENTS.afternoon;
+    }else if(currentHour >= 17 && currentHour < 19){
+        gradient = TIME_GRADIENTS.sunset;
+    }else if(currentHour >= 19 && currentHour < 22){
+        gradient = TIME_GRADIENTS.evening;
+    }else{
+        gradient = TIME_GRADIENTS.night;
+    }
+    document.body.style.background = `linear-gradient(to bottom, ${gradient.join(", ")})`;
+}
+
+// 自动更新背景
+setInterval(()=>{
+    const now = new Date();
+    applyTimeGradient(now.getHours());
+}, 30000);
+</script>
 
 </body>
 </html>
