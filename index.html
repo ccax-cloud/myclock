@@ -397,6 +397,18 @@
                 margin-bottom: 24px;
             }
 
+            .streak-inline {
+                margin-top: 6px;
+                font-size: 10px;
+                color: rgba(232,223,234,0.78);
+                white-space: nowrap;
+            }
+
+            #stat-streak {
+                font-weight: 700;
+                color: rgba(232,223,234,0.92);
+            }
+
             /* 📋 网格流 */
             .tracker-grid {
                 display: grid;
@@ -1314,6 +1326,357 @@
                 }
             }
 
+
+            /* ✅ Readable adaptive text layer: keeps the soft look but switches contrast by background/time */
+            :root {
+                --adaptive-text-strong: #4f6072;
+                --adaptive-text-main: #6f6685;
+                --adaptive-text-body: rgba(62,76,90,0.86);
+                --adaptive-text-muted: rgba(62,76,90,0.70);
+                --adaptive-text-soft: rgba(62,76,90,0.58);
+                --adaptive-card-bg: rgba(255,255,255,0.20);
+                --adaptive-card-border: rgba(255,255,255,0.26);
+                --adaptive-tab-bg: rgba(255,255,255,0.48);
+                --adaptive-shadow: rgba(0,0,0,0.10);
+                --chart-line: #53697a;
+                --chart-fill: rgba(83,105,122,0.18);
+                --chart-axis: rgba(62,76,90,0.78);
+                --chart-grid: rgba(62,76,90,0.16);
+            }
+
+            body,
+            .clock-box,
+            .panel-box {
+                color: var(--adaptive-text-body) !important;
+            }
+
+            .time-display {
+                color: var(--adaptive-text-main) !important;
+                text-shadow:
+                    0 1px 0 rgba(255,255,255,0.24),
+                    0 2px 10px var(--adaptive-shadow) !important;
+            }
+
+            .date-display,
+            .timezone-display,
+            .weather-display,
+            .sun-display,
+            .page-tab,
+            .tab,
+            .btn-checkin,
+            .mini-edit-btn,
+            .mini-reset-btn {
+                color: var(--adaptive-text-muted) !important;
+            }
+
+            .dashboard-title,
+            .section-title,
+            .stat-label {
+                color: var(--adaptive-text-body) !important;
+            }
+
+            .stat-value,
+            .stat-sub-value {
+                color: var(--adaptive-text-strong) !important;
+                text-shadow: 0 1px 8px var(--adaptive-shadow) !important;
+            }
+
+            .panel-box,
+            .stat-card,
+            .tabs,
+            .btn-checkin,
+            .btn-fit-theme,
+            .btn-study-theme {
+                background: var(--adaptive-card-bg) !important;
+                border-color: var(--adaptive-card-border) !important;
+            }
+
+            .page-tab.active,
+            .tab.active,
+            .btn-capture {
+                background: var(--adaptive-tab-bg) !important;
+                color: var(--adaptive-text-strong) !important;
+            }
+
+            .btn-capture:hover,
+            .stat-card:hover {
+                background: rgba(255,255,255,0.32) !important;
+            }
+
+            .btn-checkin.checked,
+            .stat-card.timing {
+                color: var(--adaptive-text-strong) !important;
+                background: rgba(255,255,255,0.26) !important;
+            }
+
+            .stat-card.timing .stat-value,
+            .stat-card.timing .stat-sub-value {
+                color: var(--adaptive-text-strong) !important;
+            }
+
+            .capture-mode,
+            .capture-mode * {
+                color: inherit;
+            }
+
+
+            /* 🌿 v10 Analytics layout refinement */
+            .stats-grid-compact {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 14px;
+                margin-bottom: 18px;
+                min-height: 164px;
+            }
+
+            .stats-grid-compact .completion-card {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .stats-grid-compact .sleep-duration-card {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .stats-grid-compact .avg-combo-card {
+                grid-column: 2;
+                grid-row: 1 / span 2;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                gap: 0;
+                min-height: 100%;
+            }
+
+            .avg-row {
+                min-height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+
+            .avg-divider {
+                height: 1px;
+                width: 100%;
+                background: color-mix(in srgb, var(--adaptive-text-strong) 18%, transparent);
+                opacity: 0.55;
+            }
+
+            .wake-line {
+                display: flex;
+                align-items: baseline;
+                gap: 10px;
+                white-space: nowrap;
+            }
+
+            .streak-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 2px;
+                font-size: 18px;
+                font-weight: 800;
+                color: var(--adaptive-text-strong) !important;
+                text-shadow: 0 1px 8px var(--adaptive-shadow) !important;
+                opacity: 0.98;
+            }
+
+            .target-note {
+                font-size: 8.5px !important;
+                letter-spacing: 0.25px;
+                color: var(--adaptive-text-muted) !important;
+                white-space: nowrap;
+            }
+
+            .chart-container {
+                border-radius: 14px;
+                padding: 4px 2px 0;
+            }
+
+            @media (max-width: 520px) {
+                .stats-grid-compact {
+                    gap: 10px;
+                    margin-bottom: 12px;
+                    min-height: 136px;
+                }
+
+                .avg-row {
+                    min-height: 52px;
+                }
+
+                .streak-badge {
+                    font-size: 14px;
+                }
+
+                .target-note {
+                    font-size: 7px !important;
+                    white-space: normal;
+                }
+            }
+
+
+            
+            /* 🔧 v13 Adaptive 4-card layout */
+            .stats-grid-classic {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 16px;
+                margin-bottom: 18px;
+            }
+
+            .stats-grid-classic .stat-card {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 12px 14px;
+                height: 100%;
+                box-sizing: border-box;
+            }
+
+            .stats-grid-classic .clickable-time-card {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .stats-grid-classic .stat-label {
+                margin-bottom: 4px;
+            }
+
+            .stats-grid-classic .stat-value {
+                margin-top: 4px;
+            }
+
+            @media (max-width: 520px) {
+                .stats-grid-classic {
+                    gap: 10px;
+                    margin-bottom: 12px;
+                }
+                .stats-grid-classic .stat-card {
+                    padding: 8px 10px;
+                }
+            }
+
+
+            .stats-grid-classic .stat-card {
+                min-height: 88px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 14px 15px;
+            }
+
+            .stats-grid-classic .clickable-time-card {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .stats-grid-classic .stat-label {
+                margin-bottom: 6px;
+            }
+
+            .stats-grid-classic .stat-value {
+                margin-top: 7px;
+            }
+
+            @media (max-width: 520px) {
+                .stats-grid-classic {
+                    gap: 10px;
+                    margin-bottom: 14px;
+                    min-height: 136px;
+                }
+
+                .stats-grid-classic .stat-card {
+                    min-height: 64px;
+                    padding: 11px 10px;
+                }
+            }
+
+
+            /* 🔧 v14 Compact classic analytics: narrower cards + chart moves up */
+            .panel-box {
+                padding: 30px 24px 22px !important;
+            }
+
+            .stats-grid-classic {
+                width: 92% !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-rows: 1fr 1fr !important;
+                gap: 14px 18px !important;
+                margin-bottom: 16px !important;
+                min-height: unset !important;
+                height: 150px !important;
+            }
+
+            .stats-grid-classic .stat-card {
+                min-height: 0 !important;
+                height: 68px !important;
+                padding: 10px 14px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+            }
+
+            .stats-grid-classic .clickable-time-card {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+
+            .stats-grid-classic .stat-label {
+                font-size: 10px !important;
+                margin-bottom: 3px !important;
+                line-height: 1.1 !important;
+            }
+
+            .stats-grid-classic .stat-value {
+                margin-top: 3px !important;
+                font-size: 20px !important;
+                line-height: 1.05 !important;
+            }
+
+            .chart-container {
+                width: 92% !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                height: 172px !important;
+                flex-grow: 0 !important;
+            }
+
+            @media (max-width: 520px) {
+                .stats-grid-classic {
+                    width: 92% !important;
+                    gap: 10px !important;
+                    height: 126px !important;
+                    margin-bottom: 12px !important;
+                }
+
+                .stats-grid-classic .stat-card {
+                    height: 58px !important;
+                    padding: 8px 10px !important;
+                }
+
+                .stats-grid-classic .stat-label {
+                    font-size: 8px !important;
+                }
+
+                .stats-grid-classic .stat-value {
+                    font-size: 16px !important;
+                }
+
+                .chart-container {
+                    width: 92% !important;
+                    height: 150px !important;
+                }
+            }
+
         </style>
         <script>
             (function restoreLastGradientBeforePaint() {
@@ -1379,11 +1742,12 @@
                                     <div class="tab" onclick="switchView('year')">Year</div>
                                 </div>
                             </div>
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-label">Wake Completion</div>
+                            <div class="stats-grid stats-grid-classic">
+                                <div class="stat-card completion-card">
+                                    <div class="stat-label" id="wake-target-label">Wake Completion</div>
                                     <div class="stat-value" id="stat-rate">0%</div>
                                 </div>
+
                                 <div class="stat-card clickable-time-card">
                                     <div>
                                         <div class="stat-label">Morning Avg</div>
@@ -1391,6 +1755,7 @@
                                     </div>
                                     <button class="mini-edit-btn" onclick="editTodayWakeRecord()">✎</button>
                                 </div>
+
                                 <div class="stat-card clickable-time-card">
                                     <div>
                                         <div class="stat-label">Night Avg</div>
@@ -1398,6 +1763,7 @@
                                     </div>
                                     <button class="mini-edit-btn" onclick="editTodaySleepOnlyRecord()">✎</button>
                                 </div>
+
                                 <div class="stat-card">
                                     <div class="stat-label">Avg Sleep Duration</div>
                                     <div class="stat-value" id="stat-sleep-duration">--h --m</div>
@@ -1828,6 +2194,50 @@
                 return value.trim() === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(value.trim());
             }
 
+            function getWakeCompletionTargetForDate(dateStr) {
+                // 0 = Sunday, 6 = Saturday. Weekends use a gentler target.
+                const day = new Date(`${dateStr}T12:00:00`).getDay();
+                return day === 0 || day === 6 ? "08:00" : "07:10";
+            }
+
+            function updateWakeTargetLabel() {
+                const label = document.getElementById("wake-target-label");
+                if (label) label.innerText = "Wake Completion";
+            }
+
+            function isWakeCompletedByTarget(dateStr, wakeTime) {
+                const wakeDec = timeStringToDecimal(wakeTime);
+                const targetDec = timeStringToDecimal(getWakeCompletionTargetForDate(dateStr));
+
+                if (wakeDec === null || targetDec === null) return false;
+
+                // Wake records are morning times, so direct comparison works.
+                return wakeDec <= targetDec;
+            }
+
+            function calculateWakeStreak() {
+                let streak = 0;
+                const d = new Date();
+
+                // If today has no wake record yet, show the streak ending yesterday.
+                const todayStr = getDateString(d);
+                if (!globalSleepData[todayStr]?.wake) {
+                    d.setDate(d.getDate() - 1);
+                }
+
+                for (let i = 0; i < 730; i++) {
+                    const dateStr = getDateString(d);
+                    const wake = globalSleepData[dateStr]?.wake;
+
+                    if (!wake || !isWakeCompletedByTarget(dateStr, wake)) break;
+
+                    streak++;
+                    d.setDate(d.getDate() - 1);
+                }
+
+                return streak;
+            }
+
             function editTodayWakeRecord() {
                 const todayStr = getDateString(new Date());
                 if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
@@ -1912,9 +2322,35 @@
             }
 
             function decimalToTimeString(decimal) {
-                if (!decimal) return "--:--";
-                const h = Math.floor(decimal);
-                return `${String(h).padStart(2, "0")}:${String(Math.round((decimal - h) * 60)).padStart(2, "0")}`;
+                if (decimal === null || decimal === undefined || isNaN(decimal)) return "--:--";
+
+                // Keep time inside 00:00-23:59 even when averages cross midnight.
+                const normalized = ((decimal % 24) + 24) % 24;
+                let h = Math.floor(normalized);
+                let m = Math.round((normalized - h) * 60);
+
+                if (m === 60) {
+                    h = (h + 1) % 24;
+                    m = 0;
+                }
+
+                return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+            }
+
+            function sleepTimeToNightDecimal(timeStr) {
+                // Sleep check-ins should be averaged as bedtime, not as plain clock numbers.
+                // Example: 23:30 and 00:30 should average to 00:00, not 12:00.
+                const dec = timeStringToDecimal(timeStr);
+                if (dec === null) return null;
+
+                // Treat early-morning sleep check-ins as belonging to the same night.
+                return dec < 12 ? dec + 24 : dec;
+            }
+
+
+            function getCssVar(name, fallback) {
+                const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+                return value || fallback;
             }
 
             function renderChart() {
@@ -1926,6 +2362,7 @@
                     chartData = [],
                     totalDays = 0,
                     count = 0,
+                    completedCount = 0,
                     sum = 0;
 
                 if (currentView === "week") {
@@ -1939,6 +2376,7 @@
                             const dec = timeStringToDecimal(globalSleepData[dateStr]?.wake);
                             chartData.push(dec);
                             count++;
+                            if (isWakeCompletedByTarget(dateStr, globalSleepData[dateStr]?.wake)) completedCount++;
                             sum += dec;
                         } else {
                             chartData.push(0);
@@ -1955,6 +2393,7 @@
                             const dec = timeStringToDecimal(globalSleepData[dateStr]?.wake);
                             chartData.push(dec);
                             count++;
+                            if (isWakeCompletedByTarget(dateStr, globalSleepData[dateStr]?.wake)) completedCount++;
                             sum += dec;
                         }
                     }
@@ -1977,6 +2416,7 @@
                                 mSum += dec;
                                 mCount++;
                                 count++;
+                                if (isWakeCompletedByTarget(date, record.wake)) completedCount++;
                                 sum += dec;
                             }
                         }
@@ -1984,8 +2424,9 @@
                     }
                 }
 
+                updateWakeTargetLabel();
                 document.getElementById("stat-rate").innerText =
-                    `${Math.min(totalDays > 0 ? Math.round((count / totalDays) * 100) : 0, 100)}%`;
+                    `${count > 0 ? Math.round((completedCount / count) * 100) : 0}%`;
                 document.getElementById("stat-wake-avg").innerText = decimalToTimeString(count > 0 ? sum / count : null);
 
                 let sleepCount = 0;
@@ -1994,7 +2435,7 @@
                 let durationSum = 0;
                 Object.values(globalSleepData).forEach((record) => {
                     if (record?.sleep) {
-                        const sleepDec = timeStringToDecimal(record.sleep);
+                        const sleepDec = sleepTimeToNightDecimal(record.sleep);
                         if (sleepDec !== null) {
                             sleepSum += sleepDec;
                             sleepCount++;
@@ -2015,6 +2456,7 @@
 
                 const chartSignature = JSON.stringify({
                     view: currentView,
+                    wakeTargets: "weekday-0710-weekend-0800",
                     labels: labels,
                     data: chartData,
                 });
@@ -2034,8 +2476,8 @@
                         datasets: [
                             {
                                 data: chartData,
-                                backgroundColor: "rgba(134,108,150,0.16)",
-                                borderColor: "#856995",
+                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--chart-fill").trim(),
+                                borderColor: getComputedStyle(document.documentElement).getPropertyValue("--chart-line").trim(),
                                 borderWidth: 3.5,
                                 pointRadius: 5,
                                 fill: true,
@@ -2047,15 +2489,29 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        animation: false,
+                        interaction: { intersect: false, mode: "index" },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: "rgba(18,28,38,0.82)",
+                                titleColor: "rgba(255,255,255,0.92)",
+                                bodyColor: "rgba(255,255,255,0.88)",
+                                padding: 10,
+                                displayColors: false,
+                                callbacks: {
+                                    label: (context) => decimalToTimeString(context.parsed.y)
+                                }
+                            }
+                        },
                         scales: {
                             y: {
                                 min: 0,
                                 max: 24,
-                                ticks: { color: "rgba(92,82,102,0.75)", stepSize: 4, callback: (v) => v + ":00" },
-                                grid: { color: "rgba(110,92,120,0.12)" },
+                                ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--chart-axis").trim(), stepSize: 4, callback: (v) => v + ":00" },
+                                grid: { color: getComputedStyle(document.documentElement).getPropertyValue("--chart-grid").trim() },
                             },
-                            x: { ticks: { color: "rgba(92,82,102,0.75)" }, grid: { display: false } },
+                            x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--chart-axis").trim() }, grid: { display: false } },
                         },
                     },
                 });
@@ -2237,14 +2693,81 @@
                     });
             }
 
+
+            function hexToRgb(hex) {
+                const cleanHex = String(hex).replace("#", "").trim();
+                if (cleanHex.length !== 6) return { r: 255, g: 255, b: 255 };
+                return {
+                    r: parseInt(cleanHex.slice(0, 2), 16),
+                    g: parseInt(cleanHex.slice(2, 4), 16),
+                    b: parseInt(cleanHex.slice(4, 6), 16),
+                };
+            }
+
+            function relativeLuminance({ r, g, b }) {
+                const srgb = [r, g, b].map((v) => {
+                    const c = v / 255;
+                    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+                });
+                return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+            }
+
+            function applyReadableTextColors(colors) {
+                const rgbs = colors.map(hexToRgb);
+                const avgLum = rgbs.reduce((sum, rgb) => sum + relativeLuminance(rgb), 0) / rgbs.length;
+                const root = document.documentElement;
+
+                if (avgLum < 0.32) {
+                    // Night / evening: light readable text.
+                    root.style.setProperty("--adaptive-text-strong", "rgba(246,241,248,0.94)");
+                    root.style.setProperty("--adaptive-text-main", "rgba(225,214,236,0.96)");
+                    root.style.setProperty("--adaptive-text-body", "rgba(238,244,248,0.88)");
+                    root.style.setProperty("--adaptive-text-muted", "rgba(238,244,248,0.76)");
+                    root.style.setProperty("--adaptive-text-soft", "rgba(238,244,248,0.62)");
+                    root.style.setProperty("--adaptive-card-bg", "rgba(255,255,255,0.13)");
+                    root.style.setProperty("--adaptive-card-border", "rgba(255,255,255,0.20)");
+                    root.style.setProperty("--adaptive-tab-bg", "rgba(255,255,255,0.20)");
+                    root.style.setProperty("--adaptive-shadow", "rgba(0,0,0,0.22)");
+                    root.style.setProperty("--chart-line", "rgba(238,244,248,0.92)");
+                    root.style.setProperty("--chart-fill", "rgba(238,244,248,0.18)");
+                    root.style.setProperty("--chart-axis", "rgba(238,244,248,0.76)");
+                    root.style.setProperty("--chart-grid", "rgba(238,244,248,0.18)");
+                } else {
+                    // Day / sunrise: deeper misty blue-purple text.
+                    root.style.setProperty("--adaptive-text-strong", "#506577");
+                    root.style.setProperty("--adaptive-text-main", "#506577");
+                    root.style.setProperty("--adaptive-text-body", "rgba(58,73,88,0.88)");
+                    root.style.setProperty("--adaptive-text-muted", "rgba(58,73,88,0.72)");
+                    root.style.setProperty("--adaptive-text-soft", "rgba(58,73,88,0.60)");
+                    root.style.setProperty("--adaptive-card-bg", "rgba(255,255,255,0.22)");
+                    root.style.setProperty("--adaptive-card-border", "rgba(255,255,255,0.28)");
+                    root.style.setProperty("--adaptive-tab-bg", "rgba(255,255,255,0.58)");
+                    root.style.setProperty("--adaptive-shadow", "rgba(0,0,0,0.10)");
+                    root.style.setProperty("--chart-line", "#506577");
+                    root.style.setProperty("--chart-fill", "rgba(80,101,119,0.16)");
+                    root.style.setProperty("--chart-axis", "rgba(58,73,88,0.76)");
+                    root.style.setProperty("--chart-grid", "rgba(58,73,88,0.16)");
+                }
+
+                lastChartSignature = "";
+                if (document.getElementById("page1")?.classList.contains("active")) {
+                    renderChart();
+                }
+            }
+
             function applyGradientColors(colors, shouldSave = true) {
                 if (!colors || colors.length !== 3) return;
+
+                const nextSignature = JSON.stringify(colors);
+                const currentSignature = JSON.stringify(globalColors);
+                if (nextSignature === currentSignature) return;
 
                 globalColors = colors;
 
                 document.documentElement.style.setProperty("--bg-color-1", colors[0]);
                 document.documentElement.style.setProperty("--bg-color-2", colors[1]);
                 document.documentElement.style.setProperty("--bg-color-3", colors[2]);
+                applyReadableTextColors(colors);
 
                 if (shouldSave) {
                     localStorage.setItem("lastGradientColors", JSON.stringify(colors));
@@ -2423,10 +2946,27 @@
         </script>
     
 <style id="fitness-study-contrast-fix">
-.section-title{
-    color: rgba(242,235,245,0.96) !important;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.12);
+/* Final readability overrides: no fixed pale text; follows adaptive light/dark palette. */
+.section-title,
+.btn-fit-theme,
+.btn-study-theme,
+.btn-row .btn,
+#btn-fit-toggle,
+#btn-study-toggle {
+    color: var(--adaptive-text-strong) !important;
+    text-shadow: 0 1px 6px var(--adaptive-shadow) !important;
     font-weight: 700 !important;
+}
+
+.dashboard-title,
+.stat-label,
+.stat-value,
+.stat-sub-value {
+    color: var(--adaptive-text-strong) !important;
+}
+
+.time-display {
+    color: var(--adaptive-text-strong) !important;
 }
 </style>
 
