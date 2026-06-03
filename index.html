@@ -81,7 +81,7 @@
             }
 
             .page-tab.active {
-                background: rgba(255,255,255,0.68);
+                background: rgba(255,255,255,0.18);
                 color: #5f7486;
                 box-shadow:
                     0 4px 14px rgba(0,0,0,0.08),
@@ -1695,6 +1695,255 @@
     color: var(--adaptive-text-muted) !important;
 }
 
+
+/* Move WAKE / SLEEP buttons slightly downward on page 1 */
+.page-view.page1 .btn-row-left {
+    margin-top: 12px;
+}
+
+
+/* Adjust WAKE / SLEEP spacing to match second page FIT/RESET */
+.page-view.page1 .btn-row-left {
+    margin-top: 6px;
+    gap: 10px; /* 和 second page 相同 */
+}
+
+
+
+/* Keep both tabs at the same vertical position */
+body {
+    justify-content: flex-start !important;
+    padding-top: 36px !important;
+}
+
+.main-container {
+    min-height: 560px;
+    align-items: flex-start !important;
+}
+
+.page-view {
+    align-items: flex-start !important;
+}
+
+/* Floating desktop capture dot - soft glass style */
+#desktop-capture-dot {
+    position: fixed;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    z-index: 999;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background: rgba(255,255,255,0.18);
+    border: none;
+    box-shadow:
+        0 6px 16px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+#desktop-capture-dot:hover {
+    background: rgba(255,255,255,0.18);
+    transform: translate(-50%, -50%) scale(1.08);
+}
+
+#desktop-capture-dot::after {
+    content: "CAPTURE 1x1 DESKTOP";
+    position: absolute;
+    left: 50%;
+    top: 26px;
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.72);
+    color: var(--adaptive-text-strong);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#desktop-capture-dot:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(2px);
+}
+
+
+/* Downward shift for main content while keeping relative layout */
+.main-container {
+    margin-top: 24px;
+}
+
+
+/* Life Balance Variant D: Nordic Comparison */
+#tracker-capture-area .tracker-grid {
+    position: relative;
+    gap: 22px;
+}
+
+#tracker-capture-area .tracker-grid::before {
+    content: "";
+    position: absolute;
+    top: 32px;
+    bottom: 20px;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--adaptive-text-strong) 18%, transparent);
+    opacity: 0.65;
+}
+
+.balance-mini-total {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--adaptive-text-muted);
+}
+
+.balance-mini-total span {
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: var(--adaptive-card-bg);
+    border: 1px solid var(--adaptive-card-border);
+}
+
+.tracker-section .section-title {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.tracker-section .stat-card {
+    text-align: center;
+}
+
+.tracker-section .stat-value {
+    font-size: 22px;
+}
+
+@media (max-width: 520px) {
+    .balance-mini-total {
+        margin-bottom: 12px;
+        font-size: 9px;
+    }
+    #tracker-capture-area .tracker-grid {
+        gap: 12px;
+    }
+}
+
+
+/* Life Balance: centered Today + soft wave accent */
+#tracker-capture-area .today-card {
+    position: relative;
+    overflow: hidden;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 2px !important;
+}
+
+#tracker-capture-area .today-card > div {
+    width: 100%;
+    text-align: center;
+}
+
+#tracker-capture-area .today-card .stat-label,
+#tracker-capture-area .today-card .stat-value {
+    text-align: center !important;
+}
+
+#tracker-capture-area .today-card::after {
+    content: "";
+    position: absolute;
+    left: -35%;
+    right: -35%;
+    bottom: -10px;
+    height: 26px;
+    background:
+        radial-gradient(60% 80% at 50% 0%, rgba(255,255,255,0.42), transparent 70%),
+        linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
+    border-radius: 50% 50% 0 0;
+    opacity: 0.58;
+    animation: softWave 5.8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+#tracker-capture-area .today-card .stat-value {
+    position: relative;
+    z-index: 1;
+}
+
+#tracker-capture-area .section-title {
+    text-align: center;
+}
+
+#tracker-capture-area .tracker-section .section-title {
+    animation: softFloat 4.6s ease-in-out infinite;
+}
+
+#tracker-capture-area .tracker-section:nth-child(2) .section-title {
+    animation-delay: 0.8s;
+}
+
+@keyframes softWave {
+    0%, 100% {
+        transform: translateX(-10px) translateY(0);
+    }
+    50% {
+        transform: translateX(10px) translateY(-3px);
+    }
+}
+
+@keyframes softFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+
+/* Dot A: hidden until mouse hovers nearby */
+#desktop-capture-dot {
+    opacity: 0;
+    transition:
+        opacity 0.22s ease,
+        background-color 0.22s ease,
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+}
+
+#desktop-capture-dot:hover {
+    opacity: 1;
+}
+
+#desktop-capture-dot::before {
+    content: "";
+    position: absolute;
+    inset: -16px;
+    border-radius: 999px;
+}
+
+#desktop-capture-dot:hover::after {
+    opacity: 1;
+}
+
 </style>
         <script>
             (function restoreLastGradientBeforePaint() {
@@ -1795,6 +2044,7 @@
                     </div>
                     <div class="btn-group">
                         <button class="btn btn-capture" onclick="captureChartImage()">CAPTURE 1x1 ANALYTICS</button>
+                        
                     </div>
                 </div>
             </div>
@@ -1824,6 +2074,8 @@
                             <div class="dashboard-header">
                                 <div class="dashboard-title">Life Balance Tracker</div>
                             </div>
+
+                            
 
                             <div class="tracker-grid">
                                 <!-- 🏋️‍♂️ 健身区 -->
@@ -2214,6 +2466,17 @@
             }
 
             function renderTrackerStats() {
+                const todayStrForBalance = new Date().toLocaleDateString("sv-SE");
+                const balanceFitMins = (globalTrackerData.fitness || {})[todayStrForBalance] || 0;
+                const balanceStudyMins = (globalTrackerData.study || {})[todayStrForBalance] || 0;
+                const balanceTotalMins = balanceFitMins + balanceStudyMins;
+                const balanceFitEl = document.getElementById("balance-fit-mini");
+                const balanceStudyEl = document.getElementById("balance-study-mini");
+                const balanceTotalEl = document.getElementById("balance-total-mini");
+                if (balanceFitEl) balanceFitEl.innerText = `🏋️ ${balanceFitMins} mins`;
+                if (balanceStudyEl) balanceStudyEl.innerText = `📚 ${balanceStudyMins} mins`;
+                if (balanceTotalEl) balanceTotalEl.innerText = `Today ${balanceTotalMins} mins`;
+
                 ["fitness", "study"].forEach((type) => {
                     if (timers[type].intervalId !== null) return;
 
@@ -3068,5 +3331,8 @@
     color: var(--adaptive-text-strong) !important;
 }
 </style>
+
+<div id="desktop-capture-dot" title="CAPTURE 1x1 DESKTOP" onclick="captureDesktop1x1()"></div>
+
 </body>
 </html>
