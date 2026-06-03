@@ -2099,6 +2099,187 @@ body {
     }
 }
 
+
+/* v58: single desktop capture dot, centered relative to both panels */
+.main-container {
+    position: relative !important;
+}
+
+#desktop-capture-dot {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+
+    width: 18px !important;
+    height: 18px !important;
+
+    border-radius: 999px !important;
+    border: none !important;
+    padding: 0 !important;
+
+    background: rgba(255,255,255,0.18) !important;
+    box-shadow:
+        0 6px 16px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.35) !important;
+
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+
+    opacity: 1 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    z-index: 999 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+
+#desktop-capture-dot:hover {
+    transform: translate(-50%, -50%) scale(1.08) !important;
+    background: rgba(255,255,255,0.18) !important;
+}
+
+#desktop-capture-dot::before {
+    pointer-events: none !important;
+}
+
+#desktop-capture-dot::after {
+    content: "CAPTURE 1x1 DESKTOP";
+    position: absolute;
+    left: 50%;
+    top: 26px;
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.72);
+    color: var(--adaptive-text-strong);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#desktop-capture-dot:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(2px);
+}
+
+/* Mobile keeps one fixed dot at bottom-right */
+@media (max-width: 980px) {
+    #desktop-capture-dot {
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+
+        width: 28px !important;
+        height: 28px !important;
+
+        background: rgba(255,255,255,0.55) !important;
+        border: 1px solid rgba(255,255,255,0.35) !important;
+        border-radius: 999px !important;
+        opacity: 1 !important;
+        z-index: 2147483647 !important;
+    }
+
+    #desktop-capture-dot:hover {
+        transform: none !important;
+    }
+
+    #desktop-capture-dot::after {
+        display: none !important;
+    }
+}
+
+
+/* Floating Desktop Capture Dot - bottom right */
+#desktop-capture-dot{
+    position: fixed !important;
+
+    bottom: 24px !important;
+    right: 24px !important;
+
+    top: auto !important;
+    left: auto !important;
+
+    transform: none !important;
+
+    width: 20px !important;
+    height: 20px !important;
+
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 999px !important;
+
+    background: rgba(255,255,255,0.20) !important;
+
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+
+    box-shadow:
+        0 6px 16px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.35) !important;
+
+    cursor: pointer !important;
+    opacity: 1 !important;
+    z-index: 2147483647 !important;
+}
+
+#desktop-capture-dot:hover{
+    transform: scale(1.08) !important;
+    background: rgba(255,255,255,0.26) !important;
+}
+
+@media (max-width:980px){
+    #desktop-capture-dot{
+        bottom:20px !important;
+        right:20px !important;
+        width:28px !important;
+        height:28px !important;
+    }
+}
+
+
+/* v60 capture hardening: avoid html2canvas errors on Life Balance */
+body.desktop-capture-running #tracker-capture-area .today-card::after,
+body.desktop-capture-running #tracker-capture-area .tracker-grid::before {
+    display: none !important;
+}
+
+body.desktop-capture-running #tracker-capture-area .tracker-section .section-title {
+    animation: none !important;
+    transform: none !important;
+}
+
+body.desktop-capture-running #desktop-capture-dot {
+    visibility: hidden !important;
+}
+
+
+/* v61 tooltip on left side of floating dot */
+#desktop-capture-dot::after{
+    position: fixed !important;
+    right: 54px !important;
+    bottom: 20px !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+}
+
+@media (max-width:980px){
+    #desktop-capture-dot::after{
+        right: 62px !important;
+        bottom: 24px !important;
+    }
+}
+
 </style>
         <script>
             (function restoreLastGradientBeforePaint() {
@@ -2125,6 +2306,7 @@ body {
 
         <!-- 大容器外框 -->
         <div class="main-container">
+            <button id="desktop-capture-dot" class="desktop mobile" type="button" aria-label="Capture 1x1 Desktop"></button>
             <!-- ==================== 【第一页：起床打卡线】 ==================== -->
             <div class="page-view active" id="page1">
                 <div class="control-block">
@@ -3307,12 +3489,12 @@ body {
                 const hour = now.getHours();
 
                 // Weather failed / still loading: use a stable fallback by hour.
-                // This keeps the soft purple sunset palette through 16:00-20:00.
+                // This keeps the afternoon palette until 17:00; sunset starts after 17:00.
                 if (!weatherInfo?.sunrise || !weatherInfo?.sunset) {
                     if (hour >= 5 && hour < 7) return GRADIENTS.sunrise;
                     if (hour >= 7 && hour < 12) return GRADIENTS.morning;
-                    if (hour >= 12 && hour < 16) return GRADIENTS.afternoon;
-                    if (hour >= 16 && hour < 20) return GRADIENTS.sunset;
+                    if (hour >= 12 && hour < 17) return GRADIENTS.afternoon;
+                    if (hour >= 17 && hour < 20) return GRADIENTS.sunset;
                     if (hour >= 20 && hour < 22) return GRADIENTS.evening;
                     return GRADIENTS.night;
                 }
@@ -3327,7 +3509,7 @@ body {
                 noonStart.setHours(11, 30, 0, 0);
 
                 const lateAfternoon = new Date();
-                lateAfternoon.setHours(16, 0, 0, 0);
+                lateAfternoon.setHours(17, 0, 0, 0);
 
                 const sunsetStart = new Date(sunset.getTime() - 120 * 60000);
                 const sunsetEnd = new Date(sunset.getTime() + 90 * 60000);
@@ -3338,7 +3520,12 @@ body {
                 if (now >= sunriseStart && now <= sunriseEnd) return GRADIENTS.sunrise;
                 if (now > sunriseEnd && now < noonStart) return GRADIENTS.morning;
                 if (now >= noonStart && now < lateAfternoon) return GRADIENTS.afternoon;
-                if (now >= sunsetStart && now <= sunsetEnd) return GRADIENTS.sunset;
+
+                // Keep mauve sunset from 17:00 onward.
+                // This prevents the theme from briefly falling through to night
+                // before the real sunset window begins.
+                if (now >= lateAfternoon && now <= sunsetEnd) return GRADIENTS.sunset;
+
                 if (now > sunsetEnd && now < eveningEnd) return GRADIENTS.evening;
 
                 return GRADIENTS.night;
@@ -3486,10 +3673,6 @@ body {
     color: var(--adaptive-text-strong) !important;
 }
 </style>
-
-<button id="desktop-capture-dot" class="desktop mobile" type="button" aria-label="Capture 1x1 Desktop"></button>
-
-
 <script>
 (function () {
     function downloadCanvasAsPng(canvas, filename) {
@@ -3501,51 +3684,62 @@ body {
         document.body.removeChild(link);
     }
 
-    
-window.captureDesktop1x1 = function () {
-    const isPage2 = document.getElementById("page2")?.classList.contains("active");
+    window.captureDesktop1x1 = function () {
+        const activePage = document.querySelector(".page-view.active");
+        const target = activePage || document.querySelector(".main-container");
 
-    const clock = document.getElementById(isPage2 ? "capture-area-p2" : "capture-area-p1");
-    const panel = document.getElementById(isPage2 ? "tracker-capture-area" : "chart-capture-area");
-
-    const dot = document.getElementById("desktop-capture-dot");
-    if (dot) dot.style.visibility = "hidden";
-
-    Promise.all([
-        html2canvas(clock,{backgroundColor:null,useCORS:true,scale:2}),
-        html2canvas(panel,{backgroundColor:null,useCORS:true,scale:2})
-    ]).then(([clockCanvas,panelCanvas])=>{
-        if (dot) dot.style.visibility = "";
-
-        const size = Math.max(clockCanvas.width, clockCanvas.height + panelCanvas.height + 24);
-        const square = document.createElement("canvas");
-        square.width = size;
-        square.height = size;
-
-        const ctx = square.getContext("2d");
+        if (!target || typeof html2canvas === "undefined") {
+            alert("Capture unavailable. Please refresh and try again.");
+            return;
+        }
 
         const root = getComputedStyle(document.documentElement);
-        const g = ctx.createLinearGradient(0,0,size,size);
-        g.addColorStop(0, root.getPropertyValue("--bg-color-1").trim());
-        g.addColorStop(.5, root.getPropertyValue("--bg-color-2").trim());
-        g.addColorStop(1, root.getPropertyValue("--bg-color-3").trim());
-        ctx.fillStyle = g;
-        ctx.fillRect(0,0,size,size);
+        const bg1 = root.getPropertyValue("--bg-color-1").trim() || "#b9d4e2";
+        const bg2 = root.getPropertyValue("--bg-color-2").trim() || "#dfe9ef";
+        const bg3 = root.getPropertyValue("--bg-color-3").trim() || "#f2ebe4";
 
-        const totalH = clockCanvas.height + panelCanvas.height + 24;
-        const startY = (size-totalH)/2;
+        const dot = document.getElementById("desktop-capture-dot");
+        if (dot) dot.style.visibility = "hidden";
 
-        ctx.drawImage(clockCanvas,(size-clockCanvas.width)/2,startY);
-        ctx.drawImage(panelCanvas,(size-panelCanvas.width)/2,startY+clockCanvas.height+24);
+        target.classList.add("capture-mode");
 
-        downloadCanvasAsPng(square,"Desktop_1x1.png");
-    }).catch(err=>{
-        if (dot) dot.style.visibility = "";
-        console.error(err);
-        alert("Capture failed.");
-    });
-};
+        html2canvas(target, {
+            backgroundColor: null,
+            scale: Math.min(2, window.devicePixelRatio || 2),
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: document.documentElement.scrollWidth,
+            windowHeight: document.documentElement.scrollHeight
+        }).then(function (canvas) {
+            target.classList.remove("capture-mode");
+            if (dot) dot.style.visibility = "";
 
+            const size = Math.max(canvas.width, canvas.height);
+            const square = document.createElement("canvas");
+            square.width = size;
+            square.height = size;
+
+            const ctx = square.getContext("2d");
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, bg1);
+            gradient.addColorStop(0.5, bg2);
+            gradient.addColorStop(1, bg3);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            ctx.drawImage(canvas, (size - canvas.width) / 2, (size - canvas.height) / 2);
+
+            downloadCanvasAsPng(square, "Desktop_1x1.png");
+        }).catch(function (error) {
+            target.classList.remove("capture-mode");
+            if (dot) dot.style.visibility = "";
+            console.error(error);
+            alert("Capture failed. Please try again.");
+        });
+    };
 
     function bindDot() {
         const dot = document.getElementById("desktop-capture-dot");
@@ -3562,6 +3756,260 @@ window.captureDesktop1x1 = function () {
             event.stopPropagation();
             window.captureDesktop1x1();
         }, { passive: false });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindDot);
+    } else {
+        bindDot();
+    }
+})();
+</script>
+
+
+<script id="desktop-capture-final-override">
+(function () {
+    function directDownloadPng(canvas, filename) {
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = canvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    window.captureDesktop1x1 = function () {
+        const isPage2 = document.getElementById("page2")?.classList.contains("active");
+
+        const clock = document.getElementById(isPage2 ? "capture-area-p2" : "capture-area-p1");
+        const panel = document.getElementById(isPage2 ? "tracker-capture-area" : "chart-capture-area");
+
+        if (!clock || !panel || typeof html2canvas === "undefined") {
+            alert("Capture unavailable. Please refresh and try again.");
+            return;
+        }
+
+        const dot = document.getElementById("desktop-capture-dot");
+        if (dot) dot.style.visibility = "hidden";
+
+        clock.classList.add("capture-mode");
+        panel.classList.add("capture-mode");
+
+        const captureOptions = {
+            backgroundColor: null,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            foreignObjectRendering: false,
+            scale: Math.min(2, window.devicePixelRatio || 2)
+        };
+
+        Promise.all([
+            html2canvas(clock, captureOptions),
+            html2canvas(panel, captureOptions)
+        ]).then(([clockCanvas, panelCanvas]) => {
+            clock.classList.remove("capture-mode");
+            panel.classList.remove("capture-mode");
+            if (dot) dot.style.visibility = "";
+
+            const gap = Math.round(24 * Math.min(2, window.devicePixelRatio || 2));
+            const totalW = clockCanvas.width + panelCanvas.width + gap;
+            const totalH = Math.max(clockCanvas.height, panelCanvas.height);
+            const size = Math.max(totalW, totalH);
+
+            const square = document.createElement("canvas");
+            square.width = size;
+            square.height = size;
+
+            const ctx = square.getContext("2d");
+
+            const root = getComputedStyle(document.documentElement);
+            const bg1 = root.getPropertyValue("--bg-color-1").trim() || "#b9d4e2";
+            const bg2 = root.getPropertyValue("--bg-color-2").trim() || "#dfe9ef";
+            const bg3 = root.getPropertyValue("--bg-color-3").trim() || "#f2ebe4";
+
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, bg1);
+            gradient.addColorStop(0.5, bg2);
+            gradient.addColorStop(1, bg3);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            const startX = (size - totalW) / 2;
+            const clockY = (size - clockCanvas.height) / 2;
+            const panelY = (size - panelCanvas.height) / 2;
+
+            ctx.drawImage(clockCanvas, startX, clockY);
+            ctx.drawImage(panelCanvas, startX + clockCanvas.width + gap, panelY);
+
+            directDownloadPng(square, "Desktop_1x1.png");
+        }).catch((err) => {
+            clock.classList.remove("capture-mode");
+            panel.classList.remove("capture-mode");
+            if (dot) dot.style.visibility = "";
+            console.error(err);
+            alert("Capture failed. Please try again.");
+        });
+    };
+
+    function bindDotCapture() {
+        const dot = document.getElementById("desktop-capture-dot");
+        if (!dot) return;
+
+        dot.onclick = function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.captureDesktop1x1();
+        };
+
+        dot.ontouchstart = function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.captureDesktop1x1();
+        };
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindDotCapture);
+    } else {
+        bindDotCapture();
+    }
+})();
+</script>
+
+
+<script id="v58-dot-binding-fix">
+(function () {
+    function bindSingleDesktopDot() {
+        const dot = document.getElementById("desktop-capture-dot");
+        if (!dot || typeof window.captureDesktop1x1 !== "function") return;
+
+        dot.onclick = function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.captureDesktop1x1();
+        };
+
+        dot.ontouchstart = function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.captureDesktop1x1();
+        };
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bindSingleDesktopDot);
+    } else {
+        bindSingleDesktopDot();
+    }
+})();
+</script>
+
+
+<script id="v60-dot-capture-final-fix">
+(function () {
+    function downloadPng(canvas, filename) {
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = canvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function rootGradient(size) {
+        const root = getComputedStyle(document.documentElement);
+        const bg1 = root.getPropertyValue("--bg-color-1").trim() || "#b9d4e2";
+        const bg2 = root.getPropertyValue("--bg-color-2").trim() || "#dfe9ef";
+        const bg3 = root.getPropertyValue("--bg-color-3").trim() || "#f2ebe4";
+        const c = document.createElement("canvas");
+        c.width = size;
+        c.height = size;
+        const ctx = c.getContext("2d");
+        const g = ctx.createLinearGradient(0, 0, size, size);
+        g.addColorStop(0, bg1);
+        g.addColorStop(0.5, bg2);
+        g.addColorStop(1, bg3);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, size, size);
+        return { canvas: c, ctx };
+    }
+
+    window.captureDesktop1x1 = function () {
+        const isPage2 = document.getElementById("page2")?.classList.contains("active");
+        const clock = document.getElementById(isPage2 ? "capture-area-p2" : "capture-area-p1");
+        const panel = document.getElementById(isPage2 ? "tracker-capture-area" : "chart-capture-area");
+
+        if (!clock || !panel || typeof html2canvas === "undefined") {
+            alert("Capture unavailable. Please refresh and try again.");
+            return;
+        }
+
+        const scale = Math.min(2, window.devicePixelRatio || 2);
+        const options = {
+            backgroundColor: null,
+            scale: scale,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            foreignObjectRendering: false,
+            scrollX: 0,
+            scrollY: 0
+        };
+
+        document.body.classList.add("desktop-capture-running");
+        clock.classList.add("capture-mode");
+        panel.classList.add("capture-mode");
+
+        setTimeout(function () {
+            Promise.all([
+                html2canvas(clock, options),
+                html2canvas(panel, options)
+            ]).then(function ([clockCanvas, panelCanvas]) {
+                document.body.classList.remove("desktop-capture-running");
+                clock.classList.remove("capture-mode");
+                panel.classList.remove("capture-mode");
+
+                const gap = Math.round(24 * scale);
+                const totalW = clockCanvas.width + panelCanvas.width + gap;
+                const totalH = Math.max(clockCanvas.height, panelCanvas.height);
+                const size = Math.max(totalW, totalH);
+
+                const result = rootGradient(size);
+                const square = result.canvas;
+                const ctx = result.ctx;
+
+                const startX = (size - totalW) / 2;
+                const clockY = (size - clockCanvas.height) / 2;
+                const panelY = (size - panelCanvas.height) / 2;
+
+                ctx.drawImage(clockCanvas, startX, clockY);
+                ctx.drawImage(panelCanvas, startX + clockCanvas.width + gap, panelY);
+
+                downloadPng(square, "Desktop_1x1.png");
+            }).catch(function (err) {
+                document.body.classList.remove("desktop-capture-running");
+                clock.classList.remove("capture-mode");
+                panel.classList.remove("capture-mode");
+                console.error(err);
+                alert("Capture failed. Please try again.");
+            });
+        }, 80);
+    };
+
+    function bindDot() {
+        const dot = document.getElementById("desktop-capture-dot");
+        if (!dot) return;
+        dot.onclick = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.captureDesktop1x1();
+        };
+        dot.ontouchstart = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.captureDesktop1x1();
+        };
     }
 
     if (document.readyState === "loading") {
