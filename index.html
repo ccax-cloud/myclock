@@ -2070,6 +2070,35 @@ body {
     opacity: 1 !important;
 }
 
+
+/* Desktop dot: center for desktop */
+#desktop-capture-dot.desktop {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Mobile dot: fixed bottom-right, always visible */
+@media (max-width:980px) {
+    #desktop-capture-dot.mobile {
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        top: auto !important;
+        left: auto !important;
+        width: 28px !important;
+        height: 28px !important;
+        background: rgba(255,255,255,0.55) !important;
+        border: 1px solid rgba(255,255,255,0.35) !important;
+        border-radius: 999px !important;
+        z-index: 99999 !important;
+        opacity: 1 !important;
+        cursor: pointer !important;
+        pointer-events: auto !important;
+    }
+}
+
 </style>
         <script>
             (function restoreLastGradientBeforePaint() {
@@ -3458,7 +3487,7 @@ body {
 }
 </style>
 
-<button id="desktop-capture-dot" type="button" aria-label="Capture 1x1 Desktop"></button>
+<button id="desktop-capture-dot" class="desktop mobile" type="button" aria-label="Capture 1x1 Desktop"></button>
 
 
 <script>
@@ -3472,62 +3501,51 @@ body {
         document.body.removeChild(link);
     }
 
-    window.captureDesktop1x1 = function () {
-        const activePage = document.querySelector(".page-view.active");
-        const target = activePage || document.querySelector(".main-container");
+    
+window.captureDesktop1x1 = function () {
+    const isPage2 = document.getElementById("page2")?.classList.contains("active");
 
-        if (!target || typeof html2canvas === "undefined") {
-            alert("Capture unavailable. Please refresh and try again.");
-            return;
-        }
+    const clock = document.getElementById(isPage2 ? "capture-area-p2" : "capture-area-p1");
+    const panel = document.getElementById(isPage2 ? "tracker-capture-area" : "chart-capture-area");
+
+    const dot = document.getElementById("desktop-capture-dot");
+    if (dot) dot.style.visibility = "hidden";
+
+    Promise.all([
+        html2canvas(clock,{backgroundColor:null,useCORS:true,scale:2}),
+        html2canvas(panel,{backgroundColor:null,useCORS:true,scale:2})
+    ]).then(([clockCanvas,panelCanvas])=>{
+        if (dot) dot.style.visibility = "";
+
+        const size = Math.max(clockCanvas.width, clockCanvas.height + panelCanvas.height + 24);
+        const square = document.createElement("canvas");
+        square.width = size;
+        square.height = size;
+
+        const ctx = square.getContext("2d");
 
         const root = getComputedStyle(document.documentElement);
-        const bg1 = root.getPropertyValue("--bg-color-1").trim() || "#b9d4e2";
-        const bg2 = root.getPropertyValue("--bg-color-2").trim() || "#dfe9ef";
-        const bg3 = root.getPropertyValue("--bg-color-3").trim() || "#f2ebe4";
+        const g = ctx.createLinearGradient(0,0,size,size);
+        g.addColorStop(0, root.getPropertyValue("--bg-color-1").trim());
+        g.addColorStop(.5, root.getPropertyValue("--bg-color-2").trim());
+        g.addColorStop(1, root.getPropertyValue("--bg-color-3").trim());
+        ctx.fillStyle = g;
+        ctx.fillRect(0,0,size,size);
 
-        const dot = document.getElementById("desktop-capture-dot");
-        if (dot) dot.style.visibility = "hidden";
+        const totalH = clockCanvas.height + panelCanvas.height + 24;
+        const startY = (size-totalH)/2;
 
-        target.classList.add("capture-mode");
+        ctx.drawImage(clockCanvas,(size-clockCanvas.width)/2,startY);
+        ctx.drawImage(panelCanvas,(size-panelCanvas.width)/2,startY+clockCanvas.height+24);
 
-        html2canvas(target, {
-            backgroundColor: null,
-            scale: Math.min(2, window.devicePixelRatio || 2),
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            scrollX: 0,
-            scrollY: 0,
-            windowWidth: document.documentElement.scrollWidth,
-            windowHeight: document.documentElement.scrollHeight
-        }).then(function (canvas) {
-            target.classList.remove("capture-mode");
-            if (dot) dot.style.visibility = "";
+        downloadCanvasAsPng(square,"Desktop_1x1.png");
+    }).catch(err=>{
+        if (dot) dot.style.visibility = "";
+        console.error(err);
+        alert("Capture failed.");
+    });
+};
 
-            const size = Math.max(canvas.width, canvas.height);
-            const square = document.createElement("canvas");
-            square.width = size;
-            square.height = size;
-
-            const ctx = square.getContext("2d");
-            const gradient = ctx.createLinearGradient(0, 0, size, size);
-            gradient.addColorStop(0, bg1);
-            gradient.addColorStop(0.5, bg2);
-            gradient.addColorStop(1, bg3);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, size, size);
-
-            ctx.drawImage(canvas, (size - canvas.width) / 2, (size - canvas.height) / 2);
-
-            downloadCanvasAsPng(square, "Desktop_1x1.png");
-        }).catch(function (error) {
-            target.classList.remove("capture-mode");
-            if (dot) dot.style.visibility = "";
-            console.error(error);
-            alert("Capture failed. Please try again.");
-        });
-    };
 
     function bindDot() {
         const dot = document.getElementById("desktop-capture-dot");
