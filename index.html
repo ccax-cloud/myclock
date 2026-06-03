@@ -1921,7 +1921,7 @@ body {
 
 /* Dot A: hidden until mouse hovers nearby */
 #desktop-capture-dot {
-    opacity: 0;
+    opacity: 1;
     transition:
         opacity 0.22s ease,
         background-color 0.22s ease,
@@ -2062,6 +2062,12 @@ body {
         border-radius: 999px !important;
         border: none !important;
     }
+}
+
+
+/* Dot always visible; hidden only during capture by JS */
+#desktop-capture-dot {
+    opacity: 1 !important;
 }
 
 </style>
