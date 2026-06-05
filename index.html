@@ -5262,6 +5262,40 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 }
 
 </style>
+/* v96: hide edit/reset icons during capture */
+body.capture-mode .mini-edit-btn,
+body.capture-mode .mini-reset-btn {
+    display: none !important;
+}
+
+/* Mobile fallback for geolocation/weather */
+<script>
+const defaultLat = 39.9042; // Beijing fallback
+const defaultLon = 116.4074; // Beijing fallback
+
+function fetchWeather(lat, lon){
+    // original weather fetch logic
+    console.log('Fetching weather for', lat, lon);
+    // TODO: insert your API call here if needed
+}
+
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        function(pos){
+            fetchWeather(pos.coords.latitude, pos.coords.longitude);
+        },
+        function(err){
+            console.warn('Geolocation failed, using default location', err);
+            fetchWeather(defaultLat, defaultLon);
+        },
+        {timeout:5000}
+    );
+} else {
+    console.warn('No geolocation support, using default location');
+    fetchWeather(defaultLat, defaultLon);
+}
+</script>
+
 
 </body>
 </html>
