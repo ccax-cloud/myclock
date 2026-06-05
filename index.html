@@ -5241,6 +5241,26 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     display: none !important;
 }
 
+
+/* v95: Force 1x1 capture container for mobile/desktop */
+.capture-mode .capture-wrapper,
+.capture-mode .panel-box,
+.capture-mode #tracker-capture-area-capture-clone {
+    width: 100% !important;
+    max-width: 474px !important;
+    height: 474px !important;
+    max-height: 474px !important;
+    min-width: 474px !important;
+    min-height: 474px !important;
+    margin: 0 auto !important;
+}
+
+.capture-mode .panel-box,
+.capture-mode .clock-box {
+    flex-grow: 0 !important;
+    align-self: center !important;
+}
+
 </style>
 
 </body>
