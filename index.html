@@ -1,20 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <title>Time Clock & Tracker</title>
-        <!-- 引入免费商用字体 Inter -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-        <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/128/1584/1584858.png" />
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Time Clock &amp; Tracker</title>
+<!-- 引入免费商用字体 Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn-icons-png.flaticon.com/128/1584/1584858.png" rel="icon" type="image/png"/>
+<!-- 引入 html2canvas 和 Chart.js -->
 
-        <!-- 引入 html2canvas 和 Chart.js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-        <style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
             :root {
                 --bg-color-1: #b9d4e2;
                 --bg-color-2: #dfe9ef;
@@ -2838,7 +2837,7 @@ body.desktop-capture-running #tracker-capture-area .today-card {
 }
 
 </style>
-        <script>
+<script>
             (function restoreLastGradientBeforePaint() {
                 try {
                     const savedColors = JSON.parse(localStorage.getItem("lastGradientColors"));
@@ -2853,7 +2852,6 @@ body.desktop-capture-running #tracker-capture-area .today-card {
                 }
             })();
         </script>
-
 <style id="v80-clean-final-overrides">
 /* v80 cleanup: remove frame/dot features and keep dashboard stable */
 #desktop-capture-dot,
@@ -2922,8 +2920,6 @@ body {
     }
 }
 </style>
-
-
 <style id="v81-mobile-weather-dynamic-wave-css">
 /* v81: mobile weather visibility + dynamic Life Balance wave */
 #tracker-capture-area .today-card{
@@ -3015,8 +3011,6 @@ body {
     }
 }
 </style>
-
-
 <style id="v82-zero-wave-visible-css">
 /* v82: keep a subtle baseline wave even when Today = 0 mins */
 #tracker-capture-area .today-card[data-wave-level="0"]::after{
@@ -3031,8 +3025,6 @@ body {
     bottom: -18px !important;
 }
 </style>
-
-
 <style id="v83-stronger-zero-wave">
 #tracker-capture-area .today-card[data-wave-level="0"]::after{
     opacity: .40 !important;
@@ -3063,8 +3055,6 @@ body {
         ) !important;
 }
 </style>
-
-
 <style id="v84-fitness-study-wave-match">
 /* Fitness and Study use identical wave styling */
 #tracker-capture-area .tracker-section .today-card{
@@ -3072,194 +3062,252 @@ body {
 }
 </style>
 
+<style id="v102-no-capture-clean-layout">
+/* v102: screenshot/capture features removed; keep the live dashboard layout clean. */
+.btn-capture,
+#desktop-capture-dot,
+.manual-shot-toggle,
+.manual-shot-guide,
+#v77-frame-toggle,
+#v77-shot-frame {
+    display: none !important;
+}
+
+.btn-group:empty {
+    display: none !important;
+}
+
+.control-block {
+    gap: 12px !important;
+}
+
+.capture-wrapper {
+    margin-bottom: 0 !important;
+}
+
+.page-view.active {
+    display: flex !important;
+}
+
+.clock-box,
+.panel-box {
+    width: 450px !important;
+    height: 450px !important;
+}
+
+.capture-wrapper {
+    width: 474px !important;
+    height: 474px !important;
+    flex: 0 0 474px !important;
+}
+
+@media (max-width: 980px) {
+    .main-container {
+        min-height: auto !important;
+    }
+    .page-view {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 18px !important;
+    }
+    .control-block {
+        margin-bottom: 10px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    body {
+        padding: 14px !important;
+        justify-content: flex-start !important;
+        overflow-x: hidden !important;
+    }
+    .main-container,
+    .page-view,
+    .control-block {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex-basis: auto !important;
+    }
+    .capture-wrapper {
+        width: min(92vw, 430px) !important;
+        height: min(92vw, 430px) !important;
+        max-width: 430px !important;
+        max-height: 430px !important;
+        flex: 0 0 auto !important;
+    }
+    .clock-box,
+    .panel-box {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .btn-row {
+        width: min(85vw, 320px) !important;
+        max-width: 320px !important;
+    }
+}
+</style>
 </head>
-    <body>
-        <!-- 🎛️ 顶端页面翻页标签 -->
-        <div class="page-switcher">
-            <div class="page-tab active" id="tab-p1" onclick="switchPage(1)">🌅 Timeline</div>
-            <div class="page-tab" id="tab-p2" onclick="switchPage(2)">⚖️ Life Balance</div>
-        </div>
-
-        <!-- 大容器外框 -->
-        <div class="main-container">
+<body>
+<!-- 🎛️ 顶端页面翻页标签 -->
+<div class="page-switcher">
+<div class="page-tab active" id="tab-p1" onclick="switchPage(1)">🌅 Timeline</div>
+<div class="page-tab" id="tab-p2" onclick="switchPage(2)">⚖️ Life Balance</div>
+</div>
+<!-- 大容器外框 -->
+<div class="main-container">
 <!-- ==================== 【第一页：起床打卡线】 ==================== -->
-            <div class="page-view active" id="page1">
-                <div class="control-block">
-                    <div class="capture-wrapper">
-                        <div class="clock-box" id="capture-area-p1" ondblclick="promptSetCity()" title="Double-click to change city">
-                            <div class="time-display" id="time-p1">00:00</div>
-                            <div class="date-display" id="date-p1">LOADING DATE</div>
-                            <div class="timezone-display">CURRENT TIME</div>
-                            <div class="weather-display" id="weather-p1">WEATHER LOADING</div>
-                            <div class="sun-display" id="sun-p1">SUNRISE --:-- · SUNSET --:--</div>
-                        </div>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-capture" onclick="captureImage('capture-area-p1', 'Clock_P1')">
-                            CAPTURE 1x1 CLOCK
-                        </button>
-                        <div class="btn-row">
-                            <button class="btn btn-checkin" id="wake-btn" onclick="toggleWakeCheckIn()">
+<div class="page-view active" id="page1">
+<div class="control-block">
+<div class="capture-wrapper">
+<div class="clock-box" id="capture-area-p1" ondblclick="promptSetCity()" title="Double-click to change city">
+<div class="time-display" id="time-p1">00:00</div>
+<div class="date-display" id="date-p1">LOADING DATE</div>
+<div class="timezone-display">CURRENT TIME</div>
+<div class="weather-display" id="weather-p1">WEATHER LOADING</div>
+<div class="sun-display" id="sun-p1">SUNRISE --:-- · SUNSET --:--</div>
+</div>
+</div>
+<div class="btn-group">
+
+<div class="btn-row">
+<button class="btn btn-checkin" id="wake-btn" onclick="toggleWakeCheckIn()">
                                 CONNECTING...
                             </button>
-                            <button class="btn btn-checkin" id="sleep-btn" onclick="toggleSleepCheckIn()">
+<button class="btn btn-checkin" id="sleep-btn" onclick="toggleSleepCheckIn()">
                                 CONNECTING...
                             </button>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+<div class="control-block">
+<div class="capture-wrapper">
+<div class="panel-box" id="chart-capture-area">
+<div class="dashboard-header">
+<div class="dashboard-title">Check-in Timeline</div>
+<div class="tabs" id="chart-tabs-container">
+<div class="tab active" onclick="switchView('week')">Week</div>
+<div class="tab" onclick="switchView('month')">Month</div>
+<div class="tab" onclick="switchView('halfYear')">6-M</div>
+<div class="tab" onclick="switchView('year')">Year</div>
+</div>
+</div>
+<div class="stats-grid stats-grid-classic">
+<div class="stat-card completion-card">
+<div class="stat-label" id="wake-target-label">Wake Completion</div>
+<div class="stat-value" id="stat-rate">0%</div>
+<div class="target-note">W≤7:10 · WE≤8:00</div>
+</div>
+<div class="stat-card clickable-time-card">
+<div>
+<div class="stat-label">Morning Avg</div>
+<div class="stat-value" id="stat-wake-avg">--:--</div>
+</div>
+<button class="mini-edit-btn" onclick="editTodayWakeRecord()">✎</button>
+</div>
+<div class="stat-card clickable-time-card">
+<div>
+<div class="stat-label">Night Avg</div>
+<div class="stat-value" id="stat-sleep-avg">--:--</div>
+</div>
+<button class="mini-edit-btn" onclick="editTodaySleepOnlyRecord()">✎</button>
+</div>
+<div class="stat-card">
+<div class="stat-label">Avg Sleep Duration</div>
+<div class="stat-value" id="stat-sleep-duration">--h --m</div>
+</div>
+</div>
+<div class="chart-container">
+<canvas id="analyticsChart"></canvas>
+</div>
+</div>
+</div>
 
-                <div class="control-block">
-                    <div class="capture-wrapper">
-                        <div class="panel-box" id="chart-capture-area">
-                            <div class="dashboard-header">
-                                <div class="dashboard-title">Check-in Timeline</div>
-                                <div class="tabs" id="chart-tabs-container">
-                                    <div class="tab active" onclick="switchView('week')">Week</div>
-                                    <div class="tab" onclick="switchView('month')">Month</div>
-                                    <div class="tab" onclick="switchView('halfYear')">6-M</div>
-                                    <div class="tab" onclick="switchView('year')">Year</div>
-                                </div>
-                            </div>
-                            <div class="stats-grid stats-grid-classic">
-                                <div class="stat-card completion-card">
-                                    <div class="stat-label" id="wake-target-label">Wake Completion</div>
-                                    <div class="stat-value" id="stat-rate">0%</div>
-                                    <div class="target-note">W≤7:10 · WE≤8:00</div>
-                                </div>
+</div>
+</div>
+<!-- ==================== 【第二页：健身与学习】 ==================== -->
+<div class="page-view" id="page2">
+<div class="control-block">
+<div class="capture-wrapper">
+<div class="clock-box" id="capture-area-p2" ondblclick="promptSetCity()" title="Double-click to change city">
+<div class="time-display" id="time-p2">00:00</div>
+<div class="date-display" id="date-p2">LOADING DATE</div>
+<div class="timezone-display">CURRENT TIME</div>
+<div class="weather-display" id="weather-p2">WEATHER LOADING</div>
+<div class="sun-display" id="sun-p2">SUNRISE --:-- · SUNSET --:--</div>
+</div>
+</div>
 
-                                <div class="stat-card clickable-time-card">
-                                    <div>
-                                        <div class="stat-label">Morning Avg</div>
-                                        <div class="stat-value" id="stat-wake-avg">--:--</div>
-                                    </div>
-                                    <button class="mini-edit-btn" onclick="editTodayWakeRecord()">✎</button>
-                                </div>
-
-                                <div class="stat-card clickable-time-card">
-                                    <div>
-                                        <div class="stat-label">Night Avg</div>
-                                        <div class="stat-value" id="stat-sleep-avg">--:--</div>
-                                    </div>
-                                    <button class="mini-edit-btn" onclick="editTodaySleepOnlyRecord()">✎</button>
-                                </div>
-
-                                <div class="stat-card">
-                                    <div class="stat-label">Avg Sleep Duration</div>
-                                    <div class="stat-value" id="stat-sleep-duration">--h --m</div>
-                                </div>
-                            </div>
-                            <div class="chart-container">
-                                <canvas id="analyticsChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-capture" onclick="captureChartImage()">CAPTURE 1x1 ANALYTICS</button>
-                        
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== 【第二页：健身与学习】 ==================== -->
-            <div class="page-view" id="page2">
-                <div class="control-block">
-                    <div class="capture-wrapper">
-                        <div class="clock-box" id="capture-area-p2" ondblclick="promptSetCity()" title="Double-click to change city">
-                            <div class="time-display" id="time-p2">00:00</div>
-                            <div class="date-display" id="date-p2">LOADING DATE</div>
-                            <div class="timezone-display">CURRENT TIME</div>
-                            <div class="weather-display" id="weather-p2">WEATHER LOADING</div>
-                            <div class="sun-display" id="sun-p2">SUNRISE --:-- · SUNSET --:--</div>
-                        </div>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-capture" onclick="captureImage('capture-area-p2', 'Clock_P2')">
-                            CAPTURE 1x1 CLOCK
-                        </button>
-                    </div>
-                </div>
-
-                <div class="control-block">
-                    <div class="capture-wrapper">
-                        <div class="panel-box" id="tracker-capture-area">
-                            <div class="dashboard-header">
-                                <div class="dashboard-title">Life Balance Tracker</div>
-                            </div>
-
-                            
-
-                            <div class="tracker-grid">
-                                <!-- 🏋️‍♂️ 健身区 -->
-                                <div class="tracker-section">
-                                    <div class="section-title">🏋️‍♂️ FITNESS</div>
-                                    <div class="stat-card today-card">
-                                        <div>
-                                            <div class="stat-label">Today</div>
-                                            <div class="stat-value" id="fit-today">0 mins</div>
-                                        </div>
-
-                                        <button class="mini-reset-btn" onclick="editTodayActivity('fitness')">
+</div>
+<div class="control-block">
+<div class="capture-wrapper">
+<div class="panel-box" id="tracker-capture-area">
+<div class="dashboard-header">
+<div class="dashboard-title">Life Balance Tracker</div>
+</div>
+<div class="tracker-grid">
+<!-- 🏋️‍♂️ 健身区 -->
+<div class="tracker-section">
+<div class="section-title">🏋️‍♂️ FITNESS</div>
+<div class="stat-card today-card">
+<div>
+<div class="stat-label">Today</div>
+<div class="stat-value" id="fit-today">0 mins</div>
+</div>
+<button class="mini-reset-btn" onclick="editTodayActivity('fitness')">
                                             ✎
                                         </button>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-label">Total Days</div>
-                                        <div class="stat-value" id="fit-days">0 days</div>
-                                    </div>
-                                    <div class="stat-card" id="fit-duration-card">
-                                        <div class="stat-label">Total Duration</div>
-                                        <div class="stat-value" id="fit-hours">0.0 hrs</div>
-                                        <div class="stat-sub-value" id="fit-mins">0 mins</div>
-                                    </div>
-                                </div>
-                                <!-- 📚 学习区 -->
-                                <div class="tracker-section">
-                                    <div class="section-title">📚 STUDY</div>
-                                    <div class="stat-card today-card">
-                                        <div>
-                                            <div class="stat-label">Today</div>
-                                            <div class="stat-value" id="study-today">0 mins</div>
-                                        </div>
+</div>
+<div class="stat-card">
+<div class="stat-label">Total Days</div>
+<div class="stat-value" id="fit-days">0 days</div>
+</div>
+<div class="stat-card" id="fit-duration-card">
+<div class="stat-label">Total Duration</div>
+<div class="stat-value" id="fit-hours">0.0 hrs</div>
+<div class="stat-sub-value" id="fit-mins">0 mins</div>
+</div>
+</div>
+<!-- 📚 学习区 -->
+<div class="tracker-section">
+<div class="section-title">📚 STUDY</div>
+<div class="stat-card today-card">
+<div>
+<div class="stat-label">Today</div>
+<div class="stat-value" id="study-today">0 mins</div>
+</div>
+<button class="mini-reset-btn" onclick="editTodayActivity('study')">✎</button>
+</div>
+<div class="stat-card">
+<div class="stat-label">Total Days</div>
+<div class="stat-value" id="study-days">0 days</div>
+</div>
+<div class="stat-card" id="study-duration-card">
+<div class="stat-label">Total Duration</div>
+<div class="stat-value" id="study-hours">0.0 hrs</div>
+<div class="stat-sub-value" id="study-mins">0 mins</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="btn-group">
 
-                                        <button class="mini-reset-btn" onclick="editTodayActivity('study')">✎</button>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-label">Total Days</div>
-                                        <div class="stat-value" id="study-days">0 days</div>
-                                    </div>
-                                    <div class="stat-card" id="study-duration-card">
-                                        <div class="stat-label">Total Duration</div>
-                                        <div class="stat-value" id="study-hours">0.0 hrs</div>
-                                        <div class="stat-sub-value" id="study-mins">0 mins</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <button class="btn btn-capture" onclick="captureImage('tracker-capture-area', 'Tracker_P2')">
-                            CAPTURE 1x1 TRACKER
-                        </button>
-
-                        <div class="btn-row" style="margin-top:6px;">
-                            <button class="btn btn-fit-theme" id="btn-fit-toggle" onclick="toggleTimer('fitness')">
+<div class="btn-row" style="margin-top:6px;">
+<button class="btn btn-fit-theme" id="btn-fit-toggle" onclick="toggleTimer('fitness')">
                                 FIT
                             </button>
-                            <button class="btn btn-fit-theme" onclick="resetTimer('fitness')">RESET</button>
-
-                            <button class="btn btn-study-theme" id="btn-study-toggle" onclick="toggleTimer('study')">
+<button class="btn btn-fit-theme" onclick="resetTimer('fitness')">RESET</button>
+<button class="btn btn-study-theme" id="btn-study-toggle" onclick="toggleTimer('study')">
                                 STUDY
                             </button>
-                            <button class="btn btn-study-theme" onclick="resetTimer('study')">RESET</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <script>
+<button class="btn btn-study-theme" onclick="resetTimer('study')">RESET</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
             // ======= 【核心配置区：指向你的 Firebase 实时数据库】 =======
             const FIREBASE_BASE_URL = "https://myclock-ccax-default-rtdb.asia-southeast1.firebasedatabase.app/";
             // =======================================================
@@ -4322,91 +4370,7 @@ body {
                 const pickedColors = pickSunGradient(now);
                 applyGradientColors(pickedColors, true);
             }
-
-            function copyCanvasContentToClone(originalTarget, clonedTarget) {
-                const originalCanvases = originalTarget.querySelectorAll("canvas");
-                const clonedCanvases = clonedTarget.querySelectorAll("canvas");
-
-                originalCanvases.forEach((canvas, index) => {
-                    const clonedCanvas = clonedCanvases[index];
-
-                    if (!clonedCanvas) return;
-
-                    const img = document.createElement("img");
-                    img.src = canvas.toDataURL("image/png");
-                    img.style.width = clonedCanvas.style.width || `${clonedCanvas.clientWidth || canvas.clientWidth}px`;
-                    img.style.height = clonedCanvas.style.height || `${clonedCanvas.clientHeight || canvas.clientHeight}px`;
-                    img.style.display = "block";
-
-                    clonedCanvas.parentNode.replaceChild(img, clonedCanvas);
-                });
-            }
-
-            function captureImage(targetId, fileName) {
-                const target = document.getElementById(targetId);
-                if (!target) return;
-
-                const rect = target.getBoundingClientRect();
-                const captureWidth = Math.round(rect.width);
-                const captureHeight = Math.round(rect.height);
-
-                target.classList.add("capture-mode");
-
-                html2canvas(target, {
-                    width: captureWidth,
-                    height: captureHeight,
-                    windowWidth: document.documentElement.clientWidth,
-                    windowHeight: document.documentElement.clientHeight,
-                    scrollX: -window.scrollX,
-                    scrollY: -window.scrollY,
-                    scale: Math.min(2, window.devicePixelRatio || 2),
-                    useCORS: true,
-                    backgroundColor: null,
-                    logging: false,
-                    foreignObjectRendering: false,
-                }).then((canvas) => {
-                    target.classList.remove("capture-mode");
-
-                    const side = Math.min(canvas.width, canvas.height);
-                    const cropX = Math.max(0, Math.floor((canvas.width - side) / 2));
-                    const cropY = Math.max(0, Math.floor((canvas.height - side) / 2));
-
-                    const squareCanvas = document.createElement("canvas");
-                    squareCanvas.width = side;
-                    squareCanvas.height = side;
-
-                    const ctx = squareCanvas.getContext("2d");
-                    ctx.drawImage(
-                        canvas,
-                        cropX,
-                        cropY,
-                        side,
-                        side,
-                        0,
-                        0,
-                        side,
-                        side
-                    );
-
-                    const link = document.createElement("a");
-                    link.download = `${fileName}_1x1.png`;
-                    link.href = squareCanvas.toDataURL("image/png");
-                    link.click();
-                }).catch((e) => {
-                    target.classList.remove("capture-mode");
-                    console.error(e);
-                    alert("Capture failed. Please try again.");
-                });
-            }
-
-            function captureChartImage() {
-                const tabs = document.getElementById("chart-tabs-container");
-                tabs.style.visibility = "hidden";
-                captureImage("chart-capture-area", "Analytics_P1");
-                setTimeout(() => (tabs.style.visibility = "visible"), 500);
-            }
-
-            function restoreTimers() {
+function restoreTimers() {
                 ["fitness", "study"].forEach((type) => {
                     const saved = localStorage.getItem(`${type}StartTime`);
 
@@ -4440,7 +4404,6 @@ body {
             restoreTimers();
             startTool();
         </script>
-    
 <style id="fitness-study-contrast-fix">
 /* Final readability overrides: no fixed pale text; follows adaptive light/dark palette. */
 .section-title,
@@ -4465,209 +4428,7 @@ body {
     color: var(--adaptive-text-strong) !important;
 }
 </style>
-<script>
-(function () {
-    function downloadCanvasAsPng(canvas, filename) {
-        const link = document.createElement("a");
-        link.download = filename;
-        link.href = canvas.toDataURL("image/png");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
 
-    window.captureDesktop1x1 = function () {
-        const activePage = document.querySelector(".page-view.active");
-        const target = activePage || document.querySelector(".main-container");
-
-        if (!target || typeof html2canvas === "undefined") {
-            alert("Capture unavailable. Please refresh and try again.");
-            return;
-        }
-
-        const root = getComputedStyle(document.documentElement);
-        const bg1 = root.getPropertyValue("--bg-color-1").trim() || "#b9d4e2";
-        const bg2 = root.getPropertyValue("--bg-color-2").trim() || "#dfe9ef";
-        const bg3 = root.getPropertyValue("--bg-color-3").trim() || "#f2ebe4";
-
-        const dot = document.getElementById("desktop-capture-dot");
-        if (dot) dot.style.visibility = "hidden";
-
-        target.classList.add("capture-mode");
-
-        html2canvas(target, {
-            backgroundColor: null,
-            scale: Math.min(2, window.devicePixelRatio || 2),
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            scrollX: 0,
-            scrollY: 0,
-            windowWidth: document.documentElement.scrollWidth,
-            windowHeight: document.documentElement.scrollHeight
-        }).then(function (canvas) {
-            target.classList.remove("capture-mode");
-            if (dot) dot.style.visibility = "";
-
-            const size = Math.max(canvas.width, canvas.height);
-            const square = document.createElement("canvas");
-            square.width = size;
-            square.height = size;
-
-            const ctx = square.getContext("2d");
-            const gradient = ctx.createLinearGradient(0, 0, size, size);
-            gradient.addColorStop(0, bg1);
-            gradient.addColorStop(0.5, bg2);
-            gradient.addColorStop(1, bg3);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, size, size);
-
-            ctx.drawImage(canvas, (size - canvas.width) / 2, (size - canvas.height) / 2);
-
-            downloadCanvasAsPng(square, "Desktop_1x1.png");
-        }).catch(function (error) {
-            target.classList.remove("capture-mode");
-            if (dot) dot.style.visibility = "";
-            console.error(error);
-            alert("Capture failed. Please try again.");
-        });
-    };
-
-    function bindDot() {
-        const dot = document.getElementById("desktop-capture-dot");
-        if (!dot) return;
-
-        dot.addEventListener("click", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.captureDesktop1x1();
-        });
-
-        dot.addEventListener("touchstart", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.captureDesktop1x1();
-        }, { passive: false });
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", bindDot);
-    } else {
-        bindDot();
-    }
-})();
-</script>
-
-
-<script id="desktop-capture-final-override">
-(function () {
-    function directDownloadPng(canvas, filename) {
-        const link = document.createElement("a");
-        link.download = filename;
-        link.href = canvas.toDataURL("image/png");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    window.captureDesktop1x1 = function () {
-        const isPage2 = document.getElementById("page2")?.classList.contains("active");
-
-        const clock = document.getElementById(isPage2 ? "capture-area-p2" : "capture-area-p1");
-        const panel = document.getElementById(isPage2 ? "tracker-capture-area" : "chart-capture-area");
-
-        if (!clock || !panel || typeof html2canvas === "undefined") {
-            alert("Capture unavailable. Please refresh and try again.");
-            return;
-        }
-
-        const dot = document.getElementById("desktop-capture-dot");
-        if (dot) dot.style.visibility = "hidden";
-
-        clock.classList.add("capture-mode");
-        panel.classList.add("capture-mode");
-
-        const captureOptions = {
-            backgroundColor: null,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            foreignObjectRendering: false,
-            scale: Math.min(2, window.devicePixelRatio || 2)
-        };
-
-        Promise.all([
-            html2canvas(clock, captureOptions),
-            html2canvas(panel, captureOptions)
-        ]).then(([clockCanvas, panelCanvas]) => {
-            clock.classList.remove("capture-mode");
-            panel.classList.remove("capture-mode");
-            if (dot) dot.style.visibility = "";
-
-            const gap = Math.round(24 * Math.min(2, window.devicePixelRatio || 2));
-            const totalW = clockCanvas.width + panelCanvas.width + gap;
-            const totalH = Math.max(clockCanvas.height, panelCanvas.height);
-            const size = Math.max(totalW, totalH);
-
-            const square = document.createElement("canvas");
-            square.width = size;
-            square.height = size;
-
-            const ctx = square.getContext("2d");
-
-            const root = getComputedStyle(document.documentElement);
-            const bg1 = root.getPropertyValue("--bg-color-1").trim() || "#b9d4e2";
-            const bg2 = root.getPropertyValue("--bg-color-2").trim() || "#dfe9ef";
-            const bg3 = root.getPropertyValue("--bg-color-3").trim() || "#f2ebe4";
-
-            const gradient = ctx.createLinearGradient(0, 0, size, size);
-            gradient.addColorStop(0, bg1);
-            gradient.addColorStop(0.5, bg2);
-            gradient.addColorStop(1, bg3);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, size, size);
-
-            const startX = (size - totalW) / 2;
-            const clockY = (size - clockCanvas.height) / 2;
-            const panelY = (size - panelCanvas.height) / 2;
-
-            ctx.drawImage(clockCanvas, startX, clockY);
-            ctx.drawImage(panelCanvas, startX + clockCanvas.width + gap, panelY);
-
-            directDownloadPng(square, "Desktop_1x1.png");
-        }).catch((err) => {
-            clock.classList.remove("capture-mode");
-            panel.classList.remove("capture-mode");
-            if (dot) dot.style.visibility = "";
-            console.error(err);
-            alert("Capture failed. Please try again.");
-        });
-    };
-
-    function bindDotCapture() {
-        const dot = document.getElementById("desktop-capture-dot");
-        if (!dot) return;
-
-        dot.onclick = function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.captureDesktop1x1();
-        };
-
-        dot.ontouchstart = function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.captureDesktop1x1();
-        };
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", bindDotCapture);
-    } else {
-        bindDotCapture();
-    }
-})();
-</script>
 
 <script id="v81-mobile-weather-dynamic-wave-js">
 (function () {
@@ -4894,8 +4655,6 @@ body {
     // setInterval(updateDynamicWaves, 3000);
 })();
 </script>
-
-
 <style id="v85-wave-balance-fix">
 /* 0 min baseline wave softer */
 #tracker-capture-area .today-card[data-wave-level="0"]::before{
@@ -4908,7 +4667,6 @@ body {
     --wave-min-height: 18px;
 }
 </style>
-
 <script id="v85-fitness-study-same-scaling">
 (function(){
     const oldSetWaveForCard = window.setWaveForCard;
@@ -4938,8 +4696,6 @@ body {
     };
 })();
 </script>
-
-
 <style id="v86-low-min-wave-raise-fix">
 /* Keep any non-zero wave at least as high as the 0-min baseline */
 #tracker-capture-area .today-card:not([data-wave-level="0"])::after{
@@ -4954,10 +4710,7 @@ body {
     opacity: .24 !important;
 }
 </style>
-
 <!-- v89: removed obsolete v86 low-minute wave interval to prevent wave jumping -->
-
-
 <style id="v87-final-wave-scale-clean">
 /* v87 final wave scale: clear separation between 0 and 5 mins */
 #tracker-capture-area .today-card::after{
@@ -4998,7 +4751,6 @@ body {
     min-height: 0 !important;
 }
 </style>
-
 <script id="v87-final-wave-scale-js">
 (function(){
     function finalWaveValue(mins){
@@ -5106,8 +4858,6 @@ body {
     // setInterval(applyFinalWaves, 350);
 })();
 </script>
-
-
 <style id="v88-stop-wave-jitter">
 /* v88: stop wave from visually jumping */
 #tracker-capture-area .today-card::after,
@@ -5128,7 +4878,6 @@ body {
     right: -30% !important;
 }
 </style>
-
 <script id="v88-less-frequent-wave-apply">
 (function(){
     let lastFitText = "";
@@ -5167,8 +4916,6 @@ body {
     setInterval(applyOnlyWhenTextChanges, 2000);
 })();
 </script>
-
-
 <style id="v89-fitness-wave-stability-final">
 /* v89: final stability layer - only text changes update wave height; no visual motion */
 #tracker-capture-area .today-card::after,
@@ -5351,8 +5098,6 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 }
 
 </style>
-
-
 <script id="v100-ip-weather-sunrise-sunset">
 (function () {
     "use strict";
@@ -5616,6 +5361,5 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     window.refreshWeatherV100 = refresh;
 })();
 </script>
-
 </body>
 </html>
