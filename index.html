@@ -127,13 +127,13 @@
                 border-radius: 0px;
                 margin-bottom: 15px;
                 width: 474px;
-                height: 474px;
+                height: 18px;
             }
 
             /* 核心时钟区域 */
             .clock-box {
                 width: 450px;
-                height: 450px;
+                height: 18px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -201,7 +201,7 @@
             /* 核心图表与第二页看板 1x1 区域 */
             .panel-box {
                 width: 450px;
-                height: 450px;
+                height: 18px;
 
                 display: flex;
                 flex-direction: column;
@@ -477,7 +477,7 @@
                 position: relative;
                 width: 100%;
                 flex-grow: 1;
-                height: 180px;
+                height: 18px;
             }
 
             .today-card {
@@ -492,7 +492,7 @@
                 pointer-events: none;
 
                 width: 24px;
-                height: 24px;
+                height: 18px;
 
                 border: none;
                 border-radius: 999px;
@@ -528,7 +528,7 @@
     pointer-events: none;
 
     width: 24px;
-    height: 24px;
+    height: 18px;
 
     border: none;
     border-radius: 999px;
@@ -604,13 +604,13 @@
                 border-radius: 8px;
                 margin-bottom: 15px;
                 width: 474px;
-                height: 474px;
+                height: 18px;
             }
 
                 .clock-box,
                 .panel-box {
                 width: 450px;
-                height: 450px;
+                height: 18px;
                 display: flex;
                 flex-direction: column;
                 justify-content: flex-start;
@@ -678,7 +678,7 @@
                 /* panel */
                 .panel-box {
                 width: 450px;
-                height: 450px;
+                height: 18px;
                 display: flex;
                 flex-direction: column;
                 justify-content: flex-start;
@@ -880,7 +880,7 @@
                     width: 92vw;
                     height: 92vw;
                     max-width: 430px;
-                    max-height: 430px;
+                    max-height: 18px;
                     padding: 0;
                     border: none;
                     border-radius: 22px;
@@ -978,7 +978,7 @@
 
                 .chart-container {
                     height: calc(100% - 156px);
-                    min-height: 120px;
+                    min-height: 18px;
                 }
 
                 .tracker-grid {
@@ -1427,7 +1427,7 @@
                 grid-template-rows: 1fr 1fr;
                 gap: 14px;
                 margin-bottom: 18px;
-                min-height: 164px;
+                min-height: 18px;
             }
 
             .stats-grid-compact .completion-card {
@@ -1451,7 +1451,7 @@
             }
 
             .avg-row {
-                min-height: 62px;
+                min-height: 18px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
@@ -1459,7 +1459,7 @@
             }
 
             .avg-divider {
-                height: 1px;
+                height: 18px;
                 width: 100%;
                 background: color-mix(in srgb, var(--adaptive-text-strong) 18%, transparent);
                 opacity: 0.55;
@@ -1499,11 +1499,11 @@
                 .stats-grid-compact {
                     gap: 10px;
                     margin-bottom: 12px;
-                    min-height: 136px;
+                    min-height: 18px;
                 }
 
                 .avg-row {
-                    min-height: 52px;
+                    min-height: 18px;
                 }
 
                 .streak-badge {
@@ -1562,7 +1562,7 @@
 
 
             .stats-grid-classic .stat-card {
-                min-height: 88px;
+                min-height: 18px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -1587,11 +1587,11 @@
                 .stats-grid-classic {
                     gap: 10px;
                     margin-bottom: 14px;
-                    min-height: 136px;
+                    min-height: 18px;
                 }
 
                 .stats-grid-classic .stat-card {
-                    min-height: 64px;
+                    min-height: 18px;
                     padding: 11px 10px;
                 }
             }
@@ -1716,7 +1716,7 @@ body {
 }
 
 .main-container {
-    min-height: 560px;
+    min-height: 18px;
     align-items: flex-start !important;
 }
 
@@ -1872,7 +1872,7 @@ body {
     left: -35%;
     right: -35%;
     bottom: -10px;
-    height: 26px;
+    height: 18px;
     background:
         radial-gradient(60% 80% at 50% 0%, rgba(255,255,255,0.42), transparent 70%),
         linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
@@ -2643,7 +2643,7 @@ body {
     left:-35%;
     right:-35%;
     bottom:-10px;
-    height:26px;
+    height: 18px;
 
     background:
         radial-gradient(60% 80% at 50% 0%, rgba(255,255,255,0.42), transparent 70%),
@@ -2829,6 +2829,14 @@ body.dashboard-layout-capture .manual-shot-toggle {
     visibility: hidden !important;
 }
 
+
+/* v91: Fix today time centering during capture */
+body.desktop-capture-running #tracker-capture-area .today-card {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center !important;
+}
+
 </style>
         <script>
             (function restoreLastGradientBeforePaint() {
@@ -2912,6 +2920,155 @@ body {
         width: 450px !important;
         height: 450px !important;
     }
+}
+</style>
+
+
+<style id="v81-mobile-weather-dynamic-wave-css">
+/* v81: mobile weather visibility + dynamic Life Balance wave */
+#tracker-capture-area .today-card{
+    --wave-level: 0.18;
+    --wave-height: 18px;
+    --wave-bottom: -12px;
+    --wave-opacity: .32;
+    --wave-speed: 6.4s;
+    --wave-x: 0px;
+}
+
+#tracker-capture-area .today-card::after{
+    height: var(--wave-height) !important;
+    bottom: var(--wave-bottom) !important;
+    opacity: var(--wave-opacity) !important;
+    background:
+        radial-gradient(
+            70% 120% at 50% 0%,
+            rgba(255,255,255,0.52),
+            rgba(255,255,255,0.22) 44%,
+            transparent 74%
+        ),
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.38),
+            transparent
+        ) !important;
+    animation: dynamicSoftWave var(--wave-speed) ease-in-out infinite !important;
+}
+
+#tracker-capture-area .today-card::before{
+    content:"";
+    position:absolute;
+    left:-35%;
+    right:-35%;
+    bottom: calc(var(--wave-bottom) - 6px);
+    height: calc(var(--wave-height) * 1.15);
+    border-radius: 50% 50% 0 0;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.18),
+            rgba(255,255,255,0.05)
+        );
+    opacity: calc(var(--wave-opacity) * .75);
+    pointer-events:none;
+    z-index:0;
+}
+
+#tracker-capture-area .today-card[data-wave-level="0"]::after,
+#tracker-capture-area .today-card[data-wave-level="0"]::before{
+    opacity:.16 !important;
+}
+
+#tracker-capture-area .today-card > div,
+#tracker-capture-area .today-card .mini-reset-btn{
+    position:relative;
+    z-index:2;
+}
+
+@keyframes dynamicSoftWave{
+    0%,100%{
+        transform: translateX(calc(-8px - var(--wave-x))) translateY(0);
+    }
+    50%{
+        transform: translateX(calc(8px + var(--wave-x))) translateY(-5px);
+    }
+}
+
+/* Make weather/sun text stable and readable on mobile */
+.weather-display,
+.sun-display{
+    min-height: 1em;
+}
+
+@media (max-width: 520px){
+    .weather-display{
+        white-space: normal !important;
+        line-height: 1.35 !important;
+        text-align:center !important;
+    }
+
+    .sun-display{
+        white-space: normal !important;
+        line-height: 1.35 !important;
+        text-align:center !important;
+        max-width: 92%;
+    }
+}
+</style>
+
+
+<style id="v82-zero-wave-visible-css">
+/* v82: keep a subtle baseline wave even when Today = 0 mins */
+#tracker-capture-area .today-card[data-wave-level="0"]::after{
+    opacity: .24 !important;
+    height: 18px !important;
+    bottom: -12px !important;
+}
+
+#tracker-capture-area .today-card[data-wave-level="0"]::before{
+    opacity: .14 !important;
+    height: 20px !important;
+    bottom: -18px !important;
+}
+</style>
+
+
+<style id="v83-stronger-zero-wave">
+#tracker-capture-area .today-card[data-wave-level="0"]::after{
+    opacity: .40 !important;
+    height: 28px !important;
+    bottom: -6px !important;
+}
+
+#tracker-capture-area .today-card[data-wave-level="0"]::before{
+    opacity: .26 !important;
+    height: 28px !important;
+    bottom: -14px !important;
+}
+
+/* stronger highlight for all wave states */
+#tracker-capture-area .today-card::after{
+    background:
+        radial-gradient(
+            70% 120% at 50% 0%,
+            rgba(255,255,255,0.68),
+            rgba(255,255,255,0.30) 44%,
+            transparent 74%
+        ),
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.42),
+            transparent
+        ) !important;
+}
+</style>
+
+
+<style id="v84-fitness-study-wave-match">
+/* Fitness and Study use identical wave styling */
+#tracker-capture-area .tracker-section .today-card{
+    --wave-style-match: 1;
 }
 </style>
 
@@ -4494,5 +4651,597 @@ body {
     }
 })();
 </script>
+
+<script id="v81-mobile-weather-dynamic-wave-js">
+(function () {
+    const DEFAULT_WEATHER = {
+        city: "Tianjin",
+        country: "China",
+        latitude: 39.3434,
+        longitude: 117.3616
+    };
+
+    function localTimeString(dateObj) {
+        if (!(dateObj instanceof Date) || isNaN(dateObj)) return "--:--";
+        return `${String(dateObj.getHours()).padStart(2, "0")}:${String(dateObj.getMinutes()).padStart(2, "0")}`;
+    }
+
+    function weatherCodeLabel(code) {
+        if (typeof weatherCodeToText === "function") return weatherCodeToText(code);
+        const map = {0:"Clear",1:"Mainly Clear",2:"Partly Cloudy",3:"Cloudy",45:"Fog",48:"Fog",51:"Drizzle",53:"Drizzle",55:"Drizzle",61:"Rain",63:"Rain",65:"Heavy Rain",80:"Showers",81:"Showers",82:"Heavy Showers",95:"Thunderstorm"};
+        return map[code] || "Weather";
+    }
+
+    function paintWeather(info) {
+        if (!info) return;
+
+        const weatherText =
+            `${Number.isFinite(info.temperature) ? Math.round(info.temperature) + "°C" : "--°C"} · ${weatherCodeLabel(info.code)}`;
+
+        const sunText =
+            `SUNRISE ${info.sunriseText || "--:--"} · SUNSET ${info.sunsetText || "--:--"}`;
+
+        ["p1", "p2"].forEach(function (page) {
+            const weatherEl = document.getElementById(`weather-${page}`);
+            const sunEl = document.getElementById(`sun-${page}`);
+            if (weatherEl) weatherEl.textContent = weatherText;
+            if (sunEl) sunEl.textContent = sunText;
+        });
+    }
+
+    function readCachedWeather() {
+        try {
+            const cached = JSON.parse(localStorage.getItem("v81WeatherCache") || "null");
+            if (!cached) return null;
+            if (Date.now() - cached.savedAt > 6 * 60 * 60 * 1000) return null;
+            cached.sunrise = cached.sunrise ? new Date(cached.sunrise) : null;
+            cached.sunset = cached.sunset ? new Date(cached.sunset) : null;
+            return cached;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveCachedWeather(info) {
+        try {
+            localStorage.setItem("v81WeatherCache", JSON.stringify({
+                ...info,
+                sunrise: info.sunrise ? info.sunrise.toISOString() : null,
+                sunset: info.sunset ? info.sunset.toISOString() : null,
+                savedAt: Date.now()
+            }));
+        } catch (e) {}
+    }
+
+    async function fetchWeatherDirect(latitude, longitude) {
+        const url =
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
+            `&current=temperature_2m,weather_code&daily=sunrise,sunset&timezone=auto&forecast_days=1`;
+
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("Weather request failed");
+        const data = await res.json();
+
+        const sunrise = data?.daily?.sunrise?.[0] ? new Date(data.daily.sunrise[0]) : null;
+        const sunset = data?.daily?.sunset?.[0] ? new Date(data.daily.sunset[0]) : null;
+
+        const info = {
+            temperature: data?.current?.temperature_2m,
+            code: data?.current?.weather_code,
+            sunrise,
+            sunset,
+            sunriseText: localTimeString(sunrise),
+            sunsetText: localTimeString(sunset)
+        };
+
+        weatherInfo = info;
+        paintWeather(info);
+        saveCachedWeather(info);
+
+        if (typeof updateClockAndColors === "function") updateClockAndColors();
+
+        return info;
+    }
+
+    async function ensureMobileWeather() {
+        const cached = readCachedWeather();
+        if (cached) {
+            weatherInfo = cached;
+            paintWeather(cached);
+            if (typeof updateClockAndColors === "function") updateClockAndColors();
+        }
+
+        try {
+            if (typeof fetchWeather === "function") {
+                await fetchWeather();
+                if (weatherInfo) {
+                    saveCachedWeather(weatherInfo);
+                    paintWeather(weatherInfo);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("Built-in weather failed, using direct fallback.", e);
+        }
+
+        // Direct fallback avoids geocoding failure on mobile browsers.
+        try {
+            await fetchWeatherDirect(DEFAULT_WEATHER.latitude, DEFAULT_WEATHER.longitude);
+            if (typeof currentCity !== "undefined") currentCity = DEFAULT_WEATHER.city;
+            if (typeof currentCountry !== "undefined") currentCountry = DEFAULT_WEATHER.country;
+            if (typeof currentLocationName !== "undefined") currentLocationName = `${DEFAULT_WEATHER.city} · ${DEFAULT_WEATHER.country}`;
+            localStorage.setItem("clockCityName", DEFAULT_WEATHER.city);
+            localStorage.setItem("clockCountryName", DEFAULT_WEATHER.country);
+            localStorage.setItem("clockLocationDisplay", `${DEFAULT_WEATHER.city} · ${DEFAULT_WEATHER.country}`);
+            if (typeof updateClockLocationLabel === "function") updateClockLocationLabel();
+        } catch (e) {
+            console.error("Direct weather fallback failed.", e);
+            const fallback = readCachedWeather();
+            if (fallback) paintWeather(fallback);
+        }
+    }
+
+    function setWaveForCard(valueId, minutes) {
+        const valueEl = document.getElementById(valueId);
+        if (!valueEl) return;
+
+        const card = valueEl.closest(".today-card");
+        if (!card) return;
+
+        const mins = Math.max(0, Number(minutes) || 0);
+        const level = Math.min(mins / 120, 1);
+
+        const height = 14 + level * 42;
+        const bottom = -14 + level * 14;
+        const opacity = 0.18 + level * 0.52;
+        const speed = Math.max(3.6, 7.2 - level * 3.2);
+        const waveX = 2 + level * 12;
+
+        card.style.setProperty("--wave-height", `${height.toFixed(1)}px`);
+        card.style.setProperty("--wave-bottom", `${bottom.toFixed(1)}px`);
+        card.style.setProperty("--wave-opacity", opacity.toFixed(2));
+        card.style.setProperty("--wave-speed", `${speed.toFixed(2)}s`);
+        card.style.setProperty("--wave-x", `${waveX.toFixed(1)}px`);
+        card.dataset.waveLevel = mins === 0 ? "0" : String(Math.ceil(level * 5));
+
+        const label = mins >= 120 ? "FULL" : `${Math.round(level * 100)}%`;
+        card.setAttribute("title", `${mins} mins · wave ${label}`);
+    }
+
+    function updateDynamicWaves() {
+        try {
+            const todayStr = new Date().toLocaleDateString("sv-SE");
+            const fit = (globalTrackerData?.fitness || {})[todayStr] || 0;
+            const study = (globalTrackerData?.study || {})[todayStr] || 0;
+
+            setWaveForCard("fit-today", fit);
+            setWaveForCard("study-today", study);
+        } catch (e) {}
+    }
+
+    const originalRenderTrackerStats = window.renderTrackerStats || (typeof renderTrackerStats === "function" ? renderTrackerStats : null);
+    if (originalRenderTrackerStats && !originalRenderTrackerStats.__v81Wrapped) {
+        const wrapped = function () {
+            const result = originalRenderTrackerStats.apply(this, arguments);
+            updateDynamicWaves();
+            return result;
+        };
+        wrapped.__v81Wrapped = true;
+        window.renderTrackerStats = wrapped;
+        try { renderTrackerStats = wrapped; } catch (e) {}
+    }
+
+    // Wrap timer live display so the wave rises while timing on mobile/desktop.
+    const originalUpdateLiveTimerDisplay = window.updateLiveTimerDisplay || (typeof updateLiveTimerDisplay === "function" ? updateLiveTimerDisplay : null);
+    if (originalUpdateLiveTimerDisplay && !originalUpdateLiveTimerDisplay.__v81Wrapped) {
+        const liveWrapped = function (type) {
+            const result = originalUpdateLiveTimerDisplay.apply(this, arguments);
+            try {
+                const todayStr = new Date().toLocaleDateString("sv-SE");
+                const base = (globalTrackerData?.[type] || {})[todayStr] || 0;
+                const timerObj = timers?.[type];
+                const extra = timerObj?.startTime ? Math.floor((new Date() - timerObj.startTime) / 60000) : 0;
+                setWaveForCard(type === "fitness" ? "fit-today" : "study-today", base + extra);
+            } catch (e) {}
+            return result;
+        };
+        liveWrapped.__v81Wrapped = true;
+        window.updateLiveTimerDisplay = liveWrapped;
+        try { updateLiveTimerDisplay = liveWrapped; } catch (e) {}
+    }
+
+    function scheduleWeatherRefresh() {
+        ensureMobileWeather();
+        setTimeout(ensureMobileWeather, 600);
+        setTimeout(ensureMobileWeather, 1800);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () {
+            scheduleWeatherRefresh();
+            updateDynamicWaves();
+        });
+    } else {
+        scheduleWeatherRefresh();
+        updateDynamicWaves();
+    }
+
+    window.addEventListener("load", scheduleWeatherRefresh);
+    window.addEventListener("pageshow", scheduleWeatherRefresh);
+    window.addEventListener("online", scheduleWeatherRefresh);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) scheduleWeatherRefresh();
+    });
+
+    // v89: disabled periodic wave recalculation to avoid conflicting wave heights
+    // setInterval(updateDynamicWaves, 3000);
+})();
+</script>
+
+
+<style id="v85-wave-balance-fix">
+/* 0 min baseline wave softer */
+#tracker-capture-area .today-card[data-wave-level="0"]::before{
+    height: 18px !important;
+    bottom: -14px !important;
+}
+
+/* Small progress should already look visible */
+#tracker-capture-area .today-card{
+    --wave-min-height: 18px;
+}
+</style>
+
+<script id="v85-fitness-study-same-scaling">
+(function(){
+    const oldSetWaveForCard = window.setWaveForCard;
+    if(!oldSetWaveForCard) return;
+
+    window.setWaveForCard = function(valueId, minutes){
+        const valueEl = document.getElementById(valueId);
+        if(!valueEl) return;
+
+        const card = valueEl.closest(".today-card");
+        if(!card) return;
+
+        const mins = Math.max(0, Number(minutes) || 0);
+
+        /* identical scaling for study & fitness */
+        const level = Math.min(Math.max(mins,10) / 120, 1);
+
+        const height = 24 + level * 38;
+        const bottom = -10 + level * 10;
+        const opacity = 0.28 + level * 0.42;
+
+        card.style.setProperty("--wave-height", `${height}px`);
+        card.style.setProperty("--wave-bottom", `${bottom}px`);
+        card.style.setProperty("--wave-opacity", opacity.toFixed(2));
+
+        card.dataset.waveLevel = mins === 0 ? "0" : String(Math.ceil(level * 5));
+    };
+})();
+</script>
+
+
+<style id="v86-low-min-wave-raise-fix">
+/* Keep any non-zero wave at least as high as the 0-min baseline */
+#tracker-capture-area .today-card:not([data-wave-level="0"])::after{
+    min-height: 30px !important;
+    bottom: -6px !important;
+    opacity: .42 !important;
+}
+
+#tracker-capture-area .today-card:not([data-wave-level="0"])::before{
+    min-height: 18px !important;
+    bottom: -14px !important;
+    opacity: .24 !important;
+}
+</style>
+
+<!-- v89: removed obsolete v86 low-minute wave interval to prevent wave jumping -->
+
+
+<style id="v87-final-wave-scale-clean">
+/* v87 final wave scale: clear separation between 0 and 5 mins */
+#tracker-capture-area .today-card::after{
+    height: var(--wave-height) !important;
+    min-height: 0 !important;
+    bottom: var(--wave-bottom) !important;
+    opacity: var(--wave-opacity) !important;
+}
+
+#tracker-capture-area .today-card::before{
+    height: calc(var(--wave-height) * 0.72) !important;
+    min-height: 0 !important;
+    bottom: calc(var(--wave-bottom) - 6px) !important;
+    opacity: calc(var(--wave-opacity) * 0.55) !important;
+}
+
+/* Override old v82/v83 zero-wave rules */
+#tracker-capture-area .today-card[data-wave-level="0"]::after{
+    height: 5px !important;
+    min-height: 0 !important;
+    bottom: -18px !important;
+    opacity: .15 !important;
+}
+
+#tracker-capture-area .today-card[data-wave-level="0"]::before{
+    height: 4px !important;
+    min-height: 0 !important;
+    bottom: -22px !important;
+    opacity: .06 !important;
+}
+
+/* Override old v86 non-zero min-height forcing */
+#tracker-capture-area .today-card:not([data-wave-level="0"])::after{
+    min-height: 0 !important;
+}
+
+#tracker-capture-area .today-card:not([data-wave-level="0"])::before{
+    min-height: 0 !important;
+}
+</style>
+
+<script id="v87-final-wave-scale-js">
+(function(){
+    function finalWaveValue(mins){
+        mins = Math.max(0, Number(mins) || 0);
+
+        if(mins === 0){
+            return {
+                height: 5,
+                bottom: -18,
+                opacity: 0.15,
+                level: "0"
+            };
+        }
+
+        if(mins <= 15){
+            const t = mins / 15;
+            return {
+                height: 5 + mins * 2,      // 5 mins = 15px, 15 mins = 35px
+                bottom: -18 + t * 12,     // -18 → -6
+                opacity: 0.30 + t * 0.18,
+                level: "1"
+            };
+        }
+
+        const t = Math.min(Math.sqrt((mins - 15) / 105), 1);
+        return {
+            height: 35 + t * 35,          // 15 mins = 35px, 120 mins = 70px
+            bottom: -6 + t * 6,           // -6 → 0
+            opacity: 0.48 + t * 0.22,
+            level: String(Math.min(5, Math.max(2, Math.ceil(t * 5))))
+        };
+    }
+
+    function applyFinalWaveToCard(valueId){
+        const el = document.getElementById(valueId);
+        if(!el) return;
+
+        const card = el.closest(".today-card");
+        if(!card) return;
+
+        const mins = parseInt(el.textContent, 10) || 0;
+        const wave = finalWaveValue(mins);
+
+        card.style.setProperty("--wave-height", wave.height + "px");
+        card.style.setProperty("--wave-bottom", wave.bottom + "px");
+        card.style.setProperty("--wave-opacity", wave.opacity.toFixed(2));
+        card.style.setProperty("--wave-speed", mins === 0 ? "7.2s" : "5.2s");
+        card.style.setProperty("--wave-x", mins === 0 ? "2px" : "8px");
+
+        card.dataset.waveLevel = wave.level;
+        card.setAttribute("data-wave-mins", String(mins));
+    }
+
+    function applyFinalWaves(){
+        applyFinalWaveToCard("fit-today");
+        applyFinalWaveToCard("study-today");
+    }
+
+    window.setWaveForCard = function(valueId, minutes){
+        const el = document.getElementById(valueId);
+        if(!el) return;
+
+        const card = el.closest(".today-card");
+        if(!card) return;
+
+        const wave = finalWaveValue(minutes);
+
+        card.style.setProperty("--wave-height", wave.height + "px");
+        card.style.setProperty("--wave-bottom", wave.bottom + "px");
+        card.style.setProperty("--wave-opacity", wave.opacity.toFixed(2));
+        card.style.setProperty("--wave-speed", Number(minutes) === 0 ? "7.2s" : "5.2s");
+        card.style.setProperty("--wave-x", Number(minutes) === 0 ? "2px" : "8px");
+        card.dataset.waveLevel = wave.level;
+        card.setAttribute("data-wave-mins", String(Math.max(0, Number(minutes) || 0)));
+    };
+
+    const originalRender = window.renderTrackerStats || (typeof renderTrackerStats === "function" ? renderTrackerStats : null);
+    if(originalRender && !originalRender.__v87Wrapped){
+        const wrapped = function(){
+            const result = originalRender.apply(this, arguments);
+            setTimeout(applyFinalWaves, 0);
+            return result;
+        };
+        wrapped.__v87Wrapped = true;
+        window.renderTrackerStats = wrapped;
+        try { renderTrackerStats = wrapped; } catch(e) {}
+    }
+
+    if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", applyFinalWaves);
+    }else{
+        applyFinalWaves();
+    }
+
+    window.addEventListener("load", applyFinalWaves);
+    window.addEventListener("pageshow", applyFinalWaves);
+
+    const observer = new MutationObserver(applyFinalWaves);
+    ["fit-today","study-today"].forEach(function(id){
+        const el = document.getElementById(id);
+        if(el) observer.observe(el, {childList:true, characterData:true, subtree:true});
+    });
+
+    // v89: disabled aggressive 350ms wave recalculation to avoid visible jumps
+    // setInterval(applyFinalWaves, 350);
+})();
+</script>
+
+
+<style id="v88-stop-wave-jitter">
+/* v88: stop wave from visually jumping */
+#tracker-capture-area .today-card::after,
+#tracker-capture-area .today-card::before{
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+/* keep the wave as a stable soft waterline */
+#tracker-capture-area .today-card::after{
+    left: -30% !important;
+    right: -30% !important;
+}
+
+#tracker-capture-area .today-card::before{
+    left: -30% !important;
+    right: -30% !important;
+}
+</style>
+
+<script id="v88-less-frequent-wave-apply">
+(function(){
+    let lastFitText = "";
+    let lastStudyText = "";
+
+    function applyOnlyWhenTextChanges(){
+        const fit = document.getElementById("fit-today");
+        const study = document.getElementById("study-today");
+
+        const fitText = fit ? fit.textContent : "";
+        const studyText = study ? study.textContent : "";
+
+        if(fitText === lastFitText && studyText === lastStudyText) return;
+
+        lastFitText = fitText;
+        lastStudyText = studyText;
+
+        if(typeof window.setWaveForCard === "function"){
+            const fitMins = parseInt(fitText, 10) || 0;
+            const studyMins = parseInt(studyText, 10) || 0;
+
+            window.setWaveForCard("fit-today", fitMins);
+            window.setWaveForCard("study-today", studyMins);
+        }
+    }
+
+    if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", applyOnlyWhenTextChanges);
+    }else{
+        applyOnlyWhenTextChanges();
+    }
+
+    window.addEventListener("load", applyOnlyWhenTextChanges);
+    window.addEventListener("pageshow", applyOnlyWhenTextChanges);
+
+    setInterval(applyOnlyWhenTextChanges, 2000);
+})();
+</script>
+
+
+<style id="v89-fitness-wave-stability-final">
+/* v89: final stability layer - only text changes update wave height; no visual motion */
+#tracker-capture-area .today-card::after,
+#tracker-capture-area .today-card::before {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    will-change: auto !important;
+    min-height: 0 !important;
+}
+
+/* v92: Final fix for Life Balance TODAY card capture alignment */
+body.desktop-capture-running #tracker-capture-area .today-card,
+body.dashboard-layout-capture #tracker-capture-area .today-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+body.desktop-capture-running #tracker-capture-area .today-card > div,
+body.dashboard-layout-capture #tracker-capture-area .today-card > div {
+    width: 100% !important;
+    text-align: center !important;
+}
+
+body.desktop-capture-running #tracker-capture-area .today-card .stat-label,
+body.desktop-capture-running #tracker-capture-area .today-card .stat-value,
+body.dashboard-layout-capture #tracker-capture-area .today-card .stat-label,
+body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
+    width: 100% !important;
+    display: block !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+
+/* v93: Fix TODAY alignment inside html2canvas clone capture */
+.capture-mode .today-card,
+#tracker-capture-area-capture-clone .today-card,
+.capture-mode#tracker-capture-area .today-card,
+.capture-mode#tracker-capture-area-capture-clone .today-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+.capture-mode .today-card > div,
+#tracker-capture-area-capture-clone .today-card > div,
+.capture-mode#tracker-capture-area .today-card > div,
+.capture-mode#tracker-capture-area-capture-clone .today-card > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    position: relative !important;
+    left: 0 !important;
+    transform: none !important;
+}
+
+.capture-mode .today-card .stat-label,
+.capture-mode .today-card .stat-value,
+#tracker-capture-area-capture-clone .today-card .stat-label,
+#tracker-capture-area-capture-clone .today-card .stat-value {
+    width: 100% !important;
+    display: block !important;
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* keep hidden edit button from affecting capture alignment */
+.capture-mode .today-card .mini-reset-btn,
+#tracker-capture-area-capture-clone .today-card .mini-reset-btn {
+    display: none !important;
+}
+
+
+/* v94: remove middle vertical line */
+#tracker-capture-area .tracker-grid::before,
+#tracker-capture-area-capture-clone .tracker-grid::before {
+    display: none !important;
+}
+
+</style>
+
 </body>
 </html>
