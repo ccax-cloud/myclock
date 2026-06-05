@@ -4344,39 +4344,56 @@ body {
 
             function captureImage(targetId, fileName) {
                 const target = document.getElementById(targetId);
+                if (!target) return;
 
-                const clone = target.cloneNode(true);
-                clone.id = `${targetId}-capture-clone`;
-                clone.classList.add("capture-mode");
+                const rect = target.getBoundingClientRect();
+                const captureWidth = Math.round(rect.width);
+                const captureHeight = Math.round(rect.height);
 
-                clone.style.position = "fixed";
-                clone.style.left = "-9999px";
-                clone.style.top = "0";
-                clone.style.width = `${target.offsetWidth}px`;
-                clone.style.height = `${target.offsetHeight}px`;
-                clone.style.background =
-                    `linear-gradient(135deg, ${globalColors[0]}, ${globalColors[1]}, ${globalColors[2]})`;
+                target.classList.add("capture-mode");
 
-                copyCanvasContentToClone(target, clone);
-
-                document.body.appendChild(clone);
-
-                html2canvas(clone, {
+                html2canvas(target, {
+                    width: captureWidth,
+                    height: captureHeight,
+                    windowWidth: document.documentElement.clientWidth,
+                    windowHeight: document.documentElement.clientHeight,
+                    scrollX: -window.scrollX,
+                    scrollY: -window.scrollY,
                     scale: Math.min(2, window.devicePixelRatio || 2),
                     useCORS: true,
                     backgroundColor: null,
                     logging: false,
-                    removeContainer: true,
                     foreignObjectRendering: false,
                 }).then((canvas) => {
-                    document.body.removeChild(clone);
+                    target.classList.remove("capture-mode");
+
+                    const side = Math.min(canvas.width, canvas.height);
+                    const cropX = Math.max(0, Math.floor((canvas.width - side) / 2));
+                    const cropY = Math.max(0, Math.floor((canvas.height - side) / 2));
+
+                    const squareCanvas = document.createElement("canvas");
+                    squareCanvas.width = side;
+                    squareCanvas.height = side;
+
+                    const ctx = squareCanvas.getContext("2d");
+                    ctx.drawImage(
+                        canvas,
+                        cropX,
+                        cropY,
+                        side,
+                        side,
+                        0,
+                        0,
+                        side,
+                        side
+                    );
 
                     const link = document.createElement("a");
                     link.download = `${fileName}_1x1.png`;
-                    link.href = canvas.toDataURL("image/png");
+                    link.href = squareCanvas.toDataURL("image/png");
                     link.click();
                 }).catch((e) => {
-                    document.body.removeChild(clone);
+                    target.classList.remove("capture-mode");
                     console.error(e);
                     alert("Capture failed. Please try again.");
                 });
@@ -5262,98 +5279,11 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 }
 
 
-
-/* v97: clean capture/edit icon behavior */
-.capture-mode .mini-edit-btn,
-.capture-mode .mini-reset-btn,
-body.desktop-capture-running .mini-edit-btn,
-body.desktop-capture-running .mini-reset-btn,
-body.dashboard-layout-capture .mini-edit-btn,
-body.dashboard-layout-capture .mini-reset-btn,
-#tracker-capture-area-capture-clone .mini-edit-btn,
-#tracker-capture-area-capture-clone .mini-reset-btn {
-    display: none !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* v97: keep edit/reset icons hover-only; do not force them visible on touch screens */
-@media (hover: none), (pointer: coarse) {
-    .today-card .mini-reset-btn,
-    .clickable-time-card .mini-edit-btn {
-        opacity: 0 !important;
-        pointer-events: none !important;
-    }
-}
-
-.today-card:hover .mini-reset-btn,
-.clickable-time-card:hover .mini-edit-btn {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-}
-
-
-/* v99: mobile portrait capture must stay true 1x1 */
-html.mobile-capture-1x1,
-body.mobile-capture-1x1 {
-    width: 100% !important;
-    min-height: 100% !important;
-    overflow: hidden !important;
-}
-
-body.mobile-capture-1x1 .capture-wrapper,
-body.mobile-capture-1x1 .clock-box,
-body.mobile-capture-1x1 .panel-box,
-body.mobile-capture-1x1 #tracker-capture-area,
-body.mobile-capture-1x1 #clock-capture-area {
-    width: 474px !important;
-    height: 474px !important;
-    min-width: 474px !important;
-    min-height: 474px !important;
-    max-width: 474px !important;
-    max-height: 474px !important;
-    aspect-ratio: 1 / 1 !important;
-    flex: 0 0 474px !important;
-    flex-grow: 0 !important;
-    flex-shrink: 0 !important;
-    overflow: hidden !important;
-}
-
-body.mobile-capture-1x1 .clock-box,
-body.mobile-capture-1x1 .panel-box {
-    width: 450px !important;
-    height: 450px !important;
-    min-width: 450px !important;
-    min-height: 450px !important;
-    max-width: 450px !important;
-    max-height: 450px !important;
-}
-
-body.mobile-capture-1x1 .page-view,
-body.mobile-capture-1x1 .page-view.active,
-body.mobile-capture-1x1 .main-container,
-body.mobile-capture-1x1 .control-block {
-    align-items: center !important;
-    justify-content: center !important;
-    flex-direction: row !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-}
-
-body.mobile-capture-1x1 .btn-group,
-body.mobile-capture-1x1 .page-switcher,
-body.mobile-capture-1x1 #desktop-capture-dot,
-body.mobile-capture-1x1 .mini-edit-btn,
-body.mobile-capture-1x1 .mini-reset-btn {
-    display: none !important;
-}
-
-/* html2canvas clone: force square even if viewport is portrait */
-.capture-mode,
-.capture-mode#tracker-capture-area,
-.capture-mode#clock-capture-area,
+/* v100: capture stays square without changing the live mobile layout */
+.force-square-capture,
+.capture-mode.force-square-capture,
 #tracker-capture-area-capture-clone,
+#chart-capture-area-capture-clone,
 #clock-capture-area-capture-clone {
     width: 450px !important;
     height: 450px !important;
@@ -5369,231 +5299,133 @@ body.mobile-capture-1x1 .mini-reset-btn {
 .capture-mode .mini-reset-btn,
 #tracker-capture-area-capture-clone .mini-edit-btn,
 #tracker-capture-area-capture-clone .mini-reset-btn,
+#chart-capture-area-capture-clone .mini-edit-btn,
+#chart-capture-area-capture-clone .mini-reset-btn,
 #clock-capture-area-capture-clone .mini-edit-btn,
 #clock-capture-area-capture-clone .mini-reset-btn {
     display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
-/* v99: do not leave weather/sun blank on mobile if geolocation fails */
-.weather-display:empty::before {
-    content: "WEATHER LOADING";
+/* v100: mobile should not force edit/reset icons visible; hover only on devices that support hover */
+@media (hover: none), (pointer: coarse) {
+    .today-card .mini-reset-btn,
+    .clickable-time-card .mini-edit-btn {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 }
-.sun-display:empty::before {
-    content: "SUNRISE / SUNSET";
+
+/* keep normal desktop hover behavior */
+@media (hover: hover) and (pointer: fine) {
+    .today-card:hover .mini-reset-btn,
+    .clickable-time-card:hover .mini-edit-btn {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}
+
+
+/* v101: capture real rendered view; do not squeeze mobile layout */
+.force-square-capture,
+.capture-mode.force-square-capture,
+#tracker-capture-area-capture-clone,
+#chart-capture-area-capture-clone,
+#clock-capture-area-capture-clone {
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    aspect-ratio: auto !important;
+}
+
+/* v101: hide only icons during real capture, keep layout size unchanged */
+.capture-mode .mini-edit-btn,
+.capture-mode .mini-reset-btn {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 </style>
 
 
-
-<script id="v97-mobile-location-weather-display-fix">
-(function () {
-    function getSavedLocationLabel() {
-        const display = localStorage.getItem("clockLocationDisplay");
-        const city = localStorage.getItem("clockCityName") || "Tianjin";
-        const country = localStorage.getItem("clockCountryName") || "China";
-        return display || (city && country ? `${city} · ${country}` : city || "Tianjin · China");
-    }
-
-    function paintLocationText() {
-        const label = getSavedLocationLabel();
-        document.querySelectorAll(".clock-box").forEach(function (box) {
-            box.setAttribute("data-location", label);
-        });
-        document.querySelectorAll(".timezone-display").forEach(function (el) {
-            el.textContent = String(label || "Current Location").toUpperCase();
-        });
-    }
-
-    function repaintWeatherIfCached() {
-        try {
-            const cached = JSON.parse(localStorage.getItem("v81WeatherCache") || "null");
-            if (!cached || Date.now() - cached.savedAt > 6 * 60 * 60 * 1000) return;
-            const codeMap = {
-                0: "Clear", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Cloudy",
-                45: "Fog", 48: "Fog", 51: "Drizzle", 53: "Drizzle", 55: "Drizzle",
-                61: "Rain", 63: "Rain", 65: "Heavy Rain", 80: "Showers", 81: "Showers", 82: "Heavy Showers", 95: "Thunderstorm"
-            };
-            const weatherText = `${Number.isFinite(cached.temperature) ? Math.round(cached.temperature) + "°C" : "--°C"} · ${codeMap[cached.code] || "Weather"}`;
-            const sunText = `SUNRISE ${cached.sunriseText || "--:--"} · SUNSET ${cached.sunsetText || "--:--"}`;
-            ["p1", "p2"].forEach(function (page) {
-                const weatherEl = document.getElementById(`weather-${page}`);
-                const sunEl = document.getElementById(`sun-${page}`);
-                if (weatherEl) weatherEl.textContent = weatherText;
-                if (sunEl) sunEl.textContent = sunText;
-            });
-        } catch (e) {}
-    }
-
-    const originalUpdateClockLocationLabel = window.updateClockLocationLabel;
-    if (typeof originalUpdateClockLocationLabel === "function" && !originalUpdateClockLocationLabel.__v97Wrapped) {
-        const wrapped = function () {
-            const result = originalUpdateClockLocationLabel.apply(this, arguments);
-            paintLocationText();
-            return result;
-        };
-        wrapped.__v97Wrapped = true;
-        window.updateClockLocationLabel = wrapped;
-        try { updateClockLocationLabel = wrapped; } catch (e) {}
-    }
-
-    function refreshV97() {
-        paintLocationText();
-        repaintWeatherIfCached();
-        if (typeof ensureMobileWeather === "function") {
-            try { ensureMobileWeather(); } catch (e) {}
-        }
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", refreshV97);
-    } else {
-        refreshV97();
-    }
-    window.addEventListener("load", refreshV97);
-    window.addEventListener("pageshow", refreshV97);
-    document.addEventListener("visibilitychange", function () {
-        if (!document.hidden) refreshV97();
-    });
-})();
-</script>
-
-
-<script id="v98-standalone-mobile-weather-sun-fix">
+<script id="v100-ip-weather-sunrise-sunset">
 (function () {
     "use strict";
 
     const DEFAULT_PLACE = {
-        name: "Tianjin",
+        label: "Tianjin · China",
+        city: "Tianjin",
         country: "China",
         latitude: 39.3434,
         longitude: 117.3616
     };
 
-    const WEATHER_CACHE_KEY = "v98WeatherCache";
-    const CACHE_MAX_AGE = 3 * 60 * 60 * 1000;
+    const CACHE_KEY = "v100WeatherSunCache";
+    const CACHE_MAX_AGE = 2 * 60 * 60 * 1000;
 
-    function byId(id) {
+    function $(id) {
         return document.getElementById(id);
     }
 
-    function safeText(id, text) {
-        const el = byId(id);
-        if (el) el.textContent = text;
+    function setText(id, value) {
+        const el = $(id);
+        if (el) el.textContent = value;
     }
 
-    function setAllWeatherText(weatherText, sunText) {
+    function setAllWeather(weatherText, sunText) {
         ["p1", "p2"].forEach(function (page) {
-            safeText("weather-" + page, weatherText);
-            safeText("sun-" + page, sunText);
+            setText("weather-" + page, weatherText);
+            setText("sun-" + page, sunText);
         });
     }
 
-    function setLocationText(label) {
-        const finalLabel = String(label || "CURRENT LOCATION").toUpperCase();
+    function setLocation(label) {
+        const clean = label || DEFAULT_PLACE.label;
         document.querySelectorAll(".timezone-display").forEach(function (el) {
-            el.textContent = finalLabel;
+            el.textContent = clean.toUpperCase();
         });
         document.querySelectorAll(".clock-box").forEach(function (box) {
-            box.setAttribute("data-location", label || "Current Location");
+            box.setAttribute("data-location", clean);
         });
+        try {
+            localStorage.setItem("clockLocationDisplay", clean);
+        } catch (e) {}
     }
 
-    function weatherCodeToLabel(code) {
+    function weatherCodeToText(code) {
         const map = {
-            0: "Clear",
-            1: "Mainly Clear",
-            2: "Partly Cloudy",
-            3: "Cloudy",
-            45: "Fog",
-            48: "Fog",
-            51: "Light Drizzle",
-            53: "Drizzle",
-            55: "Heavy Drizzle",
-            61: "Light Rain",
-            63: "Rain",
-            65: "Heavy Rain",
-            71: "Light Snow",
-            73: "Snow",
-            75: "Heavy Snow",
-            80: "Rain Showers",
-            81: "Rain Showers",
-            82: "Heavy Showers",
-            95: "Thunderstorm",
-            96: "Thunderstorm",
-            99: "Thunderstorm"
+            0: "Clear", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Cloudy",
+            45: "Fog", 48: "Fog",
+            51: "Light Drizzle", 53: "Drizzle", 55: "Heavy Drizzle",
+            61: "Light Rain", 63: "Rain", 65: "Heavy Rain",
+            71: "Light Snow", 73: "Snow", 75: "Heavy Snow",
+            80: "Rain Showers", 81: "Rain Showers", 82: "Heavy Showers",
+            95: "Thunderstorm", 96: "Thunderstorm", 99: "Thunderstorm"
         };
         return map[Number(code)] || "Weather";
     }
 
-    function timeFromIso(isoText) {
-        if (!isoText) return "--:--";
-        const date = new Date(isoText);
-        if (Number.isNaN(date.getTime())) {
-            const match = String(isoText).match(/T(\d{2}:\d{2})/);
-            return match ? match[1] : "--:--";
+    function hhmm(iso) {
+        if (!iso) return "--:--";
+        const d = new Date(iso);
+        if (!Number.isNaN(d.getTime())) {
+            return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
         }
-        return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
+        const m = String(iso).match(/T(\d{2}:\d{2})/);
+        return m ? m[1] : "--:--";
     }
 
-    function saveCache(payload) {
-        try {
-            localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({
-                savedAt: Date.now(),
-                payload: payload
-            }));
-            localStorage.setItem("v81WeatherCache", JSON.stringify({
-                savedAt: Date.now(),
-                temperature: payload.temperature,
-                code: payload.weatherCode,
-                sunrise: payload.sunriseIso,
-                sunset: payload.sunsetIso,
-                sunriseText: payload.sunriseText,
-                sunsetText: payload.sunsetText
-            }));
-        } catch (e) {}
-    }
-
-    function readCache() {
-        try {
-            const cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || "null");
-            if (!cached || !cached.payload) return null;
-            if (Date.now() - Number(cached.savedAt || 0) > CACHE_MAX_AGE) return null;
-            return cached.payload;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function paintPayload(payload) {
-        if (!payload) return;
-        const placeLabel = payload.placeLabel || "Current Location";
-        const temp = Number.isFinite(Number(payload.temperature)) ? Math.round(Number(payload.temperature)) + "°C" : "--°C";
-        const weatherText = temp + " · " + weatherCodeToLabel(payload.weatherCode);
-        const sunText = "SUNRISE " + (payload.sunriseText || "--:--") + " · SUNSET " + (payload.sunsetText || "--:--");
-
-        setLocationText(placeLabel);
-        setAllWeatherText(weatherText, sunText);
-
-        try {
-            window.weatherInfo = {
-                temperature: payload.temperature,
-                code: payload.weatherCode,
-                sunrise: payload.sunriseIso ? new Date(payload.sunriseIso) : null,
-                sunset: payload.sunsetIso ? new Date(payload.sunsetIso) : null,
-                sunriseText: payload.sunriseText,
-                sunsetText: payload.sunsetText
-            };
-        } catch (e) {}
-
-        if (typeof window.updateClockAndColors === "function") {
-            try { window.updateClockAndColors(); } catch (e) {}
-        }
-    }
-
-    async function fetchJsonWithTimeout(url, timeoutMs) {
+    async function fetchJson(url, timeoutMs) {
         const controller = new AbortController();
-        const timer = setTimeout(function () { controller.abort(); }, timeoutMs || 10000);
+        const timer = setTimeout(function () {
+            controller.abort();
+        }, timeoutMs || 9000);
+
         try {
             const response = await fetch(url, {
                 cache: "no-store",
@@ -5607,195 +5439,181 @@ body.mobile-capture-1x1 .mini-reset-btn {
         }
     }
 
-    async function geocodeCity(city) {
-        const url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city || DEFAULT_PLACE.name) + "&count=1&language=en&format=json";
-        const data = await fetchJsonWithTimeout(url, 9000);
+    async function resolveByIp() {
+        const providers = [
+            async function () {
+                const data = await fetchJson("https://ipapi.co/json/", 8000);
+                if (!data || !data.latitude || !data.longitude) throw new Error("ipapi no coordinates");
+                return {
+                    label: [data.city, data.country_name].filter(Boolean).join(" · "),
+                    city: data.city || DEFAULT_PLACE.city,
+                    country: data.country_name || "",
+                    latitude: Number(data.latitude),
+                    longitude: Number(data.longitude)
+                };
+            },
+            async function () {
+                const data = await fetchJson("https://ipwho.is/", 8000);
+                if (!data || data.success === false || !data.latitude || !data.longitude) throw new Error("ipwho no coordinates");
+                return {
+                    label: [data.city, data.country].filter(Boolean).join(" · "),
+                    city: data.city || DEFAULT_PLACE.city,
+                    country: data.country || "",
+                    latitude: Number(data.latitude),
+                    longitude: Number(data.longitude)
+                };
+            }
+        ];
+
+        for (const provider of providers) {
+            try {
+                const place = await provider();
+                if (Number.isFinite(place.latitude) && Number.isFinite(place.longitude)) return place;
+            } catch (e) {}
+        }
+
+        throw new Error("IP location failed");
+    }
+
+    async function resolveBySavedCity() {
+        const city = localStorage.getItem("clockCityName") || DEFAULT_PLACE.city;
+        const url =
+            "https://geocoding-api.open-meteo.com/v1/search?name=" +
+            encodeURIComponent(city) +
+            "&count=1&language=en&format=json";
+        const data = await fetchJson(url, 8000);
         const result = data && data.results && data.results[0];
-        if (!result) throw new Error("City not found");
+        if (!result) throw new Error("Saved city not found");
         return {
-            name: result.name || city || DEFAULT_PLACE.name,
+            label: [result.name, result.country].filter(Boolean).join(" · "),
+            city: result.name || city,
             country: result.country || "",
-            latitude: result.latitude,
-            longitude: result.longitude
+            latitude: Number(result.latitude),
+            longitude: Number(result.longitude)
         };
     }
 
     async function resolvePlace() {
-        // On HTTPS mobile browsers, try real device location first.
-        if (window.isSecureContext && navigator.geolocation) {
-            try {
-                const position = await new Promise(function (resolve, reject) {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: false,
-                        timeout: 7000,
-                        maximumAge: 30 * 60 * 1000
-                    });
-                });
-
-                if (position && position.coords) {
-                    return {
-                        name: "Current Location",
-                        country: "",
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
-                    };
-                }
-            } catch (e) {
-                // Continue to saved city fallback.
-            }
-        }
-
-        const savedCity = localStorage.getItem("clockCityName") || DEFAULT_PLACE.name;
         try {
-            return await geocodeCity(savedCity);
-        } catch (e) {
-            return DEFAULT_PLACE;
-        }
+            return await resolveByIp();
+        } catch (e) {}
+
+        try {
+            return await resolveBySavedCity();
+        } catch (e) {}
+
+        return DEFAULT_PLACE;
     }
 
-    async function fetchWeatherForPlace(place) {
-        const latitude = Number(place.latitude);
-        const longitude = Number(place.longitude);
-        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("Invalid coordinates");
+    async function fetchWeather(place) {
+        const lat = Number(place.latitude);
+        const lon = Number(place.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("Bad coordinates");
 
         const url =
-            "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(latitude) +
-            "&longitude=" + encodeURIComponent(longitude) +
+            "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(lat) +
+            "&longitude=" + encodeURIComponent(lon) +
             "&current=temperature_2m,weather_code" +
             "&daily=sunrise,sunset" +
             "&timezone=auto&forecast_days=1";
 
-        const data = await fetchJsonWithTimeout(url, 10000);
-        const current = data && data.current ? data.current : {};
-        const daily = data && data.daily ? data.daily : {};
+        const data = await fetchJson(url, 10000);
+        const current = data.current || {};
+        const daily = data.daily || {};
         const sunriseIso = daily.sunrise && daily.sunrise[0] ? daily.sunrise[0] : null;
         const sunsetIso = daily.sunset && daily.sunset[0] ? daily.sunset[0] : null;
 
-        const placeLabel = place.country ? (place.name + " · " + place.country) : place.name;
-
         return {
-            placeLabel: placeLabel || "Current Location",
+            label: place.label || DEFAULT_PLACE.label,
             temperature: current.temperature_2m,
-            weatherCode: current.weather_code,
+            code: current.weather_code,
             sunriseIso: sunriseIso,
             sunsetIso: sunsetIso,
-            sunriseText: timeFromIso(sunriseIso),
-            sunsetText: timeFromIso(sunsetIso)
+            sunriseText: hhmm(sunriseIso),
+            sunsetText: hhmm(sunsetIso)
         };
     }
 
-    async function refreshWeather() {
-        const cached = readCache();
-        if (cached) paintPayload(cached);
+    function paint(payload) {
+        if (!payload) return;
 
-        setAllWeatherText("WEATHER LOADING", "SUNRISE --:-- · SUNSET --:--");
+        setLocation(payload.label);
+
+        const tempText = Number.isFinite(Number(payload.temperature))
+            ? Math.round(Number(payload.temperature)) + "°C"
+            : "--°C";
+
+        setAllWeather(
+            tempText + " · " + weatherCodeToText(payload.code),
+            "SUNRISE " + (payload.sunriseText || "--:--") + " · SUNSET " + (payload.sunsetText || "--:--")
+        );
+
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+                savedAt: Date.now(),
+                payload: payload
+            }));
+        } catch (e) {}
+    }
+
+    function readCache() {
+        try {
+            const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+            if (!cached || !cached.payload) return null;
+            if (Date.now() - Number(cached.savedAt || 0) > CACHE_MAX_AGE) return null;
+            return cached.payload;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function refresh() {
+        const cached = readCache();
+        if (cached) paint(cached);
+
+        setLocation(cached && cached.label ? cached.label : (localStorage.getItem("clockLocationDisplay") || "LOCATING"));
+        setAllWeather("WEATHER LOADING", "SUNRISE --:-- · SUNSET --:--");
 
         try {
             const place = await resolvePlace();
-            const payload = await fetchWeatherForPlace(place);
-            saveCache(payload);
-            paintPayload(payload);
+            setLocation(place.label || DEFAULT_PLACE.label);
+            const payload = await fetchWeather(place);
+            paint(payload);
         } catch (e) {
             if (cached) {
-                paintPayload(cached);
-                return;
+                paint(cached);
+            } else {
+                setLocation(DEFAULT_PLACE.label);
+                try {
+                    const payload = await fetchWeather(DEFAULT_PLACE);
+                    paint(payload);
+                } catch (fallbackError) {
+                    setAllWeather("WEATHER UNAVAILABLE", "SUNRISE --:-- · SUNSET --:--");
+                    console.warn("v100 weather failed", e, fallbackError);
+                }
             }
-            setLocationText((localStorage.getItem("clockLocationDisplay") || DEFAULT_PLACE.name + " · " + DEFAULT_PLACE.country));
-            setAllWeatherText("WEATHER UNAVAILABLE", "SUNRISE --:-- · SUNSET --:--");
-            console.warn("v98 weather refresh failed", e);
         }
     }
 
-    function scheduleRefresh() {
-        refreshWeather();
-        setTimeout(refreshWeather, 1500);
+    function start() {
+        refresh();
+        setTimeout(refresh, 1800);
+        setInterval(refresh, 30 * 60 * 1000);
     }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", scheduleRefresh);
+        document.addEventListener("DOMContentLoaded", start);
     } else {
-        scheduleRefresh();
+        start();
     }
 
-    window.addEventListener("load", scheduleRefresh);
-    window.addEventListener("pageshow", scheduleRefresh);
-    window.addEventListener("online", scheduleRefresh);
+    window.addEventListener("pageshow", refresh);
+    window.addEventListener("online", refresh);
     document.addEventListener("visibilitychange", function () {
-        if (!document.hidden) scheduleRefresh();
+        if (!document.hidden) refresh();
     });
-    setInterval(refreshWeather, 30 * 60 * 1000);
 
-    window.refreshMobileWeatherV98 = refreshWeather;
-})();
-</script>
-
-
-<script>
-(function () {
-    function isMobilePortrait() {
-        return window.matchMedia && window.matchMedia("(max-width: 980px)").matches && window.innerHeight >= window.innerWidth;
-    }
-
-    function applyMobileCaptureLock() {
-        if (!isMobilePortrait()) return;
-        document.documentElement.classList.add("mobile-capture-1x1");
-        document.body.classList.add("mobile-capture-1x1");
-    }
-
-    function removeMobileCaptureLock() {
-        document.documentElement.classList.remove("mobile-capture-1x1");
-        document.body.classList.remove("mobile-capture-1x1");
-    }
-
-    function setFallbackWeatherText() {
-        var weatherEl = document.querySelector(".weather-display");
-        var sunEl = document.querySelector(".sun-display");
-        var tzEl = document.querySelector(".timezone-display");
-
-        if (tzEl && (!tzEl.textContent || tzEl.textContent.trim() === "")) {
-            tzEl.textContent = "LOCAL TIME";
-        }
-        if (weatherEl && (!weatherEl.textContent || weatherEl.textContent.trim() === "" || /loading/i.test(weatherEl.textContent))) {
-            weatherEl.textContent = "WEATHER UNAVAILABLE";
-        }
-        if (sunEl && (!sunEl.textContent || sunEl.textContent.trim() === "" || /loading/i.test(sunEl.textContent))) {
-            sunEl.textContent = "SUNRISE / SUNSET UNAVAILABLE";
-        }
-    }
-
-    window.addEventListener("load", function () {
-        setTimeout(setFallbackWeatherText, 6500);
-
-        if (typeof window.html2canvas === "function" && !window.html2canvas.__v99MobileSquarePatched) {
-            var originalHtml2Canvas = window.html2canvas;
-            var patched = function (element, options) {
-                applyMobileCaptureLock();
-
-                options = options || {};
-                var target = element;
-                var isCaptureTarget = target && (
-                    target.id === "tracker-capture-area" ||
-                    target.id === "clock-capture-area" ||
-                    target.classList && (target.classList.contains("panel-box") || target.classList.contains("clock-box"))
-                );
-
-                if (isMobilePortrait() && isCaptureTarget) {
-                    options.width = 450;
-                    options.height = 450;
-                    options.windowWidth = 450;
-                    options.windowHeight = 450;
-                    options.scrollX = 0;
-                    options.scrollY = 0;
-                }
-
-                return originalHtml2Canvas.call(this, element, options).finally(function () {
-                    setTimeout(removeMobileCaptureLock, 250);
-                });
-            };
-            patched.__v99MobileSquarePatched = true;
-            window.html2canvas = patched;
-        }
-    });
+    window.refreshWeatherV100 = refresh;
 })();
 </script>
 
