@@ -5098,7 +5098,8 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 }
 
 </style>
-<script id="v100-ip-weather-sunrise-sunset">
+
+<script id="v103-stable-location-weather">
 (function () {
     "use strict";
 
@@ -5110,7 +5111,8 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
         longitude: 117.3616
     };
 
-    const CACHE_KEY = "v100WeatherSunCache";
+    const CACHE_KEY = "v103StableWeatherCache";
+    const PLACE_KEY = "v103StablePlaceCache";
     const CACHE_MAX_AGE = 2 * 60 * 60 * 1000;
 
     function $(id) {
@@ -5122,13 +5124,6 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
         if (el) el.textContent = value;
     }
 
-    function setAllWeather(weatherText, sunText) {
-        ["p1", "p2"].forEach(function (page) {
-            setText("weather-" + page, weatherText);
-            setText("sun-" + page, sunText);
-        });
-    }
-
     function setLocation(label) {
         const clean = label || DEFAULT_PLACE.label;
         document.querySelectorAll(".timezone-display").forEach(function (el) {
@@ -5137,16 +5132,20 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
         document.querySelectorAll(".clock-box").forEach(function (box) {
             box.setAttribute("data-location", clean);
         });
-        try {
-            localStorage.setItem("clockLocationDisplay", clean);
-        } catch (e) {}
+        try { localStorage.setItem("clockLocationDisplay", clean); } catch (e) {}
+    }
+
+    function setWeather(weatherText, sunText) {
+        ["p1", "p2"].forEach(function (page) {
+            setText("weather-" + page, weatherText);
+            setText("sun-" + page, sunText);
+        });
     }
 
     function weatherCodeToText(code) {
         const map = {
             0: "Clear", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Cloudy",
-            45: "Fog", 48: "Fog",
-            51: "Light Drizzle", 53: "Drizzle", 55: "Heavy Drizzle",
+            45: "Fog", 48: "Fog", 51: "Light Drizzle", 53: "Drizzle", 55: "Heavy Drizzle",
             61: "Light Rain", 63: "Rain", 65: "Heavy Rain",
             71: "Light Snow", 73: "Snow", 75: "Heavy Snow",
             80: "Rain Showers", 81: "Rain Showers", 82: "Heavy Showers",
@@ -5155,211 +5154,250 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
         return map[Number(code)] || "Weather";
     }
 
-    function hhmm(iso) {
-        if (!iso) return "--:--";
-        const d = new Date(iso);
+    function hhmm(value) {
+        if (!value) return "--:--";
+        const d = value instanceof Date ? value : new Date(value);
         if (!Number.isNaN(d.getTime())) {
             return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
         }
-        const m = String(iso).match(/T(\d{2}:\d{2})/);
+        const m = String(value).match(/T(\d{2}:\d{2})/);
         return m ? m[1] : "--:--";
     }
 
     async function fetchJson(url, timeoutMs) {
         const controller = new AbortController();
-        const timer = setTimeout(function () {
-            controller.abort();
-        }, timeoutMs || 9000);
-
+        const timer = setTimeout(function () { controller.abort(); }, timeoutMs || 9000);
         try {
-            const response = await fetch(url, {
-                cache: "no-store",
-                mode: "cors",
-                signal: controller.signal
-            });
-            if (!response.ok) throw new Error("HTTP " + response.status);
-            return await response.json();
+            const res = await fetch(url, { cache: "no-store", mode: "cors", signal: controller.signal });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return await res.json();
         } finally {
             clearTimeout(timer);
         }
     }
 
-    async function resolveByIp() {
-        const providers = [
-            async function () {
-                const data = await fetchJson("https://ipapi.co/json/", 8000);
-                if (!data || !data.latitude || !data.longitude) throw new Error("ipapi no coordinates");
-                return {
-                    label: [data.city, data.country_name].filter(Boolean).join(" · "),
-                    city: data.city || DEFAULT_PLACE.city,
-                    country: data.country_name || "",
-                    latitude: Number(data.latitude),
-                    longitude: Number(data.longitude)
-                };
-            },
-            async function () {
-                const data = await fetchJson("https://ipwho.is/", 8000);
-                if (!data || data.success === false || !data.latitude || !data.longitude) throw new Error("ipwho no coordinates");
-                return {
-                    label: [data.city, data.country].filter(Boolean).join(" · "),
-                    city: data.city || DEFAULT_PLACE.city,
-                    country: data.country || "",
-                    latitude: Number(data.latitude),
-                    longitude: Number(data.longitude)
-                };
-            }
-        ];
+    function readJson(key) {
+        try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (e) { return null; }
+    }
 
-        for (const provider of providers) {
+    function writeJson(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    }
+
+    function readFreshWeatherCache() {
+        const cached = readJson(CACHE_KEY);
+        if (!cached || !cached.payload || Date.now() - Number(cached.savedAt || 0) > CACHE_MAX_AGE) return null;
+        return cached.payload;
+    }
+
+    function paint(payload) {
+        if (!payload) return;
+        setLocation(payload.label || DEFAULT_PLACE.label);
+        const temp = Number.isFinite(Number(payload.temperature)) ? Math.round(Number(payload.temperature)) + "°C" : "--°C";
+        setWeather(
+            temp + " · " + weatherCodeToText(payload.code),
+            "SUNRISE " + (payload.sunriseText || "--:--") + " · SUNSET " + (payload.sunsetText || "--:--")
+        );
+    }
+
+    function browserGeolocation() {
+        return new Promise(function (resolve, reject) {
+            if (!navigator.geolocation) return reject(new Error("geolocation unavailable"));
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    const lat = Number(pos.coords.latitude);
+                    const lon = Number(pos.coords.longitude);
+                    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return reject(new Error("bad coordinates"));
+                    resolve({
+                        label: "Current Location",
+                        city: "Current Location",
+                        country: "",
+                        latitude: lat,
+                        longitude: lon
+                    });
+                },
+                reject,
+                { enableHighAccuracy: false, timeout: 6000, maximumAge: 30 * 60 * 1000 }
+            );
+        });
+    }
+
+    async function reverseLabel(place) {
+        try {
+            const url = "https://geocoding-api.open-meteo.com/v1/search?name=" +
+                encodeURIComponent(place.city || "") + "&count=1&language=en&format=json";
+            if (!place.city || place.city === "Current Location") return place;
+            const data = await fetchJson(url, 5000);
+            const result = data && data.results && data.results[0];
+            if (result) {
+                place.label = [result.name, result.country].filter(Boolean).join(" · ");
+            }
+        } catch (e) {}
+        return place;
+    }
+
+    async function ipLocation() {
+        const providers = [
+            "https://ipwho.is/",
+            "https://ipapi.co/json/"
+        ];
+        for (const url of providers) {
             try {
-                const place = await provider();
-                if (Number.isFinite(place.latitude) && Number.isFinite(place.longitude)) return place;
+                const data = await fetchJson(url, 7000);
+                const lat = Number(data.latitude);
+                const lon = Number(data.longitude);
+                if (!Number.isFinite(lat) || !Number.isFinite(lon) || data.success === false) continue;
+                return {
+                    label: [data.city, data.country || data.country_name].filter(Boolean).join(" · ") || DEFAULT_PLACE.label,
+                    city: data.city || "",
+                    country: data.country || data.country_name || "",
+                    latitude: lat,
+                    longitude: lon
+                };
             } catch (e) {}
         }
-
         throw new Error("IP location failed");
     }
 
-    async function resolveBySavedCity() {
-        const city = localStorage.getItem("clockCityName") || DEFAULT_PLACE.city;
-        const url =
-            "https://geocoding-api.open-meteo.com/v1/search?name=" +
-            encodeURIComponent(city) +
-            "&count=1&language=en&format=json";
-        const data = await fetchJson(url, 8000);
-        const result = data && data.results && data.results[0];
-        if (!result) throw new Error("Saved city not found");
-        return {
-            label: [result.name, result.country].filter(Boolean).join(" · "),
-            city: result.name || city,
-            country: result.country || "",
-            latitude: Number(result.latitude),
-            longitude: Number(result.longitude)
-        };
-    }
-
     async function resolvePlace() {
+        const saved = readJson(PLACE_KEY);
+        if (saved && Number.isFinite(Number(saved.latitude)) && Number.isFinite(Number(saved.longitude))) {
+            return saved;
+        }
+
         try {
-            return await resolveByIp();
+            const place = await browserGeolocation();
+            writeJson(PLACE_KEY, place);
+            return place;
         } catch (e) {}
 
         try {
-            return await resolveBySavedCity();
+            const place = await ipLocation();
+            writeJson(PLACE_KEY, place);
+            return place;
         } catch (e) {}
 
         return DEFAULT_PLACE;
     }
 
-    async function fetchWeather(place) {
-        const lat = Number(place.latitude);
-        const lon = Number(place.longitude);
-        if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("Bad coordinates");
-
-        const url =
-            "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(lat) +
-            "&longitude=" + encodeURIComponent(lon) +
+    async function fetchWeatherModern(place) {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(place.latitude) +
+            "&longitude=" + encodeURIComponent(place.longitude) +
             "&current=temperature_2m,weather_code" +
-            "&daily=sunrise,sunset" +
-            "&timezone=auto&forecast_days=1";
-
+            "&daily=sunrise,sunset&timezone=auto&forecast_days=1";
         const data = await fetchJson(url, 10000);
-        const current = data.current || {};
-        const daily = data.daily || {};
-        const sunriseIso = daily.sunrise && daily.sunrise[0] ? daily.sunrise[0] : null;
-        const sunsetIso = daily.sunset && daily.sunset[0] ? daily.sunset[0] : null;
-
         return {
             label: place.label || DEFAULT_PLACE.label,
-            temperature: current.temperature_2m,
-            code: current.weather_code,
-            sunriseIso: sunriseIso,
-            sunsetIso: sunsetIso,
-            sunriseText: hhmm(sunriseIso),
-            sunsetText: hhmm(sunsetIso)
+            temperature: data && data.current && data.current.temperature_2m,
+            code: data && data.current && data.current.weather_code,
+            sunriseText: hhmm(data && data.daily && data.daily.sunrise && data.daily.sunrise[0]),
+            sunsetText: hhmm(data && data.daily && data.daily.sunset && data.daily.sunset[0])
         };
     }
 
-    function paint(payload) {
-        if (!payload) return;
-
-        setLocation(payload.label);
-
-        const tempText = Number.isFinite(Number(payload.temperature))
-            ? Math.round(Number(payload.temperature)) + "°C"
-            : "--°C";
-
-        setAllWeather(
-            tempText + " · " + weatherCodeToText(payload.code),
-            "SUNRISE " + (payload.sunriseText || "--:--") + " · SUNSET " + (payload.sunsetText || "--:--")
-        );
-
-        try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({
-                savedAt: Date.now(),
-                payload: payload
-            }));
-        } catch (e) {}
+    async function fetchWeatherLegacy(place) {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(place.latitude) +
+            "&longitude=" + encodeURIComponent(place.longitude) +
+            "&current_weather=true&daily=sunrise,sunset&timezone=auto&forecast_days=1";
+        const data = await fetchJson(url, 10000);
+        return {
+            label: place.label || DEFAULT_PLACE.label,
+            temperature: data && data.current_weather && data.current_weather.temperature,
+            code: data && data.current_weather && data.current_weather.weathercode,
+            sunriseText: hhmm(data && data.daily && data.daily.sunrise && data.daily.sunrise[0]),
+            sunsetText: hhmm(data && data.daily && data.daily.sunset && data.daily.sunset[0])
+        };
     }
 
-    function readCache() {
-        try {
-            const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-            if (!cached || !cached.payload) return null;
-            if (Date.now() - Number(cached.savedAt || 0) > CACHE_MAX_AGE) return null;
-            return cached.payload;
-        } catch (e) {
-            return null;
-        }
+    async function fetchWeather(place) {
+        try { return await fetchWeatherModern(place); } catch (e) {}
+        return await fetchWeatherLegacy(place);
     }
 
-    async function refresh() {
-        const cached = readCache();
+    async function refreshStableWeather() {
+        const cached = readFreshWeatherCache();
         if (cached) paint(cached);
-
-        setLocation(cached && cached.label ? cached.label : (localStorage.getItem("clockLocationDisplay") || "LOCATING"));
-        setAllWeather("WEATHER LOADING", "SUNRISE --:-- · SUNSET --:--");
+        else {
+            setLocation(localStorage.getItem("clockLocationDisplay") || DEFAULT_PLACE.label);
+            setWeather("WEATHER LOADING", "SUNRISE --:-- · SUNSET --:--");
+        }
 
         try {
             const place = await resolvePlace();
             setLocation(place.label || DEFAULT_PLACE.label);
             const payload = await fetchWeather(place);
+            payload.label = place.label || payload.label || DEFAULT_PLACE.label;
+            writeJson(CACHE_KEY, { savedAt: Date.now(), payload: payload });
             paint(payload);
         } catch (e) {
-            if (cached) {
-                paint(cached);
-            } else {
-                setLocation(DEFAULT_PLACE.label);
-                try {
-                    const payload = await fetchWeather(DEFAULT_PLACE);
-                    paint(payload);
-                } catch (fallbackError) {
-                    setAllWeather("WEATHER UNAVAILABLE", "SUNRISE --:-- · SUNSET --:--");
-                    console.warn("v100 weather failed", e, fallbackError);
+            try {
+                const payload = await fetchWeather(DEFAULT_PLACE);
+                payload.label = DEFAULT_PLACE.label;
+                writeJson(CACHE_KEY, { savedAt: Date.now(), payload: payload });
+                paint(payload);
+            } catch (fallbackError) {
+                if (cached) paint(cached);
+                else {
+                    setLocation(DEFAULT_PLACE.label);
+                    setWeather("WEATHER UNAVAILABLE", "SUNRISE --:-- · SUNSET --:--");
+                    console.warn("Stable weather failed", e, fallbackError);
                 }
             }
         }
     }
 
+    function bindManualLocationEdit() {
+        document.querySelectorAll(".clock-box, .timezone-display").forEach(function (el) {
+            el.style.cursor = "pointer";
+            el.addEventListener("click", async function () {
+                const input = prompt("Enter city name for weather / sunrise / sunset", localStorage.getItem("clockCityName") || DEFAULT_PLACE.city);
+                if (input === null) return;
+                const city = String(input).trim();
+                if (!city) return;
+                try {
+                    const url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=1&language=en&format=json";
+                    const data = await fetchJson(url, 8000);
+                    const result = data && data.results && data.results[0];
+                    if (!result) throw new Error("city not found");
+                    const place = {
+                        label: [result.name, result.country].filter(Boolean).join(" · "),
+                        city: result.name || city,
+                        country: result.country || "",
+                        latitude: Number(result.latitude),
+                        longitude: Number(result.longitude)
+                    };
+                    localStorage.setItem("clockCityName", place.city);
+                    writeJson(PLACE_KEY, place);
+                    setWeather("WEATHER LOADING", "SUNRISE --:-- · SUNSET --:--");
+                    const payload = await fetchWeather(place);
+                    payload.label = place.label;
+                    writeJson(CACHE_KEY, { savedAt: Date.now(), payload: payload });
+                    paint(payload);
+                } catch (e) {
+                    alert("City not found or weather service unavailable. Try: Tianjin, Tokyo, Singapore.");
+                }
+            });
+        });
+    }
+
     function start() {
-        refresh();
-        setTimeout(refresh, 1800);
-        setInterval(refresh, 30 * 60 * 1000);
+        bindManualLocationEdit();
+        refreshStableWeather();
+        setTimeout(refreshStableWeather, 2200);
+        setInterval(refreshStableWeather, 30 * 60 * 1000);
     }
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", start);
-    } else {
-        start();
-    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+    else start();
 
-    window.addEventListener("pageshow", refresh);
-    window.addEventListener("online", refresh);
+    window.addEventListener("pageshow", refreshStableWeather);
+    window.addEventListener("online", refreshStableWeather);
     document.addEventListener("visibilitychange", function () {
-        if (!document.hidden) refresh();
+        if (!document.hidden) refreshStableWeather();
     });
-
-    window.refreshWeatherV100 = refresh;
+    window.refreshStableWeather = refreshStableWeather;
 })();
 </script>
+
 </body>
 </html>
