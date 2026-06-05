@@ -5368,5 +5368,276 @@ body.dashboard-layout-capture .mini-reset-btn,
 })();
 </script>
 
+
+<script id="v98-standalone-mobile-weather-sun-fix">
+(function () {
+    "use strict";
+
+    const DEFAULT_PLACE = {
+        name: "Tianjin",
+        country: "China",
+        latitude: 39.3434,
+        longitude: 117.3616
+    };
+
+    const WEATHER_CACHE_KEY = "v98WeatherCache";
+    const CACHE_MAX_AGE = 3 * 60 * 60 * 1000;
+
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+    function safeText(id, text) {
+        const el = byId(id);
+        if (el) el.textContent = text;
+    }
+
+    function setAllWeatherText(weatherText, sunText) {
+        ["p1", "p2"].forEach(function (page) {
+            safeText("weather-" + page, weatherText);
+            safeText("sun-" + page, sunText);
+        });
+    }
+
+    function setLocationText(label) {
+        const finalLabel = String(label || "CURRENT LOCATION").toUpperCase();
+        document.querySelectorAll(".timezone-display").forEach(function (el) {
+            el.textContent = finalLabel;
+        });
+        document.querySelectorAll(".clock-box").forEach(function (box) {
+            box.setAttribute("data-location", label || "Current Location");
+        });
+    }
+
+    function weatherCodeToLabel(code) {
+        const map = {
+            0: "Clear",
+            1: "Mainly Clear",
+            2: "Partly Cloudy",
+            3: "Cloudy",
+            45: "Fog",
+            48: "Fog",
+            51: "Light Drizzle",
+            53: "Drizzle",
+            55: "Heavy Drizzle",
+            61: "Light Rain",
+            63: "Rain",
+            65: "Heavy Rain",
+            71: "Light Snow",
+            73: "Snow",
+            75: "Heavy Snow",
+            80: "Rain Showers",
+            81: "Rain Showers",
+            82: "Heavy Showers",
+            95: "Thunderstorm",
+            96: "Thunderstorm",
+            99: "Thunderstorm"
+        };
+        return map[Number(code)] || "Weather";
+    }
+
+    function timeFromIso(isoText) {
+        if (!isoText) return "--:--";
+        const date = new Date(isoText);
+        if (Number.isNaN(date.getTime())) {
+            const match = String(isoText).match(/T(\d{2}:\d{2})/);
+            return match ? match[1] : "--:--";
+        }
+        return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
+    }
+
+    function saveCache(payload) {
+        try {
+            localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({
+                savedAt: Date.now(),
+                payload: payload
+            }));
+            localStorage.setItem("v81WeatherCache", JSON.stringify({
+                savedAt: Date.now(),
+                temperature: payload.temperature,
+                code: payload.weatherCode,
+                sunrise: payload.sunriseIso,
+                sunset: payload.sunsetIso,
+                sunriseText: payload.sunriseText,
+                sunsetText: payload.sunsetText
+            }));
+        } catch (e) {}
+    }
+
+    function readCache() {
+        try {
+            const cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || "null");
+            if (!cached || !cached.payload) return null;
+            if (Date.now() - Number(cached.savedAt || 0) > CACHE_MAX_AGE) return null;
+            return cached.payload;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function paintPayload(payload) {
+        if (!payload) return;
+        const placeLabel = payload.placeLabel || "Current Location";
+        const temp = Number.isFinite(Number(payload.temperature)) ? Math.round(Number(payload.temperature)) + "°C" : "--°C";
+        const weatherText = temp + " · " + weatherCodeToLabel(payload.weatherCode);
+        const sunText = "SUNRISE " + (payload.sunriseText || "--:--") + " · SUNSET " + (payload.sunsetText || "--:--");
+
+        setLocationText(placeLabel);
+        setAllWeatherText(weatherText, sunText);
+
+        try {
+            window.weatherInfo = {
+                temperature: payload.temperature,
+                code: payload.weatherCode,
+                sunrise: payload.sunriseIso ? new Date(payload.sunriseIso) : null,
+                sunset: payload.sunsetIso ? new Date(payload.sunsetIso) : null,
+                sunriseText: payload.sunriseText,
+                sunsetText: payload.sunsetText
+            };
+        } catch (e) {}
+
+        if (typeof window.updateClockAndColors === "function") {
+            try { window.updateClockAndColors(); } catch (e) {}
+        }
+    }
+
+    async function fetchJsonWithTimeout(url, timeoutMs) {
+        const controller = new AbortController();
+        const timer = setTimeout(function () { controller.abort(); }, timeoutMs || 10000);
+        try {
+            const response = await fetch(url, {
+                cache: "no-store",
+                mode: "cors",
+                signal: controller.signal
+            });
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return await response.json();
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    async function geocodeCity(city) {
+        const url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city || DEFAULT_PLACE.name) + "&count=1&language=en&format=json";
+        const data = await fetchJsonWithTimeout(url, 9000);
+        const result = data && data.results && data.results[0];
+        if (!result) throw new Error("City not found");
+        return {
+            name: result.name || city || DEFAULT_PLACE.name,
+            country: result.country || "",
+            latitude: result.latitude,
+            longitude: result.longitude
+        };
+    }
+
+    async function resolvePlace() {
+        // On HTTPS mobile browsers, try real device location first.
+        if (window.isSecureContext && navigator.geolocation) {
+            try {
+                const position = await new Promise(function (resolve, reject) {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: false,
+                        timeout: 7000,
+                        maximumAge: 30 * 60 * 1000
+                    });
+                });
+
+                if (position && position.coords) {
+                    return {
+                        name: "Current Location",
+                        country: "",
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                }
+            } catch (e) {
+                // Continue to saved city fallback.
+            }
+        }
+
+        const savedCity = localStorage.getItem("clockCityName") || DEFAULT_PLACE.name;
+        try {
+            return await geocodeCity(savedCity);
+        } catch (e) {
+            return DEFAULT_PLACE;
+        }
+    }
+
+    async function fetchWeatherForPlace(place) {
+        const latitude = Number(place.latitude);
+        const longitude = Number(place.longitude);
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("Invalid coordinates");
+
+        const url =
+            "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(latitude) +
+            "&longitude=" + encodeURIComponent(longitude) +
+            "&current=temperature_2m,weather_code" +
+            "&daily=sunrise,sunset" +
+            "&timezone=auto&forecast_days=1";
+
+        const data = await fetchJsonWithTimeout(url, 10000);
+        const current = data && data.current ? data.current : {};
+        const daily = data && data.daily ? data.daily : {};
+        const sunriseIso = daily.sunrise && daily.sunrise[0] ? daily.sunrise[0] : null;
+        const sunsetIso = daily.sunset && daily.sunset[0] ? daily.sunset[0] : null;
+
+        const placeLabel = place.country ? (place.name + " · " + place.country) : place.name;
+
+        return {
+            placeLabel: placeLabel || "Current Location",
+            temperature: current.temperature_2m,
+            weatherCode: current.weather_code,
+            sunriseIso: sunriseIso,
+            sunsetIso: sunsetIso,
+            sunriseText: timeFromIso(sunriseIso),
+            sunsetText: timeFromIso(sunsetIso)
+        };
+    }
+
+    async function refreshWeather() {
+        const cached = readCache();
+        if (cached) paintPayload(cached);
+
+        setAllWeatherText("WEATHER LOADING", "SUNRISE --:-- · SUNSET --:--");
+
+        try {
+            const place = await resolvePlace();
+            const payload = await fetchWeatherForPlace(place);
+            saveCache(payload);
+            paintPayload(payload);
+        } catch (e) {
+            if (cached) {
+                paintPayload(cached);
+                return;
+            }
+            setLocationText((localStorage.getItem("clockLocationDisplay") || DEFAULT_PLACE.name + " · " + DEFAULT_PLACE.country));
+            setAllWeatherText("WEATHER UNAVAILABLE", "SUNRISE --:-- · SUNSET --:--");
+            console.warn("v98 weather refresh failed", e);
+        }
+    }
+
+    function scheduleRefresh() {
+        refreshWeather();
+        setTimeout(refreshWeather, 1500);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", scheduleRefresh);
+    } else {
+        scheduleRefresh();
+    }
+
+    window.addEventListener("load", scheduleRefresh);
+    window.addEventListener("pageshow", scheduleRefresh);
+    window.addEventListener("online", scheduleRefresh);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) scheduleRefresh();
+    });
+    setInterval(refreshWeather, 30 * 60 * 1000);
+
+    window.refreshMobileWeatherV98 = refreshWeather;
+})();
+</script>
+
 </body>
 </html>
