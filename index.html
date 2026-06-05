@@ -5292,6 +5292,96 @@ body.dashboard-layout-capture .mini-reset-btn,
     pointer-events: auto !important;
 }
 
+
+/* v99: mobile portrait capture must stay true 1x1 */
+html.mobile-capture-1x1,
+body.mobile-capture-1x1 {
+    width: 100% !important;
+    min-height: 100% !important;
+    overflow: hidden !important;
+}
+
+body.mobile-capture-1x1 .capture-wrapper,
+body.mobile-capture-1x1 .clock-box,
+body.mobile-capture-1x1 .panel-box,
+body.mobile-capture-1x1 #tracker-capture-area,
+body.mobile-capture-1x1 #clock-capture-area {
+    width: 474px !important;
+    height: 474px !important;
+    min-width: 474px !important;
+    min-height: 474px !important;
+    max-width: 474px !important;
+    max-height: 474px !important;
+    aspect-ratio: 1 / 1 !important;
+    flex: 0 0 474px !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+}
+
+body.mobile-capture-1x1 .clock-box,
+body.mobile-capture-1x1 .panel-box {
+    width: 450px !important;
+    height: 450px !important;
+    min-width: 450px !important;
+    min-height: 450px !important;
+    max-width: 450px !important;
+    max-height: 450px !important;
+}
+
+body.mobile-capture-1x1 .page-view,
+body.mobile-capture-1x1 .page-view.active,
+body.mobile-capture-1x1 .main-container,
+body.mobile-capture-1x1 .control-block {
+    align-items: center !important;
+    justify-content: center !important;
+    flex-direction: row !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+body.mobile-capture-1x1 .btn-group,
+body.mobile-capture-1x1 .page-switcher,
+body.mobile-capture-1x1 #desktop-capture-dot,
+body.mobile-capture-1x1 .mini-edit-btn,
+body.mobile-capture-1x1 .mini-reset-btn {
+    display: none !important;
+}
+
+/* html2canvas clone: force square even if viewport is portrait */
+.capture-mode,
+.capture-mode#tracker-capture-area,
+.capture-mode#clock-capture-area,
+#tracker-capture-area-capture-clone,
+#clock-capture-area-capture-clone {
+    width: 450px !important;
+    height: 450px !important;
+    min-width: 450px !important;
+    min-height: 450px !important;
+    max-width: 450px !important;
+    max-height: 450px !important;
+    aspect-ratio: 1 / 1 !important;
+    overflow: hidden !important;
+}
+
+.capture-mode .mini-edit-btn,
+.capture-mode .mini-reset-btn,
+#tracker-capture-area-capture-clone .mini-edit-btn,
+#tracker-capture-area-capture-clone .mini-reset-btn,
+#clock-capture-area-capture-clone .mini-edit-btn,
+#clock-capture-area-capture-clone .mini-reset-btn {
+    display: none !important;
+}
+
+/* v99: do not leave weather/sun blank on mobile if geolocation fails */
+.weather-display:empty::before {
+    content: "WEATHER LOADING";
+}
+.sun-display:empty::before {
+    content: "SUNRISE / SUNSET";
+}
+
 </style>
 
 
@@ -5636,6 +5726,76 @@ body.dashboard-layout-capture .mini-reset-btn,
     setInterval(refreshWeather, 30 * 60 * 1000);
 
     window.refreshMobileWeatherV98 = refreshWeather;
+})();
+</script>
+
+
+<script>
+(function () {
+    function isMobilePortrait() {
+        return window.matchMedia && window.matchMedia("(max-width: 980px)").matches && window.innerHeight >= window.innerWidth;
+    }
+
+    function applyMobileCaptureLock() {
+        if (!isMobilePortrait()) return;
+        document.documentElement.classList.add("mobile-capture-1x1");
+        document.body.classList.add("mobile-capture-1x1");
+    }
+
+    function removeMobileCaptureLock() {
+        document.documentElement.classList.remove("mobile-capture-1x1");
+        document.body.classList.remove("mobile-capture-1x1");
+    }
+
+    function setFallbackWeatherText() {
+        var weatherEl = document.querySelector(".weather-display");
+        var sunEl = document.querySelector(".sun-display");
+        var tzEl = document.querySelector(".timezone-display");
+
+        if (tzEl && (!tzEl.textContent || tzEl.textContent.trim() === "")) {
+            tzEl.textContent = "LOCAL TIME";
+        }
+        if (weatherEl && (!weatherEl.textContent || weatherEl.textContent.trim() === "" || /loading/i.test(weatherEl.textContent))) {
+            weatherEl.textContent = "WEATHER UNAVAILABLE";
+        }
+        if (sunEl && (!sunEl.textContent || sunEl.textContent.trim() === "" || /loading/i.test(sunEl.textContent))) {
+            sunEl.textContent = "SUNRISE / SUNSET UNAVAILABLE";
+        }
+    }
+
+    window.addEventListener("load", function () {
+        setTimeout(setFallbackWeatherText, 6500);
+
+        if (typeof window.html2canvas === "function" && !window.html2canvas.__v99MobileSquarePatched) {
+            var originalHtml2Canvas = window.html2canvas;
+            var patched = function (element, options) {
+                applyMobileCaptureLock();
+
+                options = options || {};
+                var target = element;
+                var isCaptureTarget = target && (
+                    target.id === "tracker-capture-area" ||
+                    target.id === "clock-capture-area" ||
+                    target.classList && (target.classList.contains("panel-box") || target.classList.contains("clock-box"))
+                );
+
+                if (isMobilePortrait() && isCaptureTarget) {
+                    options.width = 450;
+                    options.height = 450;
+                    options.windowWidth = 450;
+                    options.windowHeight = 450;
+                    options.scrollX = 0;
+                    options.scrollY = 0;
+                }
+
+                return originalHtml2Canvas.call(this, element, options).finally(function () {
+                    setTimeout(removeMobileCaptureLock, 250);
+                });
+            };
+            patched.__v99MobileSquarePatched = true;
+            window.html2canvas = patched;
+        }
+    });
 })();
 </script>
 
