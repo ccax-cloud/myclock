@@ -5261,41 +5261,112 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     align-self: center !important;
 }
 
-</style>
-/* v96: hide edit/reset icons during capture */
-body.capture-mode .mini-edit-btn,
-body.capture-mode .mini-reset-btn {
+
+
+/* v97: clean capture/edit icon behavior */
+.capture-mode .mini-edit-btn,
+.capture-mode .mini-reset-btn,
+body.desktop-capture-running .mini-edit-btn,
+body.desktop-capture-running .mini-reset-btn,
+body.dashboard-layout-capture .mini-edit-btn,
+body.dashboard-layout-capture .mini-reset-btn,
+#tracker-capture-area-capture-clone .mini-edit-btn,
+#tracker-capture-area-capture-clone .mini-reset-btn {
     display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
-/* Mobile fallback for geolocation/weather */
-<script>
-const defaultLat = 39.9042; // Beijing fallback
-const defaultLon = 116.4074; // Beijing fallback
-
-function fetchWeather(lat, lon){
-    // original weather fetch logic
-    console.log('Fetching weather for', lat, lon);
-    // TODO: insert your API call here if needed
+/* v97: keep edit/reset icons hover-only; do not force them visible on touch screens */
+@media (hover: none), (pointer: coarse) {
+    .today-card .mini-reset-btn,
+    .clickable-time-card .mini-edit-btn {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 }
 
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-        function(pos){
-            fetchWeather(pos.coords.latitude, pos.coords.longitude);
-        },
-        function(err){
-            console.warn('Geolocation failed, using default location', err);
-            fetchWeather(defaultLat, defaultLon);
-        },
-        {timeout:5000}
-    );
-} else {
-    console.warn('No geolocation support, using default location');
-    fetchWeather(defaultLat, defaultLon);
+.today-card:hover .mini-reset-btn,
+.clickable-time-card:hover .mini-edit-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
 }
+
+</style>
+
+
+
+<script id="v97-mobile-location-weather-display-fix">
+(function () {
+    function getSavedLocationLabel() {
+        const display = localStorage.getItem("clockLocationDisplay");
+        const city = localStorage.getItem("clockCityName") || "Tianjin";
+        const country = localStorage.getItem("clockCountryName") || "China";
+        return display || (city && country ? `${city} · ${country}` : city || "Tianjin · China");
+    }
+
+    function paintLocationText() {
+        const label = getSavedLocationLabel();
+        document.querySelectorAll(".clock-box").forEach(function (box) {
+            box.setAttribute("data-location", label);
+        });
+        document.querySelectorAll(".timezone-display").forEach(function (el) {
+            el.textContent = String(label || "Current Location").toUpperCase();
+        });
+    }
+
+    function repaintWeatherIfCached() {
+        try {
+            const cached = JSON.parse(localStorage.getItem("v81WeatherCache") || "null");
+            if (!cached || Date.now() - cached.savedAt > 6 * 60 * 60 * 1000) return;
+            const codeMap = {
+                0: "Clear", 1: "Mainly Clear", 2: "Partly Cloudy", 3: "Cloudy",
+                45: "Fog", 48: "Fog", 51: "Drizzle", 53: "Drizzle", 55: "Drizzle",
+                61: "Rain", 63: "Rain", 65: "Heavy Rain", 80: "Showers", 81: "Showers", 82: "Heavy Showers", 95: "Thunderstorm"
+            };
+            const weatherText = `${Number.isFinite(cached.temperature) ? Math.round(cached.temperature) + "°C" : "--°C"} · ${codeMap[cached.code] || "Weather"}`;
+            const sunText = `SUNRISE ${cached.sunriseText || "--:--"} · SUNSET ${cached.sunsetText || "--:--"}`;
+            ["p1", "p2"].forEach(function (page) {
+                const weatherEl = document.getElementById(`weather-${page}`);
+                const sunEl = document.getElementById(`sun-${page}`);
+                if (weatherEl) weatherEl.textContent = weatherText;
+                if (sunEl) sunEl.textContent = sunText;
+            });
+        } catch (e) {}
+    }
+
+    const originalUpdateClockLocationLabel = window.updateClockLocationLabel;
+    if (typeof originalUpdateClockLocationLabel === "function" && !originalUpdateClockLocationLabel.__v97Wrapped) {
+        const wrapped = function () {
+            const result = originalUpdateClockLocationLabel.apply(this, arguments);
+            paintLocationText();
+            return result;
+        };
+        wrapped.__v97Wrapped = true;
+        window.updateClockLocationLabel = wrapped;
+        try { updateClockLocationLabel = wrapped; } catch (e) {}
+    }
+
+    function refreshV97() {
+        paintLocationText();
+        repaintWeatherIfCached();
+        if (typeof ensureMobileWeather === "function") {
+            try { ensureMobileWeather(); } catch (e) {}
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", refreshV97);
+    } else {
+        refreshV97();
+    }
+    window.addEventListener("load", refreshV97);
+    window.addEventListener("pageshow", refreshV97);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) refreshV97();
+    });
+})();
 </script>
-
 
 </body>
 </html>
