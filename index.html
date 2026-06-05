@@ -4114,7 +4114,7 @@ body {
                     await fetchWeatherByLocation(place.latitude, place.longitude);
                 } catch (e) {
                     console.error(e);
-                    alert("City not found. Please try another city name, e.g. Tianjin, Tokyo, Singapore.");
+                    alert("Using built-in city coordinates. Try: Tianjin, Tokyo, Narita, Singapore.");
                 }
             }
 
@@ -5374,7 +5374,7 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
                     writeJson(CACHE_KEY, { savedAt: Date.now(), payload: payload });
                     paint(payload);
                 } catch (e) {
-                    alert("City not found or weather service unavailable. Try: Tianjin, Tokyo, Singapore.");
+                    alert("Using built-in city coordinates. Try: Tianjin, Tokyo, Narita, Singapore.");
                 }
             });
         });
@@ -5398,6 +5398,202 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     window.refreshStableWeather = refreshStableWeather;
 })();
 </script>
+
+
+<script id="mobile-weather-no-geocode-v106">
+(function () {
+    "use strict";
+
+    const CITY_DB = {
+        "tianjin": { city: "Tianjin", country: "China", label: "Tianjin · China", latitude: 39.3434, longitude: 117.3616, timezone: "Asia/Shanghai" },
+        "天津": { city: "Tianjin", country: "China", label: "Tianjin · China", latitude: 39.3434, longitude: 117.3616, timezone: "Asia/Shanghai" },
+        "tokyo": { city: "Tokyo", country: "Japan", label: "Tokyo · Japan", latitude: 35.6762, longitude: 139.6503, timezone: "Asia/Tokyo" },
+        "東京": { city: "Tokyo", country: "Japan", label: "Tokyo · Japan", latitude: 35.6762, longitude: 139.6503, timezone: "Asia/Tokyo" },
+        "narita": { city: "Narita", country: "Japan", label: "Narita · Japan", latitude: 35.7767, longitude: 140.3189, timezone: "Asia/Tokyo" },
+        "成田": { city: "Narita", country: "Japan", label: "Narita · Japan", latitude: 35.7767, longitude: 140.3189, timezone: "Asia/Tokyo" },
+        "singapore": { city: "Singapore", country: "Singapore", label: "Singapore", latitude: 1.3521, longitude: 103.8198, timezone: "Asia/Singapore" },
+        "beijing": { city: "Beijing", country: "China", label: "Beijing · China", latitude: 39.9042, longitude: 116.4074, timezone: "Asia/Shanghai" },
+        "北京": { city: "Beijing", country: "China", label: "Beijing · China", latitude: 39.9042, longitude: 116.4074, timezone: "Asia/Shanghai" },
+        "shanghai": { city: "Shanghai", country: "China", label: "Shanghai · China", latitude: 31.2304, longitude: 121.4737, timezone: "Asia/Shanghai" },
+        "上海": { city: "Shanghai", country: "China", label: "Shanghai · China", latitude: 31.2304, longitude: 121.4737, timezone: "Asia/Shanghai" }
+    };
+
+    const DEFAULT_PLACE = CITY_DB["tianjin"];
+    const PLACE_KEY = "clockPlaceNoGeocodeV106";
+    const WEATHER_CACHE_KEY = "clockWeatherNoGeocodeV106";
+
+    function readJson(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+    function writeJson(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+
+    function getSavedPlace() {
+        const saved = readJson(PLACE_KEY);
+        if (saved && Number.isFinite(Number(saved.latitude)) && Number.isFinite(Number(saved.longitude))) return saved;
+        const cityName = String(localStorage.getItem("clockCityName") || "tianjin").trim().toLowerCase();
+        return CITY_DB[cityName] || DEFAULT_PLACE;
+    }
+
+    function savePlace(place) {
+        localStorage.setItem("clockCityName", place.city);
+        localStorage.setItem("clockCountryName", place.country || "");
+        localStorage.setItem("clockLocationDisplay", place.label);
+        writeJson(PLACE_KEY, place);
+    }
+
+    function setText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
+    function setWeatherText(weatherText, sunText) {
+        ["p1", "p2"].forEach(function (page) {
+            setText("weather-" + page, weatherText);
+            setText("sun-" + page, sunText);
+        });
+    }
+    function setLocationLabel(label) {
+        document.querySelectorAll(".clock-box").forEach(function (box) {
+            box.setAttribute("data-location", label);
+            box.title = "Tap / double-click to change city · " + label;
+        });
+    }
+
+    function weatherCodeToText(code) {
+        const map = {0:"Clear",1:"Mainly Clear",2:"Partly Cloudy",3:"Cloudy",45:"Fog",48:"Rime Fog",51:"Light Drizzle",53:"Drizzle",55:"Heavy Drizzle",61:"Light Rain",63:"Rain",65:"Heavy Rain",71:"Light Snow",73:"Snow",75:"Heavy Snow",80:"Rain Showers",81:"Rain Showers",82:"Heavy Showers",95:"Thunderstorm",96:"Thunderstorm",99:"Thunderstorm"};
+        return map[Number(code)] || "Weather";
+    }
+    function toHHMM(value) {
+        if (!value) return "--:--";
+        const match = String(value).match(/T(\d{2}:\d{2})/);
+        if (match) return match[1];
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return "--:--";
+        return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+    }
+
+    async function fetchJson(url, timeoutMs) {
+        const controller = new AbortController();
+        const timer = setTimeout(function () { controller.abort(); }, timeoutMs || 15000);
+        try {
+            const res = await fetch(url, { cache: "no-store", mode: "cors", signal: controller.signal });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return await res.json();
+        } finally { clearTimeout(timer); }
+    }
+
+    async function fetchWeatherDirect(place) {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(place.latitude) +
+            "&longitude=" + encodeURIComponent(place.longitude) +
+            "&current_weather=true&daily=sunrise,sunset&timezone=" + encodeURIComponent(place.timezone || "auto") +
+            "&forecast_days=1";
+        const data = await fetchJson(url, 15000);
+        const payload = {
+            label: place.label,
+            temperature: data && data.current_weather && data.current_weather.temperature,
+            code: data && data.current_weather && data.current_weather.weathercode,
+            sunriseText: toHHMM(data && data.daily && data.daily.sunrise && data.daily.sunrise[0]),
+            sunsetText: toHHMM(data && data.daily && data.daily.sunset && data.daily.sunset[0]),
+            savedAt: Date.now()
+        };
+        if (!Number.isFinite(Number(payload.temperature))) throw new Error("No temperature");
+        return payload;
+    }
+
+    function paint(payload, cached) {
+        if (!payload) return;
+        const temp = Number(payload.temperature);
+        setLocationLabel(payload.label || DEFAULT_PLACE.label);
+        setWeatherText((Number.isFinite(temp) ? Math.round(temp) + "°C" : "--°C") + " · " + weatherCodeToText(payload.code) + (cached ? " · CACHED" : ""),
+            "SUNRISE " + (payload.sunriseText || "--:--") + " · SUNSET " + (payload.sunsetText || "--:--"));
+        try { window.weatherInfo = { temperature: payload.temperature, code: payload.code, sunriseText: payload.sunriseText, sunsetText: payload.sunsetText }; } catch(e) {}
+    }
+
+    function getFreshCache() {
+        const cache = readJson(WEATHER_CACHE_KEY);
+        if (!cache || !cache.payload) return null;
+        if (Date.now() - Number(cache.savedAt || 0) > 24*60*60*1000) return null;
+        return cache.payload;
+    }
+
+    async function refreshWeatherV106() {
+        const place = getSavedPlace();
+        savePlace(place);
+        setLocationLabel(place.label);
+        const cached = getFreshCache();
+        if (cached) paint(cached, true); else setWeatherText("WEATHER LOADING", "SUNRISE --:-- · SUNSET --:--");
+        try {
+            const payload = await fetchWeatherDirect(place);
+            writeJson(WEATHER_CACHE_KEY, { savedAt: Date.now(), payload });
+            paint(payload, false);
+            return payload;
+        } catch (e) {
+            console.warn("Weather direct failed:", e);
+            if (cached) { paint(cached, true); return cached; }
+            setWeatherText("MOBILE BLOCKED WEATHER", "TRY HTTPS HOSTING / GITHUB PAGES");
+            return null;
+        }
+    }
+
+    function parseManualInput(value) {
+        const raw = String(value || "").trim();
+        const key = raw.toLowerCase();
+        if (CITY_DB[key]) return CITY_DB[key];
+        const parts = raw.split(",").map(function(x){return x.trim();});
+        const lat = Number(parts[0]), lon = Number(parts[1]);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+            return { city: parts[2] || "Manual", country: "", label: parts[2] || (lat.toFixed(2)+", "+lon.toFixed(2)), latitude: lat, longitude: lon, timezone: "auto" };
+        }
+        return null;
+    }
+
+    async function promptSetCityV106() {
+        const current = getSavedPlace();
+        const input = prompt("Choose city: Tianjin / Tokyo / Narita / Singapore / Beijing / Shanghai\nOr enter coordinates: 35.7767,140.3189,Narita", current.city || "Tianjin");
+        if (input === null) return;
+        const place = parseManualInput(input);
+        if (!place) { alert("This mobile-safe version uses built-in coordinates. Try: Tianjin, Tokyo, Narita, Singapore, Beijing, Shanghai."); return; }
+        savePlace(place);
+        localStorage.removeItem(WEATHER_CACHE_KEY);
+        await refreshWeatherV106();
+    }
+
+    function bindClicks() {
+        document.querySelectorAll(".clock-box, .weather-display, .sun-display, .timezone-display").forEach(function(el){
+            el.style.cursor = "pointer";
+            el.addEventListener("click", function(){ promptSetCityV106(); });
+            el.addEventListener("dblclick", function(){ promptSetCityV106(); });
+        });
+    }
+
+    window.fetchWeather = refreshWeatherV106;
+    window.fetchWeatherByLocation = function(latitude, longitude) {
+        const place = { city:"Manual", country:"", label:"Manual Location", latitude:Number(latitude), longitude:Number(longitude), timezone:"auto" };
+        savePlace(place);
+        return refreshWeatherV106();
+    };
+    window.promptSetCity = promptSetCityV106;
+    window.refreshWeatherV106 = refreshWeatherV106;
+
+    function start(){
+        bindClicks();
+        savePlace(getSavedPlace());
+        refreshWeatherV106();
+        setTimeout(refreshWeatherV106, 3000);
+        setInterval(refreshWeatherV106, 30*60*1000);
+        window.addEventListener("pageshow", refreshWeatherV106);
+        window.addEventListener("online", refreshWeatherV106);
+        document.addEventListener("visibilitychange", function(){ if(!document.hidden) refreshWeatherV106(); });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();
+</script>
+
+<style id="desktop-mode-phone-layout-v106">
+@media (max-width: 980px) {
+    body { justify-content:flex-start !important; align-items:flex-start !important; overflow-x:auto !important; overflow-y:auto !important; padding:20px !important; }
+    .page-switcher { align-self:center !important; min-width:340px !important; margin-left:auto !important; margin-right:auto !important; }
+    .main-container { width:1100px !important; max-width:none !important; min-width:1100px !important; flex-shrink:0 !important; margin-left:0 !important; margin-right:0 !important; }
+    .page-view, .page-view.active { width:1100px !important; max-width:none !important; min-width:1100px !important; flex-direction:row !important; justify-content:center !important; align-items:flex-start !important; gap:60px !important; }
+    .control-block { width:474px !important; min-width:474px !important; max-width:474px !important; flex:0 0 474px !important; margin-bottom:0 !important; }
+    .capture-wrapper { width:474px !important; height:474px !important; max-width:none !important; max-height:none !important; padding:10px !important; margin-bottom:15px !important; }
+    .clock-box, .panel-box { width:450px !important; height:450px !important; }
+}
+</style>
 
 </body>
 </html>
