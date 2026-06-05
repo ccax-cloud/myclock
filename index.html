@@ -1709,7 +1709,6 @@
 }
 
 
-
 /* Keep both tabs at the same vertical position */
 body {
     justify-content: flex-start !important;
@@ -2280,6 +2279,556 @@ body.desktop-capture-running #desktop-capture-dot {
     }
 }
 
+
+/* v62 final: mobile desktop-mode centering + reliable floating capture dot */
+@media (max-width: 980px) {
+    body {
+        overflow-x: auto !important;
+        align-items: center !important;
+    }
+
+    .page-switcher {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .main-container {
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+/* Make manual edit buttons usable on touch devices */
+@media (hover: none), (pointer: coarse) {
+    .today-card .mini-reset-btn,
+    .clickable-time-card .mini-edit-btn {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}
+
+/* Keep the floating dot bottom-right and tooltip on the left */
+#desktop-capture-dot {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+
+    border: none !important;
+    border-radius: 999px !important;
+
+    background: rgba(255,255,255,0.20) !important;
+
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+
+    box-shadow:
+        0 6px 16px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.35) !important;
+
+    opacity: 1 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    z-index: 2147483647 !important;
+}
+
+#desktop-capture-dot:hover {
+    transform: scale(1.08) !important;
+    background: rgba(255,255,255,0.26) !important;
+}
+
+#desktop-capture-dot::after {
+    content: "CAPTURE 1x1 DESKTOP";
+    position: fixed !important;
+    right: 54px !important;
+    bottom: 20px !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+
+    padding: 6px 10px;
+    border-radius: 999px;
+
+    background: rgba(255,255,255,0.72);
+    color: var(--adaptive-text-strong);
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+
+    opacity: 0;
+    pointer-events: none !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    transition: opacity 0.2s ease;
+}
+
+#desktop-capture-dot:hover::after {
+    opacity: 1;
+}
+
+@media (max-width: 980px) {
+    #desktop-capture-dot {
+        bottom: 20px !important;
+        right: 20px !important;
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    #desktop-capture-dot:hover {
+        transform: none !important;
+    }
+
+    #desktop-capture-dot::after {
+        display: none !important;
+    }
+}
+
+/* Screenshot stability */
+body.dashboard-layout-capture #desktop-capture-dot {
+    visibility: hidden !important;
+}
+
+body.dashboard-layout-capture #tracker-capture-area .today-card::after,
+body.dashboard-layout-capture #tracker-capture-area .tracker-grid::before {
+    display: none !important;
+}
+
+body.dashboard-layout-capture #tracker-capture-area .tracker-section .section-title {
+    animation: none !important;
+    transform: none !important;
+}
+
+
+/* v63: center the whole dashboard vertically */
+body {
+    justify-content: center !important;
+    padding-top: 0 !important;
+}
+
+.page-switcher {
+    margin-bottom: 26px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.main-container {
+    min-height: 560px !important;
+    margin-top: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    align-items: center !important;
+}
+
+.page-view {
+    align-items: center !important;
+}
+
+/* Keep mobile / desktop-mode browsing centered too */
+@media (max-width: 980px) {
+    body {
+        justify-content: center !important;
+        align-items: center !important;
+        overflow-x: auto !important;
+        padding-top: 0 !important;
+    }
+
+    .main-container {
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .page-switcher {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+
+/* v64: keep both pages on the same fixed dashboard grid */
+.main-container {
+    width: 100% !important;
+    max-width: 1100px !important;
+    min-height: 560px !important;
+
+    display: flex !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+
+    margin-top: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.page-view {
+    width: 100% !important;
+    max-width: 1100px !important;
+
+    justify-content: center !important;
+    align-items: flex-start !important;
+
+    gap: 60px !important;
+}
+
+.page-view.active {
+    display: flex !important;
+}
+
+.control-block {
+    width: 474px !important;
+    min-width: 474px !important;
+    max-width: 474px !important;
+    flex: 0 0 474px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+.capture-wrapper {
+    width: 474px !important;
+    height: 474px !important;
+    flex: 0 0 474px !important;
+}
+
+.clock-box,
+.panel-box {
+    width: 450px !important;
+    height: 450px !important;
+}
+
+/* Keep global vertical centering */
+body {
+    justify-content: center !important;
+    padding-top: 0 !important;
+}
+
+.page-switcher {
+    margin-bottom: 26px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Mobile normal mode can stay stacked, but keep desktop-mode centered */
+@media (max-width: 980px) {
+    body {
+        justify-content: flex-start !important;
+        align-items: center !important;
+        overflow-x: auto !important;
+        padding-top: 20px !important;
+    }
+
+    .page-view {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    .control-block {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex: none !important;
+    }
+
+    .capture-wrapper {
+        width: 474px !important;
+        height: 474px !important;
+        flex: none !important;
+    }
+
+    .main-container {
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .capture-wrapper {
+        width: 92vw !important;
+        height: 92vw !important;
+        max-width: 430px !important;
+        max-height: 430px !important;
+    }
+
+    .clock-box,
+    .panel-box {
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
+
+
+/* v65: lock page-switch layout so Life Balance switch does not move the center */
+@media (min-width: 981px) {
+    .main-container {
+        position: relative !important;
+
+        width: 1100px !important;
+        max-width: 1100px !important;
+        min-width: 1100px !important;
+
+        height: 560px !important;
+        min-height: 560px !important;
+        max-height: 560px !important;
+
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-top: 0 !important;
+
+        display: block !important;
+    }
+
+    .page-view {
+        position: absolute !important;
+        inset: 0 !important;
+
+        width: 1100px !important;
+        max-width: 1100px !important;
+        min-width: 1100px !important;
+
+        height: 560px !important;
+        min-height: 560px !important;
+        max-height: 560px !important;
+
+        justify-content: center !important;
+        align-items: flex-start !important;
+        gap: 60px !important;
+
+        margin: 0 !important;
+    }
+
+    .page-view.active {
+        display: flex !important;
+    }
+
+    .page-view:not(.active) {
+        display: none !important;
+    }
+
+    .control-block {
+        width: 474px !important;
+        min-width: 474px !important;
+        max-width: 474px !important;
+        flex: 0 0 474px !important;
+    }
+
+    .capture-wrapper {
+        width: 474px !important;
+        height: 474px !important;
+        flex: 0 0 474px !important;
+    }
+
+    .clock-box,
+    .panel-box {
+        width: 450px !important;
+        height: 450px !important;
+    }
+}
+
+
+/* v67b: keep original wave colors during screenshot */
+.static-capture-wave{
+    position:absolute;
+    left:-35%;
+    right:-35%;
+    bottom:-10px;
+    height:26px;
+
+    background:
+        radial-gradient(60% 80% at 50% 0%, rgba(255,255,255,0.42), transparent 70%),
+        linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
+
+    border-radius:50% 50% 0 0;
+    opacity:0.58;
+    pointer-events:none;
+    z-index:0;
+}
+
+
+/* v70: SVG wave during screenshot, stable and cleaner than pseudo-element animation */
+.capture-svg-wave {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 7px;
+    width: 100%;
+    height: 18px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.38;
+}
+
+.capture-svg-wave path {
+    fill: none;
+    stroke: var(--adaptive-text-strong);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    opacity: 0.58;
+}
+
+.capture-svg-wave .wave-fill {
+    fill: var(--adaptive-card-bg);
+    stroke: none;
+    opacity: 0.42;
+}
+
+/* Hide animated pseudo wave only while screenshot is running */
+body.dashboard-layout-capture #tracker-capture-area .today-card::after {
+    display: none !important;
+}
+
+
+/* v71: visible SVG wave captured as real DOM, not pseudo-element */
+body.dashboard-layout-capture #tracker-capture-area .today-card::after {
+    display: none !important;
+}
+
+.capture-svg-wave {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 4px !important;
+    width: 100% !important;
+    height: 26px !important;
+    pointer-events: none !important;
+    z-index: 3 !important;
+    opacity: 0.72 !important;
+}
+
+.capture-svg-wave path {
+    fill: none !important;
+    stroke: var(--adaptive-text-strong) !important;
+    stroke-width: 2.4 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    opacity: 0.42 !important;
+}
+
+.capture-svg-wave .wave-fill {
+    fill: var(--adaptive-text-strong) !important;
+    stroke: none !important;
+    opacity: 0.08 !important;
+}
+
+body.dashboard-layout-capture #tracker-capture-area .today-card > div {
+    position: relative !important;
+    z-index: 4 !important;
+}
+
+
+/* v73: manual 1x1 screenshot guide */
+.manual-shot-guide {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: min(92vw, 860px);
+    height: min(92vw, 860px);
+    transform: translate(-50%, -50%);
+    border: 1.5px dashed rgba(255,255,255,0.78);
+    box-shadow:
+        0 0 0 9999px rgba(0,0,0,0.08),
+        inset 0 0 0 1px rgba(80,96,112,0.12);
+    pointer-events: none;
+    z-index: 2147483000;
+    display: none;
+}
+
+body.manual-shot-mode .manual-shot-guide {
+    display: block;
+}
+
+.manual-shot-toggle {
+    position: fixed;
+    right: 24px;
+    bottom: 54px;
+    z-index: 2147483647;
+    border: none;
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: var(--adaptive-text-strong);
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    cursor: pointer;
+}
+
+body.manual-shot-mode .manual-shot-toggle {
+    background: rgba(255,255,255,0.78);
+}
+
+@media (max-width:980px){
+    .manual-shot-guide {
+        width: 92vw;
+        height: 92vw;
+    }
+
+    .manual-shot-toggle {
+        right: 20px;
+        bottom: 58px;
+    }
+}
+
+
+/* v74: draggable/resizable 1x1 capture frame */
+.manual-shot-guide {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    width: min(92vw, 860px) !important;
+    height: min(92vw, 860px) !important;
+    transform: translate(-50%, -50%) !important;
+
+    border: 3px solid rgba(255,255,255,0.95) !important;
+    box-shadow:
+        0 0 0 9999px rgba(0,0,0,0.18),
+        0 0 0 1px rgba(80,96,112,0.20),
+        0 0 24px rgba(255,255,255,0.35) !important;
+
+    pointer-events: auto !important;
+    z-index: 2147483000 !important;
+    display: none;
+    cursor: move;
+    touch-action: none;
+}
+
+body.manual-shot-mode .manual-shot-guide {
+    display: block !important;
+}
+
+.manual-shot-guide::after {
+    content: "";
+    position: absolute;
+    right: -8px;
+    bottom: -8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.86);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+    cursor: nwse-resize;
+}
+
+body.dashboard-layout-capture .manual-shot-guide,
+body.dashboard-layout-capture .manual-shot-toggle {
+    visibility: hidden !important;
+}
+
 </style>
         <script>
             (function restoreLastGradientBeforePaint() {
@@ -2296,7 +2845,77 @@ body.desktop-capture-running #desktop-capture-dot {
                 }
             })();
         </script>
-    </head>
+
+<style id="v80-clean-final-overrides">
+/* v80 cleanup: remove frame/dot features and keep dashboard stable */
+#desktop-capture-dot,
+.manual-shot-toggle,
+.manual-shot-guide,
+#v77-frame-toggle,
+#v77-shot-frame {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Keep the normal dashboard centered and aligned */
+body {
+    justify-content: center !important;
+    padding-top: 0 !important;
+}
+
+.page-switcher {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+@media (min-width: 981px) {
+    .main-container {
+        position: relative !important;
+        width: 1100px !important;
+        max-width: 1100px !important;
+        min-width: 1100px !important;
+        min-height: 560px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-top: 0 !important;
+    }
+
+    .page-view {
+        width: 1100px !important;
+        max-width: 1100px !important;
+        min-width: 1100px !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
+        gap: 60px !important;
+    }
+
+    .page-view.active {
+        display: flex !important;
+    }
+
+    .control-block {
+        width: 474px !important;
+        min-width: 474px !important;
+        max-width: 474px !important;
+        flex: 0 0 474px !important;
+    }
+
+    .capture-wrapper {
+        width: 474px !important;
+        height: 474px !important;
+        flex: 0 0 474px !important;
+    }
+
+    .clock-box,
+    .panel-box {
+        width: 450px !important;
+        height: 450px !important;
+    }
+}
+</style>
+
+</head>
     <body>
         <!-- 🎛️ 顶端页面翻页标签 -->
         <div class="page-switcher">
@@ -2306,8 +2925,7 @@ body.desktop-capture-running #desktop-capture-dot {
 
         <!-- 大容器外框 -->
         <div class="main-container">
-            <button id="desktop-capture-dot" class="desktop mobile" type="button" aria-label="Capture 1x1 Desktop"></button>
-            <!-- ==================== 【第一页：起床打卡线】 ==================== -->
+<!-- ==================== 【第一页：起床打卡线】 ==================== -->
             <div class="page-view active" id="page1">
                 <div class="control-block">
                     <div class="capture-wrapper">
@@ -3876,149 +4494,5 @@ body.desktop-capture-running #desktop-capture-dot {
     }
 })();
 </script>
-
-
-<script id="v58-dot-binding-fix">
-(function () {
-    function bindSingleDesktopDot() {
-        const dot = document.getElementById("desktop-capture-dot");
-        if (!dot || typeof window.captureDesktop1x1 !== "function") return;
-
-        dot.onclick = function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.captureDesktop1x1();
-        };
-
-        dot.ontouchstart = function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            window.captureDesktop1x1();
-        };
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", bindSingleDesktopDot);
-    } else {
-        bindSingleDesktopDot();
-    }
-})();
-</script>
-
-
-<script id="v60-dot-capture-final-fix">
-(function () {
-    function downloadPng(canvas, filename) {
-        const link = document.createElement("a");
-        link.download = filename;
-        link.href = canvas.toDataURL("image/png");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function rootGradient(size) {
-        const root = getComputedStyle(document.documentElement);
-        const bg1 = root.getPropertyValue("--bg-color-1").trim() || "#b9d4e2";
-        const bg2 = root.getPropertyValue("--bg-color-2").trim() || "#dfe9ef";
-        const bg3 = root.getPropertyValue("--bg-color-3").trim() || "#f2ebe4";
-        const c = document.createElement("canvas");
-        c.width = size;
-        c.height = size;
-        const ctx = c.getContext("2d");
-        const g = ctx.createLinearGradient(0, 0, size, size);
-        g.addColorStop(0, bg1);
-        g.addColorStop(0.5, bg2);
-        g.addColorStop(1, bg3);
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, size, size);
-        return { canvas: c, ctx };
-    }
-
-    window.captureDesktop1x1 = function () {
-        const isPage2 = document.getElementById("page2")?.classList.contains("active");
-        const clock = document.getElementById(isPage2 ? "capture-area-p2" : "capture-area-p1");
-        const panel = document.getElementById(isPage2 ? "tracker-capture-area" : "chart-capture-area");
-
-        if (!clock || !panel || typeof html2canvas === "undefined") {
-            alert("Capture unavailable. Please refresh and try again.");
-            return;
-        }
-
-        const scale = Math.min(2, window.devicePixelRatio || 2);
-        const options = {
-            backgroundColor: null,
-            scale: scale,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            foreignObjectRendering: false,
-            scrollX: 0,
-            scrollY: 0
-        };
-
-        document.body.classList.add("desktop-capture-running");
-        clock.classList.add("capture-mode");
-        panel.classList.add("capture-mode");
-
-        setTimeout(function () {
-            Promise.all([
-                html2canvas(clock, options),
-                html2canvas(panel, options)
-            ]).then(function ([clockCanvas, panelCanvas]) {
-                document.body.classList.remove("desktop-capture-running");
-                clock.classList.remove("capture-mode");
-                panel.classList.remove("capture-mode");
-
-                const gap = Math.round(24 * scale);
-                const totalW = clockCanvas.width + panelCanvas.width + gap;
-                const totalH = Math.max(clockCanvas.height, panelCanvas.height);
-                const size = Math.max(totalW, totalH);
-
-                const result = rootGradient(size);
-                const square = result.canvas;
-                const ctx = result.ctx;
-
-                const startX = (size - totalW) / 2;
-                const clockY = (size - clockCanvas.height) / 2;
-                const panelY = (size - panelCanvas.height) / 2;
-
-                ctx.drawImage(clockCanvas, startX, clockY);
-                ctx.drawImage(panelCanvas, startX + clockCanvas.width + gap, panelY);
-
-                downloadPng(square, "Desktop_1x1.png");
-            }).catch(function (err) {
-                document.body.classList.remove("desktop-capture-running");
-                clock.classList.remove("capture-mode");
-                panel.classList.remove("capture-mode");
-                console.error(err);
-                alert("Capture failed. Please try again.");
-            });
-        }, 80);
-    };
-
-    function bindDot() {
-        const dot = document.getElementById("desktop-capture-dot");
-        if (!dot) return;
-        dot.onclick = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            window.captureDesktop1x1();
-        };
-        dot.ontouchstart = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            window.captureDesktop1x1();
-        };
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", bindDot);
-    } else {
-        bindDot();
-    }
-})();
-</script>
-
 </body>
 </html>
