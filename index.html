@@ -3147,6 +3147,69 @@ body {
     }
 }
 </style>
+
+<style id="edit-pencil-visible-v108">
+/* v108: restore edit pencil visibility for Morning Avg + Fitness/Study Today */
+
+/* Desktop: show edit pencils on hover/focus */
+.clickable-time-card:hover .mini-edit-btn,
+.clickable-time-card:focus-within .mini-edit-btn,
+.today-card:hover .mini-reset-btn,
+.today-card:focus-within .mini-reset-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    display: flex !important;
+}
+
+/* Touch/mobile: no hover, so always show the edit pencils */
+@media (hover: none), (pointer: coarse), (max-width: 980px) {
+    .clickable-time-card .mini-edit-btn,
+    .today-card .mini-reset-btn {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+        display: flex !important;
+    }
+}
+
+/* Make the small pencil buttons tappable and visible enough */
+.mini-edit-btn,
+.mini-reset-btn {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    border-radius: 999px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 8 !important;
+    position: relative !important;
+    background: rgba(255,255,255,0.24) !important;
+    color: var(--adaptive-text-strong, #4f6072) !important;
+    border: 1px solid rgba(255,255,255,0.28) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+}
+
+/* Fitness/Study Today cards are centered by later styles; place pencil at top-right so it is not hidden */
+#tracker-capture-area .today-card {
+    padding-right: 10px !important;
+}
+
+#tracker-capture-area .today-card .mini-reset-btn {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+}
+
+/* Morning Avg card pencil stays on the right */
+.clickable-time-card .mini-edit-btn {
+    flex-shrink: 0 !important;
+}
+</style>
+
 </head>
 <body>
 <!-- 🎛️ 顶端页面翻页标签 -->
