@@ -3433,6 +3433,51 @@ body {
 }
 </style>
 
+
+
+<style id="checkin-bg-match-tracker-final">
+/* Match Check-in Timeline panel and cards to the Life Balance Tracker glass tone. */
+#chart-capture-area {
+    --timeline-card-bg: rgba(255,255,255,0.115) !important;
+    --timeline-card-border: rgba(255,255,255,0.19) !important;
+    --timeline-card-hover: rgba(255,255,255,0.16) !important;
+    background: rgba(255,255,255,0.16) !important;
+    border-color: rgba(255,255,255,0.22) !important;
+}
+
+#chart-capture-area .stat-card,
+#chart-capture-area .tabs,
+#chart-capture-area .tab.active,
+#chart-capture-area .mini-edit-btn {
+    background: var(--timeline-card-bg) !important;
+    border-color: var(--timeline-card-border) !important;
+    box-shadow:
+        0 8px 18px rgba(0,0,0,0.045),
+        inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+#chart-capture-area .stat-card:hover,
+#chart-capture-area .tab.active:hover {
+    background: var(--timeline-card-hover) !important;
+}
+
+#chart-capture-area .dashboard-title,
+#chart-capture-area .stat-value {
+    color: rgba(236,243,248,0.88) !important;
+}
+
+#chart-capture-area .stat-label,
+#chart-capture-area .target-note,
+#chart-capture-area .tab,
+#chart-capture-area .mini-edit-btn {
+    color: rgba(226,236,243,0.64) !important;
+}
+
+#chart-capture-area .tab.active {
+    color: rgba(236,243,248,0.88) !important;
+}
+</style>
+
 </head>
 <body>
 <!-- 🎛️ 顶端页面翻页标签 -->
@@ -7776,6 +7821,42 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 #tracker-capture-area .stat-value,
 #tracker-capture-area .countdown-title,
 #tracker-capture-area .countdown-mini-btn {
+    color: rgba(242,247,250,0.88) !important;
+}
+</style>
+
+
+<style id="checkin-cards-match-tracker-circled-final">
+/* Match Check-in Timeline stat cards to the circled Life Balance Tracker boxes. */
+#chart-capture-area {
+    --checkin-match-bg: rgba(126, 148, 163, 0.46) !important;
+    --checkin-match-bg-hover: rgba(134, 156, 171, 0.52) !important;
+    --checkin-match-border: rgba(225, 236, 244, 0.22) !important;
+    --checkin-match-inner: rgba(255,255,255,0.08) !important;
+}
+
+#chart-capture-area .stat-card,
+#chart-capture-area .tabs,
+#chart-capture-area .tab.active {
+    background: var(--checkin-match-bg) !important;
+    border: 1px solid var(--checkin-match-border) !important;
+    box-shadow:
+        0 8px 18px rgba(0,0,0,0.045),
+        inset 0 1px 0 var(--checkin-match-inner) !important;
+}
+
+#chart-capture-area .stat-card:hover,
+#chart-capture-area .tab.active:hover {
+    background: var(--checkin-match-bg-hover) !important;
+}
+
+#chart-capture-area .stat-label,
+#chart-capture-area .stat-sub-value {
+    color: rgba(230,238,244,0.66) !important;
+}
+
+#chart-capture-area .stat-value,
+#chart-capture-area .dashboard-title {
     color: rgba(242,247,250,0.88) !important;
 }
 </style>
