@@ -3434,47 +3434,376 @@ body {
 </style>
 
 
-
-<style id="checkin-bg-match-tracker-final">
-/* Match Check-in Timeline panel and cards to the Life Balance Tracker glass tone. */
-#chart-capture-area {
-    --timeline-card-bg: rgba(255,255,255,0.115) !important;
-    --timeline-card-border: rgba(255,255,255,0.19) !important;
-    --timeline-card-hover: rgba(255,255,255,0.16) !important;
+<style id="life-tracker-match-checkin-timeline-final">
+/* Final page-2 visual override: make Life Balance Tracker use the same quiet glass-card language as Check-in Timeline. */
+#tracker-capture-area {
+    padding: 30px 24px 22px !important;
     background: rgba(255,255,255,0.16) !important;
     border-color: rgba(255,255,255,0.22) !important;
 }
 
-#chart-capture-area .stat-card,
-#chart-capture-area .tabs,
-#chart-capture-area .tab.active,
-#chart-capture-area .mini-edit-btn {
-    background: var(--timeline-card-bg) !important;
-    border-color: var(--timeline-card-border) !important;
+#tracker-capture-area .dashboard-header {
+    width: 92% !important;
+    margin: 0 auto 16px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+#tracker-capture-area .dashboard-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+    color: var(--adaptive-text-body) !important;
+    text-shadow: none !important;
+}
+
+/* Remove the Life Balance decorative treatment so page 2 feels like page 1. */
+#tracker-capture-area .tracker-grid::before,
+#tracker-capture-area .today-card::before,
+#tracker-capture-area .today-card::after,
+#tracker-capture-area .capture-svg-wave {
+    display: none !important;
+    content: none !important;
+}
+
+#tracker-capture-area .tracker-section .section-title {
+    animation: none !important;
+    transform: none !important;
+}
+
+/* Focus Timer becomes a calm timeline-style glass card. */
+#tracker-capture-area .countdown-zone {
+    width: 92% !important;
+    margin: 0 auto 16px !important;
+    padding: 12px 14px !important;
+    min-height: 92px !important;
+
+    display: grid !important;
+    grid-template-columns: 76px 1fr !important;
+    align-items: center !important;
+    gap: 14px !important;
+
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid var(--adaptive-card-border) !important;
+    border-radius: 0 !important;
     box-shadow:
         0 8px 18px rgba(0,0,0,0.045),
         inset 0 1px 0 rgba(255,255,255,0.12) !important;
 }
 
-#chart-capture-area .stat-card:hover,
-#chart-capture-area .tab.active:hover {
-    background: var(--timeline-card-hover) !important;
+#tracker-capture-area .countdown-dial {
+    width: 66px !important;
+    height: 66px !important;
+    border-radius: 0 !important;
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid rgba(255,255,255,0.19) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
 }
 
-#chart-capture-area .dashboard-title,
-#chart-capture-area .stat-value {
-    color: rgba(236,243,248,0.88) !important;
+#tracker-capture-area .countdown-dial::before {
+    inset: 8px !important;
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,0.26) !important;
+    opacity: 0.62 !important;
 }
 
-#chart-capture-area .stat-label,
-#chart-capture-area .target-note,
-#chart-capture-area .tab,
-#chart-capture-area .mini-edit-btn {
-    color: rgba(226,236,243,0.64) !important;
+#tracker-capture-area .countdown-dial::after {
+    width: 14px !important;
+    height: 14px !important;
+    opacity: 0.52 !important;
 }
 
-#chart-capture-area .tab.active {
-    color: rgba(236,243,248,0.88) !important;
+#tracker-capture-area .countdown-face {
+    transform: translateY(15px) !important;
+    gap: 1px !important;
+}
+
+#tracker-capture-area .countdown-time {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    color: var(--adaptive-text-strong) !important;
+    text-shadow: 0 1px 8px var(--adaptive-shadow) !important;
+}
+
+#tracker-capture-area .countdown-label {
+    font-size: 6.5px !important;
+    letter-spacing: 0.55px !important;
+    color: var(--adaptive-text-muted) !important;
+}
+
+#tracker-capture-area .countdown-title {
+    margin: 0 0 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    color: var(--adaptive-text-body) !important;
+    text-shadow: none !important;
+}
+
+#tracker-capture-area .countdown-note {
+    margin: 0 0 8px !important;
+    font-size: 9px !important;
+    line-height: 1.35 !important;
+    color: var(--adaptive-text-muted) !important;
+}
+
+#tracker-capture-area .countdown-actions {
+    display: flex !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+}
+
+#tracker-capture-area .countdown-mini-btn {
+    padding: 5px 9px !important;
+    border-radius: 999px !important;
+    font-size: 8px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid var(--adaptive-card-border) !important;
+    color: var(--adaptive-text-strong) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.035) !important;
+}
+
+#tracker-capture-area .countdown-mini-btn:hover {
+    background: rgba(255,255,255,0.16) !important;
+}
+
+/* Fitness / Study section layout follows the Check-in Timeline stat cards. */
+#tracker-capture-area .tracker-grid {
+    width: 92% !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 14px 18px !important;
+    flex-grow: 0 !important;
+    position: relative !important;
+}
+
+#tracker-capture-area .tracker-section {
+    display: grid !important;
+    grid-template-rows: auto repeat(3, 1fr) !important;
+    gap: 8px !important;
+}
+
+#tracker-capture-area .tracker-section .section-title {
+    text-align: left !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 1px !important;
+    color: var(--adaptive-text-body) !important;
+    margin: 0 0 1px !important;
+}
+
+#tracker-capture-area .tracker-section .stat-card {
+    height: 54px !important;
+    min-height: 0 !important;
+    padding: 9px 13px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 0 !important;
+    text-align: left !important;
+
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid var(--adaptive-card-border) !important;
+    border-radius: 0 !important;
+    box-shadow:
+        0 8px 18px rgba(0,0,0,0.045),
+        inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+#tracker-capture-area .tracker-section .stat-card:hover {
+    background: rgba(255,255,255,0.16) !important;
+    transform: translateY(-1px) !important;
+}
+
+#tracker-capture-area .tracker-section .stat-label {
+    margin: 0 0 3px !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    color: var(--adaptive-text-body) !important;
+    text-align: left !important;
+}
+
+#tracker-capture-area .tracker-section .stat-value {
+    margin: 0 !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+    color: var(--adaptive-text-strong) !important;
+    text-align: left !important;
+    text-shadow: 0 1px 8px var(--adaptive-shadow) !important;
+}
+
+#tracker-capture-area .tracker-section .stat-sub-value {
+    margin-top: 2px !important;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+    color: var(--adaptive-text-muted) !important;
+    text-align: left !important;
+}
+
+#tracker-capture-area .today-card {
+    position: relative !important;
+    overflow: visible !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    padding-right: 42px !important;
+}
+
+#tracker-capture-area .today-card > div {
+    width: auto !important;
+    text-align: left !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+#tracker-capture-area .today-card .mini-reset-btn {
+    position: absolute !important;
+    top: 50% !important;
+    right: 10px !important;
+    transform: translateY(-50%) !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    background: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    color: var(--adaptive-text-muted) !important;
+    box-shadow: none !important;
+}
+
+#tracker-capture-area .today-card .mini-reset-btn:hover {
+    background: rgba(255,255,255,0.18) !important;
+    color: var(--adaptive-text-strong) !important;
+    transform: translateY(-50%) scale(1.06) !important;
+}
+
+#tracker-capture-area #fit-duration-card,
+#tracker-capture-area #study-duration-card {
+    justify-content: center !important;
+}
+
+@media (max-width: 520px) {
+    #tracker-capture-area {
+        padding: 20px 16px !important;
+    }
+
+    #tracker-capture-area .dashboard-header {
+        width: 92% !important;
+        margin-bottom: 12px !important;
+    }
+
+    #tracker-capture-area .dashboard-title {
+        font-size: 13px !important;
+    }
+
+    #tracker-capture-area .countdown-zone {
+        width: 92% !important;
+        margin-bottom: 12px !important;
+        padding: 10px !important;
+        min-height: 80px !important;
+        grid-template-columns: 62px 1fr !important;
+        gap: 10px !important;
+        border-radius: 12px !important;
+    }
+
+    #tracker-capture-area .countdown-dial {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 11px !important;
+    }
+
+    #tracker-capture-area .countdown-face {
+        transform: translateY(12px) !important;
+    }
+
+    #tracker-capture-area .countdown-time {
+        font-size: 11px !important;
+    }
+
+    #tracker-capture-area .countdown-title {
+        font-size: 8.5px !important;
+        margin-bottom: 3px !important;
+    }
+
+    #tracker-capture-area .countdown-note {
+        font-size: 7.5px !important;
+        line-height: 1.25 !important;
+        margin-bottom: 6px !important;
+    }
+
+    #tracker-capture-area .countdown-mini-btn {
+        padding: 4px 6px !important;
+        font-size: 7px !important;
+    }
+
+    #tracker-capture-area .tracker-grid {
+        width: 92% !important;
+        gap: 10px !important;
+    }
+
+    #tracker-capture-area .tracker-section {
+        gap: 6px !important;
+    }
+
+    #tracker-capture-area .tracker-section .section-title {
+        font-size: 8.5px !important;
+    }
+
+    #tracker-capture-area .tracker-section .stat-card {
+        height: 44px !important;
+        padding: 7px 9px !important;
+        border-radius: 0 !important;
+    }
+
+    #tracker-capture-area .tracker-section .stat-label {
+        font-size: 7px !important;
+        letter-spacing: 0.6px !important;
+    }
+
+    #tracker-capture-area .tracker-section .stat-value {
+        font-size: 13px !important;
+    }
+
+    #tracker-capture-area .tracker-section .stat-sub-value {
+        font-size: 7px !important;
+    }
+
+    #tracker-capture-area .today-card {
+        padding-right: 32px !important;
+    }
+
+    #tracker-capture-area .today-card .mini-reset-btn {
+        right: 7px !important;
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+        min-height: 22px !important;
+        font-size: 11px !important;
+    }
+}
+</style>
+
+
+
+<style id="v164-focus-timer-bg-remove">
+/* v164: remove only the dark glass background behind Focus Timer; keep all other sizing/color/spacing changes. */
+#tracker-capture-area .countdown-zone {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
 }
 </style>
 
@@ -3660,9 +3989,9 @@ body {
 
                 sunset: ["#6f7890", "#9aa7ba", "#d8d5dc"],
 
-                evening: ["#3f5870", "#5a7184", "#7a8d9c"],
+                evening: ["#587184", "#748c9d", "#9aabb7"],
 
-                night: ["#344b61", "#50677a", "#728695"],
+                night: ["#40576b", "#5d7385", "#8295a4"],
             };
 
             const THEME_PROFILES = {
@@ -3723,32 +4052,32 @@ body {
                     chartGrid: "rgba(54,65,82,0.18)",
                 },
                 evening: {
-                    textStrong: "rgba(226,236,244,0.92)",
-                    textMain: "rgba(207,220,232,0.94)",
-                    textBody: "rgba(226,236,244,0.84)",
-                    textMuted: "rgba(226,236,244,0.66)",
-                    cardBg: "rgba(178,203,220,0.14)",
-                    cardBorder: "rgba(225,238,248,0.18)",
-                    tabBg: "rgba(205,222,236,0.18)",
-                    shadow: "rgba(0,0,0,0.30)",
-                    chartLine: "rgba(226,236,244,0.88)",
-                    chartFill: "rgba(226,236,244,0.12)",
-                    chartAxis: "rgba(226,236,244,0.66)",
-                    chartGrid: "rgba(226,236,244,0.13)",
+                    textStrong: "rgba(232,240,246,0.94)",
+                    textMain: "rgba(214,226,236,0.96)",
+                    textBody: "rgba(232,240,246,0.88)",
+                    textMuted: "rgba(232,240,246,0.72)",
+                    cardBg: "rgba(210,226,238,0.18)",
+                    cardBorder: "rgba(235,245,252,0.24)",
+                    tabBg: "rgba(226,238,246,0.24)",
+                    shadow: "rgba(0,0,0,0.24)",
+                    chartLine: "rgba(232,240,246,0.94)",
+                    chartFill: "rgba(232,240,246,0.16)",
+                    chartAxis: "rgba(232,240,246,0.74)",
+                    chartGrid: "rgba(232,240,246,0.18)",
                 },
                 night: {
-                    textStrong: "rgba(226,236,245,0.94)",
-                    textMain: "rgba(196,211,226,0.94)",
-                    textBody: "rgba(226,236,245,0.84)",
-                    textMuted: "rgba(226,236,245,0.64)",
-                    cardBg: "rgba(174,198,218,0.10)",
-                    cardBorder: "rgba(224,238,252,0.15)",
-                    tabBg: "rgba(205,222,240,0.14)",
-                    shadow: "rgba(0,0,0,0.34)",
-                    chartLine: "rgba(226,236,245,0.88)",
-                    chartFill: "rgba(226,236,245,0.10)",
-                    chartAxis: "rgba(226,236,245,0.64)",
-                    chartGrid: "rgba(226,236,245,0.12)",
+                    textStrong: "rgba(235,241,248,0.96)",
+                    textMain: "rgba(201,215,230,0.96)",
+                    textBody: "rgba(235,241,248,0.88)",
+                    textMuted: "rgba(235,241,248,0.70)",
+                    cardBg: "rgba(210,226,244,0.12)",
+                    cardBorder: "rgba(235,245,255,0.18)",
+                    tabBg: "rgba(230,240,255,0.18)",
+                    shadow: "rgba(0,0,0,0.30)",
+                    chartLine: "rgba(235,241,248,0.94)",
+                    chartFill: "rgba(235,241,248,0.14)",
+                    chartAxis: "rgba(235,241,248,0.72)",
+                    chartGrid: "rgba(235,241,248,0.16)",
                 },
             };
 
@@ -7825,38 +8154,1216 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 }
 </style>
 
-
-<style id="checkin-cards-match-tracker-circled-final">
-/* Match Check-in Timeline stat cards to the circled Life Balance Tracker boxes. */
-#chart-capture-area {
-    --checkin-match-bg: rgba(126, 148, 163, 0.46) !important;
-    --checkin-match-bg-hover: rgba(134, 156, 171, 0.52) !important;
-    --checkin-match-border: rgba(225, 236, 244, 0.22) !important;
-    --checkin-match-inner: rgba(255,255,255,0.08) !important;
+<style id="life-tracker-final-overrides-after-all">
+/* Final override placed after all previous experiment blocks. Page 2 Life Balance now follows Page 1 Check-in Timeline. */
+#tracker-capture-area {
+    padding: 30px 24px 22px !important;
+    background: rgba(255,255,255,0.16) !important;
+    border-color: rgba(255,255,255,0.22) !important;
 }
-
-#chart-capture-area .stat-card,
-#chart-capture-area .tabs,
-#chart-capture-area .tab.active {
-    background: var(--checkin-match-bg) !important;
-    border: 1px solid var(--checkin-match-border) !important;
-    box-shadow:
-        0 8px 18px rgba(0,0,0,0.045),
-        inset 0 1px 0 var(--checkin-match-inner) !important;
+#tracker-capture-area .dashboard-header {
+    width: 92% !important;
+    margin: 0 auto 16px !important;
+    justify-content: space-between !important;
+    align-items: center !important;
 }
-
-#chart-capture-area .stat-card:hover,
-#chart-capture-area .tab.active:hover {
-    background: var(--checkin-match-bg-hover) !important;
+#tracker-capture-area .dashboard-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+    color: var(--adaptive-text-strong) !important;
+    text-shadow: none !important;
 }
-
-#chart-capture-area .stat-label,
-#chart-capture-area .stat-sub-value {
-    color: rgba(230,238,244,0.66) !important;
+#tracker-capture-area .tracker-grid::before,
+#tracker-capture-area .today-card::before,
+#tracker-capture-area .today-card::after,
+#tracker-capture-area .capture-svg-wave {
+    display: none !important;
+    content: none !important;
 }
-
-#chart-capture-area .stat-value,
-#chart-capture-area .dashboard-title {
-    color: rgba(242,247,250,0.88) !important;
+#tracker-capture-area .tracker-section .section-title {
+    animation: none !important;
+    transform: none !important;
+}
+#tracker-capture-area .countdown-zone {
+    width: 92% !important;
+    margin: 0 auto 16px !important;
+    padding: 12px 14px !important;
+    min-height: 92px !important;
+    display: grid !important;
+    grid-template-columns: 76px 1fr !important;
+    align-items: center !important;
+    gap: 14px !important;
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid var(--adaptive-card-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.045), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+#tracker-capture-area .countdown-dial {
+    width: 66px !important;
+    height: 66px !important;
+    border-radius: 0 !important;
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid var(--adaptive-card-border) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
+    animation: none !important;
+}
+#tracker-capture-area .countdown-dial::before {
+    inset: 8px !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,0.26) !important;
+    opacity: 0.62 !important;
+}
+#tracker-capture-area .countdown-dial::after {
+    width: 14px !important;
+    height: 14px !important;
+    opacity: 0.52 !important;
+}
+#tracker-capture-area .countdown-face {
+    transform: translateY(15px) !important;
+    gap: 1px !important;
+}
+#tracker-capture-area .countdown-time {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    color: var(--adaptive-text-strong) !important;
+    text-shadow: 0 1px 8px var(--adaptive-shadow) !important;
+}
+#tracker-capture-area .countdown-label {
+    font-size: 6.5px !important;
+    letter-spacing: 0.55px !important;
+    color: var(--adaptive-text-muted) !important;
+}
+#tracker-capture-area .countdown-title {
+    margin: 0 0 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    color: var(--adaptive-text-body) !important;
+    text-shadow: none !important;
+}
+#tracker-capture-area .countdown-note {
+    margin: 0 0 8px !important;
+    font-size: 9px !important;
+    line-height: 1.35 !important;
+    color: var(--adaptive-text-muted) !important;
+}
+#tracker-capture-area .countdown-actions {
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+}
+#tracker-capture-area .countdown-mini-btn {
+    padding: 5px 9px !important;
+    border-radius: 999px !important;
+    font-size: 8px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid var(--adaptive-card-border) !important;
+    color: var(--adaptive-text-strong) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.035) !important;
+}
+#tracker-capture-area .countdown-mini-btn:hover {
+    background: rgba(255,255,255,0.26) !important;
+}
+#tracker-capture-area .tracker-grid {
+    width: 92% !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 14px 18px !important;
+    flex-grow: 0 !important;
+    position: relative !important;
+}
+#tracker-capture-area .tracker-section {
+    display: grid !important;
+    grid-template-rows: auto repeat(3, 1fr) !important;
+    gap: 8px !important;
+}
+#tracker-capture-area .tracker-section .section-title {
+    text-align: left !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 1px !important;
+    color: var(--adaptive-text-body) !important;
+    margin: 0 0 1px !important;
+}
+#tracker-capture-area .tracker-section .stat-card {
+    height: 54px !important;
+    min-height: 0 !important;
+    padding: 9px 13px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 0 !important;
+    text-align: left !important;
+    background: var(--adaptive-card-bg) !important;
+    border: 1px solid var(--adaptive-card-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.045), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+#tracker-capture-area .tracker-section .stat-card:hover {
+    background: rgba(255,255,255,0.26) !important;
+    transform: translateY(-1px) !important;
+}
+#tracker-capture-area .tracker-section .stat-label {
+    margin: 0 0 3px !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    color: var(--adaptive-text-body) !important;
+    text-align: left !important;
+}
+#tracker-capture-area .tracker-section .stat-value {
+    margin: 0 !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+    color: var(--adaptive-text-strong) !important;
+    text-align: left !important;
+    text-shadow: 0 1px 8px var(--adaptive-shadow) !important;
+}
+#tracker-capture-area .tracker-section .stat-sub-value {
+    margin-top: 2px !important;
+    font-size: 9px !important;
+    line-height: 1.1 !important;
+    color: var(--adaptive-text-muted) !important;
+    text-align: left !important;
+}
+#tracker-capture-area .today-card {
+    position: relative !important;
+    overflow: visible !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    padding-right: 42px !important;
+    min-height: 0 !important;
+}
+#tracker-capture-area .today-card > div {
+    width: auto !important;
+    text-align: left !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+#tracker-capture-area .today-card .mini-reset-btn {
+    position: absolute !important;
+    top: 50% !important;
+    right: 10px !important;
+    transform: translateY(-50%) !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    background: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    color: var(--adaptive-text-muted) !important;
+    box-shadow: none !important;
+}
+#tracker-capture-area .today-card .mini-reset-btn:hover {
+    background: rgba(255,255,255,0.18) !important;
+    color: var(--adaptive-text-strong) !important;
+    transform: translateY(-50%) scale(1.06) !important;
+}
+#tracker-capture-area #fit-duration-card,
+#tracker-capture-area #study-duration-card {
+    justify-content: center !important;
+}
+@media (max-width: 520px) {
+    #tracker-capture-area { padding: 20px 16px !important; }
+    #tracker-capture-area .dashboard-header { width: 92% !important; margin-bottom: 12px !important; }
+    #tracker-capture-area .dashboard-title { font-size: 13px !important; }
+    #tracker-capture-area .countdown-zone {
+        width: 92% !important;
+        margin-bottom: 12px !important;
+        padding: 10px !important;
+        min-height: 80px !important;
+        grid-template-columns: 62px 1fr !important;
+        gap: 10px !important;
+        border-radius: 0 !important;
+    }
+    #tracker-capture-area .countdown-dial { width: 56px !important; height: 56px !important; border-radius: 0 !important; }
+    #tracker-capture-area .countdown-face { transform: translateY(12px) !important; }
+    #tracker-capture-area .countdown-time { font-size: 11px !important; }
+    #tracker-capture-area .countdown-title { font-size: 8.5px !important; margin-bottom: 3px !important; }
+    #tracker-capture-area .countdown-note { font-size: 7.5px !important; line-height: 1.25 !important; margin-bottom: 6px !important; }
+    #tracker-capture-area .countdown-mini-btn { padding: 4px 6px !important; font-size: 7px !important; }
+    #tracker-capture-area .tracker-grid { width: 92% !important; gap: 10px !important; }
+    #tracker-capture-area .tracker-section { gap: 6px !important; }
+    #tracker-capture-area .tracker-section .section-title { font-size: 8.5px !important; }
+    #tracker-capture-area .tracker-section .stat-card { height: 44px !important; padding: 7px 9px !important; border-radius: 0 !important; }
+    #tracker-capture-area .tracker-section .stat-label { font-size: 7px !important; letter-spacing: 0.6px !important; }
+    #tracker-capture-area .tracker-section .stat-value { font-size: 13px !important; }
+    #tracker-capture-area .tracker-section .stat-sub-value { font-size: 7px !important; }
+    #tracker-capture-area .today-card { padding-right: 32px !important; }
+    #tracker-capture-area .today-card .mini-reset-btn {
+        right: 7px !important;
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+        min-height: 22px !important;
+        font-size: 11px !important;
+    }
 }
 </style>
+
+
+<style id="v163-life-tracker-contrast-spacing-fix">
+/* v163: Improve Focus Timer readability and reduce the blank area at the bottom of Page 2. */
+#tracker-capture-area {
+    padding: 28px 24px 20px !important;
+}
+
+#tracker-capture-area .dashboard-header {
+    margin-bottom: 14px !important;
+}
+
+/* Focus Timer: darker ink, still matching the Check-in Timeline glass style. */
+#tracker-capture-area .countdown-zone {
+    margin: 0 auto 15px !important;
+    min-height: 96px !important;
+    background: rgba(126,148,163,0.38) !important;
+    border-color: rgba(225,236,244,0.26) !important;
+}
+
+#tracker-capture-area .countdown-dial {
+    background: rgba(126,148,163,0.32) !important;
+    border-color: rgba(225,236,244,0.30) !important;
+}
+
+#tracker-capture-area .countdown-dial::before {
+    background:
+        conic-gradient(from -90deg,
+            var(--bg-color-1) 0deg,
+            var(--bg-color-2) var(--countdown-half-progress, 0deg),
+            var(--bg-color-3) var(--countdown-progress),
+            rgba(77,111,134,0.16) var(--countdown-progress),
+            rgba(77,111,134,0.16) 360deg) !important;
+    box-shadow:
+        inset 0 0 0 7px rgba(77,111,134,0.13),
+        inset 0 0 18px rgba(77,111,134,0.08) !important;
+    opacity: 0.92 !important;
+}
+
+#tracker-capture-area .countdown-dial::after {
+    background: rgba(225,236,244,0.62) !important;
+    opacity: 0.86 !important;
+}
+
+#tracker-capture-area .countdown-title {
+    color: var(--adaptive-text-strong) !important;
+    opacity: 0.98 !important;
+}
+
+#tracker-capture-area .countdown-note {
+    color: var(--adaptive-text-body) !important;
+    opacity: 0.78 !important;
+}
+
+/* The moved READY status is the first small button visually; make it readable on the blue background. */
+#tracker-capture-area .countdown-actions .countdown-label,
+#tracker-capture-area .countdown-mini-btn {
+    background: rgba(236,246,251,0.30) !important;
+    border-color: rgba(245,251,255,0.38) !important;
+    color: var(--adaptive-text-strong) !important;
+    text-shadow: none !important;
+    box-shadow:
+        0 5px 12px rgba(0,0,0,0.035),
+        inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+#tracker-capture-area .countdown-actions .countdown-label:hover,
+#tracker-capture-area .countdown-mini-btn:hover {
+    background: rgba(236,246,251,0.40) !important;
+}
+
+/* Stretch the lower cards slightly so Page 2 no longer leaves a large empty area at the bottom. */
+#tracker-capture-area .tracker-grid {
+    gap: 16px 18px !important;
+}
+
+#tracker-capture-area .tracker-section {
+    gap: 10px !important;
+}
+
+#tracker-capture-area .tracker-section .stat-card {
+    height: 62px !important;
+    min-height: 62px !important;
+    padding: 10px 13px !important;
+}
+
+#tracker-capture-area .tracker-section .stat-label {
+    color: var(--adaptive-text-body) !important;
+    opacity: 0.88 !important;
+}
+
+#tracker-capture-area .tracker-section .stat-value {
+    color: var(--adaptive-text-strong) !important;
+}
+
+#tracker-capture-area .tracker-section .stat-sub-value {
+    color: var(--adaptive-text-muted) !important;
+    opacity: 0.86 !important;
+}
+
+@media (max-width: 520px) {
+    #tracker-capture-area {
+        padding: 19px 16px 16px !important;
+    }
+
+    #tracker-capture-area .countdown-zone {
+        margin-bottom: 11px !important;
+        min-height: 82px !important;
+    }
+
+    #tracker-capture-area .tracker-section {
+        gap: 7px !important;
+    }
+
+    #tracker-capture-area .tracker-section .stat-card {
+        height: 48px !important;
+        min-height: 48px !important;
+        padding: 7px 9px !important;
+    }
+}
+</style>
+
+<style id="v165-focus-timer-bg-really-remove">
+/* v165: This is placed at the very end so it overrides the later v163 contrast block. */
+#tracker-capture-area .countdown-zone,
+#tracker-capture-area #countdown-zone {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+#tracker-capture-area .countdown-zone:hover,
+#tracker-capture-area #countdown-zone:hover {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+</style>
+
+
+<script id="v166-data-sync-fix">
+(function () {
+    const SYNC_INTERVAL_MS = 15000;
+
+    function canSync() {
+        return typeof FIREBASE_BASE_URL !== "undefined" && typeof fetch === "function";
+    }
+
+    function asObject(value) {
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    }
+
+    function firebaseUrl(path) {
+        const cleanPath = String(path || "").replace(/^\/+/, "");
+        return `${FIREBASE_BASE_URL}${cleanPath}.json`;
+    }
+
+    async function cloudRead(path) {
+        const res = await fetch(`${firebaseUrl(path)}?t=${Date.now()}`, {
+            method: "GET",
+            cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`Read failed: ${path} (${res.status})`);
+        return res.json();
+    }
+
+    async function cloudWrite(path, value) {
+        const res = await fetch(firebaseUrl(path), {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(value),
+            cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`Write failed: ${path} (${res.status})`);
+        return res.json();
+    }
+
+    function refreshPanels() {
+        try { if (typeof updateSleepButtons === "function") updateSleepButtons(); } catch (e) {}
+        try {
+            if (typeof lastChartSignature !== "undefined") lastChartSignature = "";
+            if (document.getElementById("page1")?.classList.contains("active") && typeof renderChart === "function") renderChart();
+        } catch (e) {}
+        try { if (typeof renderTrackerStats === "function") renderTrackerStats(); } catch (e) {}
+    }
+
+    async function syncFromCloud() {
+        if (!canSync()) return false;
+
+        try {
+            const [legacyResult, sleepResult, trackerResult] = await Promise.allSettled([
+                cloudRead("checkins"),
+                cloudRead("sleepRecords"),
+                cloudRead("tracker"),
+            ]);
+
+            if (legacyResult.status === "fulfilled") {
+                globalHistoryData = asObject(legacyResult.value);
+            }
+
+            if (sleepResult.status === "fulfilled") {
+                globalSleepData = asObject(sleepResult.value);
+            }
+
+            if (trackerResult.status === "fulfilled") {
+                const tracker = asObject(trackerResult.value);
+                globalTrackerData = {
+                    fitness: asObject(tracker.fitness),
+                    study: asObject(tracker.study),
+                };
+            } else if (!globalTrackerData || typeof globalTrackerData !== "object") {
+                globalTrackerData = { fitness: {}, study: {} };
+            } else {
+                globalTrackerData.fitness = asObject(globalTrackerData.fitness);
+                globalTrackerData.study = asObject(globalTrackerData.study);
+            }
+
+            try {
+                if (typeof migrateLegacyWakeData === "function") migrateLegacyWakeData();
+            } catch (e) {}
+
+            window.__lastSuccessfulCloudSyncAt = Date.now();
+            refreshPanels();
+            return true;
+        } catch (e) {
+            console.warn("Cloud sync skipped.", e);
+            refreshPanels();
+            return false;
+        }
+    }
+
+    async function writeSleepDate(dateStr) {
+        if (!dateStr || !canSync()) return false;
+        const record = asObject(globalSleepData?.[dateStr]);
+        const hasValue = Object.keys(record).length > 0;
+        await cloudWrite(`sleepRecords/${dateStr}`, hasValue ? record : null);
+        return syncFromCloud();
+    }
+
+    let lastSleepTouchedDate = null;
+
+    function markSleepDate(dateStr) {
+        lastSleepTouchedDate = dateStr;
+        return dateStr;
+    }
+
+    window.fetchCloudData = fetchCloudData = function () {
+        return syncFromCloud();
+    };
+
+    window.saveSleepData = saveSleepData = async function () {
+        try { if (typeof updateSleepButtons === "function") updateSleepButtons(); } catch (e) {}
+        try {
+            if (typeof lastChartSignature !== "undefined") lastChartSignature = "";
+            if (document.getElementById("page1")?.classList.contains("active") && typeof renderChart === "function") renderChart();
+        } catch (e) {}
+
+        const touchedDate = lastSleepTouchedDate;
+        lastSleepTouchedDate = null;
+
+        try {
+            if (touchedDate) {
+                return await writeSleepDate(touchedDate);
+            }
+            await cloudWrite("sleepRecords", asObject(globalSleepData));
+            return await syncFromCloud();
+        } catch (e) {
+            console.warn("Sleep data write failed.", e);
+            return false;
+        }
+    };
+
+    window.toggleWakeCheckIn = toggleWakeCheckIn = function () {
+        const todayStr = getDateString(new Date());
+        markSleepDate(todayStr);
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+        if (globalSleepData[todayStr].wake) {
+            delete globalSleepData[todayStr].wake;
+        } else {
+            globalSleepData[todayStr].wake = getTimeString(new Date());
+        }
+
+        saveSleepData();
+    };
+
+    window.toggleSleepCheckIn = toggleSleepCheckIn = function () {
+        const targetDate = getSleepTargetDate();
+        markSleepDate(targetDate);
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+
+        if (globalSleepData[targetDate].sleep) {
+            delete globalSleepData[targetDate].sleep;
+        } else {
+            globalSleepData[targetDate].sleep = getTimeString(new Date());
+        }
+
+        saveSleepData();
+    };
+
+    window.editTodayWakeRecord = editTodayWakeRecord = function () {
+        const todayStr = getDateString(new Date());
+        markSleepDate(todayStr);
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+        const currentWake = globalSleepData[todayStr].wake || "";
+        const wakeInput = prompt("Enter today's WAKE time in HH:MM format. Leave blank to clear wake time.", currentWake);
+        if (wakeInput === null) return;
+
+        if (!isValidTimeOrBlank(wakeInput)) {
+            alert("Please enter time as HH:MM, e.g. 07:15.");
+            return;
+        }
+
+        const value = wakeInput.trim();
+        if (value) globalSleepData[todayStr].wake = value;
+        else delete globalSleepData[todayStr].wake;
+
+        saveSleepData();
+    };
+
+    window.editTodaySleepOnlyRecord = editTodaySleepOnlyRecord = function () {
+        const targetDate = getSleepTargetDate();
+        markSleepDate(targetDate);
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+
+        const currentSleep = globalSleepData[targetDate].sleep || "";
+        const sleepInput = prompt("Enter SLEEP time in HH:MM format. Leave blank to clear sleep time.", currentSleep);
+        if (sleepInput === null) return;
+
+        if (!isValidTimeOrBlank(sleepInput)) {
+            alert("Please enter time as HH:MM, e.g. 23:40.");
+            return;
+        }
+
+        const value = sleepInput.trim();
+        if (value) globalSleepData[targetDate].sleep = value;
+        else delete globalSleepData[targetDate].sleep;
+
+        saveSleepData();
+    };
+
+    function trackerDatePath(type, dateStr) {
+        return `tracker/${type}/${dateStr}`;
+    }
+
+    async function writeTrackerDate(type, dateStr, value) {
+        if (!canSync()) return false;
+        if (!globalTrackerData[type]) globalTrackerData[type] = {};
+
+        const safeValue = value === null || value === undefined ? null : Math.max(0, Math.round(Number(value) || 0));
+        if (!safeValue) {
+            delete globalTrackerData[type][dateStr];
+            refreshPanels();
+            await cloudWrite(trackerDatePath(type, dateStr), null);
+        } else {
+            globalTrackerData[type][dateStr] = safeValue;
+            refreshPanels();
+            await cloudWrite(trackerDatePath(type, dateStr), safeValue);
+        }
+
+        return syncFromCloud();
+    }
+
+    async function addTrackerMinutes(type, dateStr, minutes) {
+        const safeMinutes = Math.max(0, Math.round(Number(minutes) || 0));
+        if (safeMinutes < 1) return false;
+        if (!globalTrackerData[type]) globalTrackerData[type] = {};
+
+        let remoteMinutes = Number(globalTrackerData[type][dateStr] || 0);
+        try {
+            const remoteValue = await cloudRead(trackerDatePath(type, dateStr));
+            remoteMinutes = Number(remoteValue || 0);
+        } catch (e) {}
+
+        return writeTrackerDate(type, dateStr, remoteMinutes + safeMinutes);
+    }
+
+    window.addActivityMinutes = addActivityMinutes = function (type, minutes) {
+        const todayStr = typeof getTodayStringForTimer === "function" ? getTodayStringForTimer() : new Date().toLocaleDateString("sv-SE");
+        return addTrackerMinutes(type, todayStr, minutes).catch(function (e) {
+            console.warn("Tracker add failed.", e);
+            return false;
+        });
+    };
+
+    window.editTodayActivity = editTodayActivity = function (type) {
+        const todayStr = new Date().toLocaleDateString("sv-SE");
+        if (!globalTrackerData[type]) globalTrackerData[type] = {};
+
+        const currentMinutes = globalTrackerData[type][todayStr] || 0;
+        const minutesInput = prompt(
+            `Enter today's ${type === "fitness" ? "Fitness" : "Study"} duration in MINUTES.\nEnter 0 to clear today's record:`,
+            currentMinutes,
+        );
+        if (minutesInput === null) return;
+
+        const minutes = parseInt(minutesInput, 10);
+        if (isNaN(minutes) || minutes < 0) {
+            alert("Please enter 0 or a positive number.");
+            return;
+        }
+
+        writeTrackerDate(type, todayStr, minutes).catch(function (e) {
+            console.warn("Tracker edit failed.", e);
+        });
+    };
+
+    window.clearTodayActivity = clearTodayActivity = function (type) {
+        const todayStr = new Date().toLocaleDateString("sv-SE");
+        writeTrackerDate(type, todayStr, null).catch(function (e) {
+            console.warn("Tracker clear failed.", e);
+        });
+    };
+
+    window.toggleTimer = toggleTimer = function (type) {
+        const timerObj = timers[type];
+        if (!timerObj) return;
+
+        if (timerObj.intervalId === null) {
+            timerObj.startTime = new Date();
+            localStorage.setItem(`${type}StartTime`, timerObj.startTime.getTime());
+            timerObj.intervalId = setInterval(function () { updateLiveTimerDisplay(type); }, 1000);
+            setTimerButtonState(type, "running");
+            return;
+        }
+
+        clearInterval(timerObj.intervalId);
+        timerObj.intervalId = null;
+        localStorage.removeItem(`${type}StartTime`);
+
+        const elapsedSeconds = Math.floor((new Date() - timerObj.startTime) / 1000);
+        const elapsedMinutes = Math.round(elapsedSeconds / 60);
+        timerObj.startTime = null;
+        setTimerButtonState(type, "idle");
+
+        if (elapsedMinutes >= 1) {
+            addActivityMinutes(type, elapsedMinutes);
+        } else {
+            alert("Duration too short (less than 1 minute). Not recorded.");
+            refreshPanels();
+        }
+    };
+
+    // Resume from cloud when the tab/device comes back, and keep short-interval sync active.
+    window.addEventListener("focus", syncFromCloud);
+    window.addEventListener("online", syncFromCloud);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) syncFromCloud();
+    });
+
+    if (!window.__v166DataSyncInterval) {
+        window.__v166DataSyncInterval = setInterval(syncFromCloud, SYNC_INTERVAL_MS);
+    }
+
+    setTimeout(syncFromCloud, 250);
+    setTimeout(syncFromCloud, 1200);
+})();
+</script>
+
+
+<script id="v167-local-first-sync-persistence-fix">
+(function () {
+    "use strict";
+
+    const SYNC_INTERVAL_MS = 12000;
+    const SLEEP_CACHE_KEY = "ccaxLifeTracker.sleepRecords.v167";
+    const TRACKER_CACHE_KEY = "ccaxLifeTracker.tracker.v167";
+    const PENDING_SLEEP_KEY = "ccaxLifeTracker.pendingSleepDates.v167";
+    const PENDING_TRACKER_KEY = "ccaxLifeTracker.pendingTrackerDates.v167";
+
+    if (window.__v166DataSyncInterval) {
+        clearInterval(window.__v166DataSyncInterval);
+        window.__v166DataSyncInterval = null;
+    }
+    if (window.__v167DataSyncInterval) {
+        clearInterval(window.__v167DataSyncInterval);
+        window.__v167DataSyncInterval = null;
+    }
+
+    function canSync() {
+        return typeof FIREBASE_BASE_URL !== "undefined" && typeof fetch === "function";
+    }
+
+    function asObject(value) {
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    }
+
+    function readJson(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            const parsed = JSON.parse(raw);
+            return parsed === null || parsed === undefined ? fallback : parsed;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function writeJson(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.warn("Local save skipped.", e);
+        }
+    }
+
+    function firebaseUrl(path) {
+        const cleanPath = String(path || "").replace(/^\/+/, "");
+        return `${FIREBASE_BASE_URL}${cleanPath}.json`;
+    }
+
+    async function cloudRead(path) {
+        const res = await fetch(`${firebaseUrl(path)}?v=${Date.now()}`, {
+            method: "GET",
+            cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`Read failed: ${path} (${res.status})`);
+        return res.json();
+    }
+
+    async function cloudPut(path, value) {
+        const res = await fetch(firebaseUrl(path), {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(value),
+            cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`Write failed: ${path} (${res.status})`);
+        return res.json();
+    }
+
+    function cleanSleepData(data) {
+        const result = {};
+        Object.entries(asObject(data)).forEach(([date, record]) => {
+            const safeRecord = asObject(record);
+            const cleaned = {};
+            if (typeof safeRecord.wake === "string" && safeRecord.wake.trim()) cleaned.wake = safeRecord.wake.trim();
+            if (typeof safeRecord.sleep === "string" && safeRecord.sleep.trim()) cleaned.sleep = safeRecord.sleep.trim();
+            if (Object.keys(cleaned).length) result[date] = cleaned;
+        });
+        return result;
+    }
+
+    function cleanTrackerData(data) {
+        const source = asObject(data);
+        const result = { fitness: {}, study: {} };
+        ["fitness", "study"].forEach((type) => {
+            Object.entries(asObject(source[type])).forEach(([date, value]) => {
+                const safeValue = Math.max(0, Math.round(Number(value) || 0));
+                if (safeValue > 0) result[type][date] = safeValue;
+            });
+        });
+        return result;
+    }
+
+    function getPendingSleep() {
+        return asObject(readJson(PENDING_SLEEP_KEY, {}));
+    }
+
+    function savePendingSleep(value) {
+        writeJson(PENDING_SLEEP_KEY, asObject(value));
+    }
+
+    function getPendingTracker() {
+        const pending = asObject(readJson(PENDING_TRACKER_KEY, {}));
+        return {
+            fitness: asObject(pending.fitness),
+            study: asObject(pending.study),
+        };
+    }
+
+    function savePendingTracker(value) {
+        writeJson(PENDING_TRACKER_KEY, {
+            fitness: asObject(value && value.fitness),
+            study: asObject(value && value.study),
+        });
+    }
+
+    function persistSleepLocal() {
+        globalSleepData = cleanSleepData(globalSleepData);
+        writeJson(SLEEP_CACHE_KEY, globalSleepData);
+    }
+
+    function persistTrackerLocal() {
+        globalTrackerData = cleanTrackerData(globalTrackerData);
+        writeJson(TRACKER_CACHE_KEY, globalTrackerData);
+    }
+
+    function mergeSleepRecords(remoteData) {
+        const remote = cleanSleepData(remoteData);
+        const local = cleanSleepData(readJson(SLEEP_CACHE_KEY, {}));
+        const pending = getPendingSleep();
+        const merged = Object.assign({}, remote);
+
+        // Local cache protects data from disappearing when the cloud is empty or temporarily unavailable.
+        Object.entries(local).forEach(([date, record]) => {
+            if (!merged[date] || pending[date]) merged[date] = record;
+        });
+
+        // Pending deletions must also survive refresh until Firebase accepts the delete.
+        Object.keys(pending).forEach((date) => {
+            if (!local[date]) delete merged[date];
+        });
+
+        return cleanSleepData(merged);
+    }
+
+    function mergeTrackerRecords(remoteData) {
+        const remote = cleanTrackerData(remoteData);
+        const local = cleanTrackerData(readJson(TRACKER_CACHE_KEY, {}));
+        const pending = getPendingTracker();
+        const merged = cleanTrackerData(remote);
+
+        ["fitness", "study"].forEach((type) => {
+            Object.entries(local[type]).forEach(([date, value]) => {
+                if (!merged[type][date] || pending[type][date]) merged[type][date] = value;
+            });
+
+            Object.keys(pending[type]).forEach((date) => {
+                if (!local[type][date]) delete merged[type][date];
+            });
+        });
+
+        return cleanTrackerData(merged);
+    }
+
+    function refreshPanels() {
+        try { if (typeof migrateLegacyWakeData === "function") migrateLegacyWakeData(); } catch (e) {}
+        try { if (typeof updateSleepButtons === "function") updateSleepButtons(); } catch (e) {}
+        try {
+            if (typeof lastChartSignature !== "undefined") lastChartSignature = "";
+            if (document.getElementById("page1")?.classList.contains("active") && typeof renderChart === "function") renderChart();
+        } catch (e) {}
+        try { if (typeof renderTrackerStats === "function") renderTrackerStats(); } catch (e) {}
+    }
+
+    function loadLocalFirst() {
+        const localSleep = cleanSleepData(readJson(SLEEP_CACHE_KEY, {}));
+        const localTracker = cleanTrackerData(readJson(TRACKER_CACHE_KEY, {}));
+
+        if (Object.keys(localSleep).length) {
+            globalSleepData = Object.assign(cleanSleepData(globalSleepData), localSleep);
+        }
+
+        if (Object.keys(localTracker.fitness).length || Object.keys(localTracker.study).length) {
+            globalTrackerData = {
+                fitness: Object.assign({}, cleanTrackerData(globalTrackerData).fitness, localTracker.fitness),
+                study: Object.assign({}, cleanTrackerData(globalTrackerData).study, localTracker.study),
+            };
+        }
+
+        refreshPanels();
+    }
+
+    async function syncFromCloudLocalFirst() {
+        loadLocalFirst();
+        if (!canSync()) return false;
+
+        try {
+            const [legacyResult, sleepResult, trackerResult] = await Promise.allSettled([
+                cloudRead("checkins"),
+                cloudRead("sleepRecords"),
+                cloudRead("tracker"),
+            ]);
+
+            if (legacyResult.status === "fulfilled") globalHistoryData = asObject(legacyResult.value);
+
+            if (sleepResult.status === "fulfilled") {
+                globalSleepData = mergeSleepRecords(sleepResult.value);
+                persistSleepLocal();
+            } else {
+                globalSleepData = mergeSleepRecords(globalSleepData);
+                persistSleepLocal();
+            }
+
+            if (trackerResult.status === "fulfilled") {
+                globalTrackerData = mergeTrackerRecords(trackerResult.value);
+                persistTrackerLocal();
+            } else {
+                globalTrackerData = mergeTrackerRecords(globalTrackerData);
+                persistTrackerLocal();
+            }
+
+            window.__lastSuccessfulCloudSyncAt = Date.now();
+            refreshPanels();
+            return true;
+        } catch (e) {
+            console.warn("Local-first sync kept local data. Cloud read skipped.", e);
+            loadLocalFirst();
+            return false;
+        }
+    }
+
+    function markPendingSleep(dateStr) {
+        if (!dateStr) return;
+        const pending = getPendingSleep();
+        pending[dateStr] = true;
+        savePendingSleep(pending);
+    }
+
+    function clearPendingSleep(dateStr) {
+        const pending = getPendingSleep();
+        delete pending[dateStr];
+        savePendingSleep(pending);
+    }
+
+    function markPendingTracker(type, dateStr) {
+        if (!type || !dateStr) return;
+        const pending = getPendingTracker();
+        if (!pending[type]) pending[type] = {};
+        pending[type][dateStr] = true;
+        savePendingTracker(pending);
+    }
+
+    function clearPendingTracker(type, dateStr) {
+        const pending = getPendingTracker();
+        if (pending[type]) delete pending[type][dateStr];
+        savePendingTracker(pending);
+    }
+
+    async function writeSleepDate(dateStr) {
+        const record = cleanSleepData({ [dateStr]: globalSleepData[dateStr] })[dateStr];
+        markPendingSleep(dateStr);
+        persistSleepLocal();
+        refreshPanels();
+
+        if (!canSync()) return false;
+
+        try {
+            await cloudPut(`sleepRecords/${dateStr}`, record || null);
+            clearPendingSleep(dateStr);
+            return await syncFromCloudLocalFirst();
+        } catch (e) {
+            console.warn("Sleep cloud write failed; local data kept.", e);
+            return false;
+        }
+    }
+
+    async function writeTrackerDate(type, dateStr, value) {
+        if (!globalTrackerData[type]) globalTrackerData[type] = {};
+        const safeValue = Math.max(0, Math.round(Number(value) || 0));
+
+        if (safeValue > 0) globalTrackerData[type][dateStr] = safeValue;
+        else delete globalTrackerData[type][dateStr];
+
+        markPendingTracker(type, dateStr);
+        persistTrackerLocal();
+        refreshPanels();
+
+        if (!canSync()) return false;
+
+        try {
+            await cloudPut(`tracker/${type}/${dateStr}`, safeValue > 0 ? safeValue : null);
+            clearPendingTracker(type, dateStr);
+            return await syncFromCloudLocalFirst();
+        } catch (e) {
+            console.warn("Tracker cloud write failed; local data kept.", e);
+            return false;
+        }
+    }
+
+    async function addTrackerMinutes(type, dateStr, minutes) {
+        const safeMinutes = Math.max(0, Math.round(Number(minutes) || 0));
+        if (safeMinutes < 1) return false;
+
+        const localTracker = cleanTrackerData(readJson(TRACKER_CACHE_KEY, {}));
+        const localMinutes = Number((localTracker[type] || {})[dateStr] || globalTrackerData[type]?.[dateStr] || 0);
+        let baseMinutes = localMinutes;
+
+        if (canSync()) {
+            try {
+                const remoteValue = await cloudRead(`tracker/${type}/${dateStr}`);
+                baseMinutes = Math.max(localMinutes, Number(remoteValue || 0));
+            } catch (e) {}
+        }
+
+        return writeTrackerDate(type, dateStr, baseMinutes + safeMinutes);
+    }
+
+    let lastSleepTouchedDateV167 = null;
+    function touchSleepDate(dateStr) {
+        lastSleepTouchedDateV167 = dateStr;
+        return dateStr;
+    }
+
+    window.fetchCloudData = fetchCloudData = function () {
+        return syncFromCloudLocalFirst();
+    };
+
+    window.saveSleepData = saveSleepData = function () {
+        const touchedDate = lastSleepTouchedDateV167;
+        lastSleepTouchedDateV167 = null;
+
+        persistSleepLocal();
+        refreshPanels();
+
+        if (touchedDate) return writeSleepDate(touchedDate);
+
+        // Fallback: keep local data immediately, then write changed dates one by one.
+        const pendingWrites = Object.keys(globalSleepData || {}).map((date) => writeSleepDate(date));
+        return Promise.allSettled(pendingWrites).then(() => syncFromCloudLocalFirst());
+    };
+
+    window.toggleWakeCheckIn = toggleWakeCheckIn = function () {
+        const todayStr = getDateString(new Date());
+        touchSleepDate(todayStr);
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+        if (globalSleepData[todayStr].wake) delete globalSleepData[todayStr].wake;
+        else globalSleepData[todayStr].wake = getTimeString(new Date());
+
+        if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
+        saveSleepData();
+    };
+
+    window.toggleSleepCheckIn = toggleSleepCheckIn = function () {
+        const targetDate = getSleepTargetDate();
+        touchSleepDate(targetDate);
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+
+        if (globalSleepData[targetDate].sleep) delete globalSleepData[targetDate].sleep;
+        else globalSleepData[targetDate].sleep = getTimeString(new Date());
+
+        if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
+        saveSleepData();
+    };
+
+    window.editTodayWakeRecord = editTodayWakeRecord = function () {
+        const todayStr = getDateString(new Date());
+        touchSleepDate(todayStr);
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+        const currentWake = globalSleepData[todayStr].wake || "";
+        const wakeInput = prompt("Enter today's WAKE time in HH:MM format. Leave blank to clear wake time.", currentWake);
+        if (wakeInput === null) return;
+
+        if (!isValidTimeOrBlank(wakeInput)) {
+            alert("Please enter time as HH:MM, e.g. 07:15.");
+            return;
+        }
+
+        const value = wakeInput.trim();
+        if (value) globalSleepData[todayStr].wake = value;
+        else delete globalSleepData[todayStr].wake;
+
+        if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
+        saveSleepData();
+    };
+
+    window.editTodaySleepOnlyRecord = editTodaySleepOnlyRecord = function () {
+        const targetDate = getSleepTargetDate();
+        touchSleepDate(targetDate);
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+
+        const currentSleep = globalSleepData[targetDate].sleep || "";
+        const sleepInput = prompt("Enter SLEEP time in HH:MM format. Leave blank to clear sleep time.", currentSleep);
+        if (sleepInput === null) return;
+
+        if (!isValidTimeOrBlank(sleepInput)) {
+            alert("Please enter time as HH:MM, e.g. 23:40.");
+            return;
+        }
+
+        const value = sleepInput.trim();
+        if (value) globalSleepData[targetDate].sleep = value;
+        else delete globalSleepData[targetDate].sleep;
+
+        if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
+        saveSleepData();
+    };
+
+    window.addActivityMinutes = addActivityMinutes = function (type, minutes) {
+        const todayStr = typeof getTodayStringForTimer === "function" ? getTodayStringForTimer() : new Date().toLocaleDateString("sv-SE");
+        return addTrackerMinutes(type, todayStr, minutes);
+    };
+
+    window.editTodayActivity = editTodayActivity = function (type) {
+        if (timers[type]?.intervalId !== null) {
+            alert("Please stop or reset the active timer before editing today's data.");
+            return;
+        }
+
+        const todayStr = new Date().toLocaleDateString("sv-SE");
+        if (!globalTrackerData[type]) globalTrackerData[type] = {};
+
+        const currentMinutes = globalTrackerData[type][todayStr] || 0;
+        const minutesInput = prompt(
+            `Enter today's ${type === "fitness" ? "Fitness" : "Study"} duration in MINUTES.\nEnter 0 to clear today's record:`,
+            currentMinutes,
+        );
+        if (minutesInput === null) return;
+
+        const minutes = parseInt(minutesInput, 10);
+        if (isNaN(minutes) || minutes < 0) {
+            alert("Please enter 0 or a positive number.");
+            return;
+        }
+
+        writeTrackerDate(type, todayStr, minutes);
+    };
+
+    window.clearTodayActivity = clearTodayActivity = function (type) {
+        const todayStr = new Date().toLocaleDateString("sv-SE");
+        writeTrackerDate(type, todayStr, null);
+    };
+
+    window.toggleTimer = toggleTimer = function (type) {
+        const timerObj = timers[type];
+        if (!timerObj) return;
+
+        if (timerObj.intervalId === null) {
+            timerObj.startTime = new Date();
+            localStorage.setItem(`${type}StartTime`, timerObj.startTime.getTime());
+            timerObj.intervalId = setInterval(function () { updateLiveTimerDisplay(type); }, 1000);
+            setTimerButtonState(type, "running");
+            return;
+        }
+
+        clearInterval(timerObj.intervalId);
+        timerObj.intervalId = null;
+        localStorage.removeItem(`${type}StartTime`);
+
+        const elapsedSeconds = Math.floor((new Date() - timerObj.startTime) / 1000);
+        const elapsedMinutes = Math.round(elapsedSeconds / 60);
+        timerObj.startTime = null;
+        setTimerButtonState(type, "idle");
+
+        if (elapsedMinutes >= 1) addActivityMinutes(type, elapsedMinutes);
+        else {
+            alert("Duration too short (less than 1 minute). Not recorded.");
+            refreshPanels();
+        }
+    };
+
+    // Local-first load immediately. This prevents a refresh from showing empty data while cloud is slow/empty.
+    loadLocalFirst();
+    setTimeout(loadLocalFirst, 350);
+    setTimeout(loadLocalFirst, 1300);
+    setTimeout(syncFromCloudLocalFirst, 1500);
+
+    window.addEventListener("focus", syncFromCloudLocalFirst);
+    window.addEventListener("online", syncFromCloudLocalFirst);
+    window.addEventListener("pageshow", function () {
+        loadLocalFirst();
+        setTimeout(syncFromCloudLocalFirst, 300);
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) syncFromCloudLocalFirst();
+    });
+
+    window.__v167DataSyncInterval = setInterval(syncFromCloudLocalFirst, SYNC_INTERVAL_MS);
+})();
+</script>
