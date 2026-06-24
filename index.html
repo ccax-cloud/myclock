@@ -5003,7 +5003,9 @@ body {
                                 backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--chart-fill").trim(),
                                 borderColor: getComputedStyle(document.documentElement).getPropertyValue("--chart-line").trim(),
                                 borderWidth: 3.5,
-                                pointRadius: 5,
+                                pointRadius: 0,
+                                pointHoverRadius: 0,
+                                pointHitRadius: 12,
                                 fill: true,
                                 tension: 0.3,
                                 spanGaps: true,
@@ -5014,8 +5016,9 @@ body {
                                 backgroundColor: "transparent",
                                 borderColor: "rgba(76, 94, 112, 0.50)",
                                 borderWidth: 2.1,
-                                pointRadius: 2.6,
-                                pointHoverRadius: 3.6,
+                                pointRadius: 0,
+                                pointHoverRadius: 0,
+                                pointHitRadius: 12,
                                 fill: false,
                                 tension: 0.3,
                                 borderDash: [4, 6],
@@ -9810,5 +9813,1011 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     });
 
     window.__v168CloudSyncInterval = setInterval(syncFromCloudV168, SYNC_INTERVAL_MS);
+})();
+</script>
+
+
+<!-- v169: Tianjin default + visible cloud sync checker -->
+<style id="v169-tianjin-sync-check-css">
+.sync-check-wrap {
+    width: 85%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.btn-sync-check {
+    width: 100% !important;
+    max-width: 320px !important;
+    padding: 9px 18px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.9px !important;
+    color: var(--adaptive-text-strong) !important;
+    background: rgba(255,255,255,0.18) !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
+    box-shadow: 0 7px 16px rgba(0,0,0,0.07) !important;
+}
+
+.btn-sync-check:hover {
+    background: rgba(255,255,255,0.28) !important;
+}
+
+.sync-check-note {
+    min-height: 12px;
+    font-size: 8px;
+    line-height: 1.2;
+    letter-spacing: 0.45px;
+    text-transform: uppercase;
+    color: var(--adaptive-text-muted);
+    text-align: center;
+    opacity: 0.88;
+}
+
+.sync-check-note.ok { color: var(--adaptive-text-strong); }
+.sync-check-note.warn { color: #9b7461; }
+.sync-check-note.error { color: #a85f5f; }
+
+@media (max-width: 520px) {
+    .sync-check-wrap {
+        width: 85%;
+        max-width: 320px;
+        gap: 5px;
+        margin-top: 0;
+    }
+
+    .btn-sync-check {
+        padding: 8px 14px !important;
+        font-size: 8px !important;
+    }
+
+    .sync-check-note {
+        font-size: 7px;
+    }
+}
+</style>
+
+<script id="v169-tianjin-default-and-sync-check">
+(function () {
+    "use strict";
+
+    const DEFAULT_CITY_VERSION_KEY = "ccaxLifeTracker.defaultCityVersion";
+    const DEFAULT_CITY_VERSION = "v169-tianjin-default";
+    const TIANJIN_PLACE = {
+        label: "Tianjin · China",
+        city: "Tianjin",
+        name: "Tianjin",
+        country: "China",
+        latitude: 39.3434,
+        longitude: 117.3616,
+        timezone: "Asia/Shanghai"
+    };
+
+    const SLEEP_CACHE_KEY = "ccaxLifeTracker.sleepRecords.v167";
+    const TRACKER_CACHE_KEY = "ccaxLifeTracker.tracker.v167";
+
+    function safeReadJson(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            const parsed = JSON.parse(raw);
+            return parsed == null ? fallback : parsed;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function safeWriteJson(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    }
+
+    function setDefaultTianjinOnce() {
+        try {
+            if (localStorage.getItem(DEFAULT_CITY_VERSION_KEY) === DEFAULT_CITY_VERSION) return;
+
+            localStorage.setItem("clockCityName", TIANJIN_PLACE.city);
+            localStorage.setItem("clockCountryName", TIANJIN_PLACE.country);
+            localStorage.setItem("clockLocationDisplay", TIANJIN_PLACE.label);
+            localStorage.setItem("clockLatitude", String(TIANJIN_PLACE.latitude));
+            localStorage.setItem("clockLongitude", String(TIANJIN_PLACE.longitude));
+            safeWriteJson("stableWeatherPlaceV107", TIANJIN_PLACE);
+
+            localStorage.removeItem("stableWeatherCacheV107");
+            localStorage.removeItem("stableHourlyWeatherCacheV1");
+            localStorage.setItem(DEFAULT_CITY_VERSION_KEY, DEFAULT_CITY_VERSION);
+
+            try { currentCity = TIANJIN_PLACE.city; } catch (e) {}
+            try { currentCountry = TIANJIN_PLACE.country; } catch (e) {}
+            try { currentLocationName = TIANJIN_PLACE.label; } catch (e) {}
+            try { currentLatitude = TIANJIN_PLACE.latitude; } catch (e) {}
+            try { currentLongitude = TIANJIN_PLACE.longitude; } catch (e) {}
+            try { if (typeof saveWeatherLocation === "function") saveWeatherLocation(TIANJIN_PLACE); } catch (e) {}
+            try { if (typeof updateClockLocationLabel === "function") updateClockLocationLabel(); } catch (e) {}
+        } catch (e) {
+            console.warn("Tianjin default setup skipped.", e);
+        }
+    }
+
+    function refreshTianjinWeather() {
+        try {
+            if (typeof window.refreshWeatherV107 === "function") {
+                window.refreshWeatherV107();
+                return;
+            }
+            if (typeof window.fetchWeather === "function") {
+                window.fetchWeather();
+                return;
+            }
+            if (typeof fetchWeather === "function") fetchWeather();
+        } catch (e) {}
+    }
+
+    function asObject(value) {
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    }
+
+    function cleanSleepData(data) {
+        const result = {};
+        Object.entries(asObject(data)).forEach(function ([date, record]) {
+            const source = asObject(record);
+            const cleaned = {};
+            if (typeof source.wake === "string" && source.wake.trim()) cleaned.wake = source.wake.trim();
+            if (typeof source.sleep === "string" && source.sleep.trim()) cleaned.sleep = source.sleep.trim();
+            if (Object.keys(cleaned).length) result[date] = cleaned;
+        });
+        return result;
+    }
+
+    function cleanTrackerData(data) {
+        const source = asObject(data);
+        const result = { fitness: {}, study: {} };
+        ["fitness", "study"].forEach(function (type) {
+            Object.entries(asObject(source[type])).forEach(function ([date, value]) {
+                const minutes = Math.max(0, Math.round(Number(value) || 0));
+                if (minutes > 0) result[type][date] = minutes;
+            });
+        });
+        return result;
+    }
+
+    function getTodayString() {
+        try { if (typeof getDateString === "function") return getDateString(new Date()); } catch (e) {}
+        return new Date().toLocaleDateString("sv-SE");
+    }
+
+    function getSleepDateString() {
+        try { if (typeof getSleepTargetDate === "function") return getSleepTargetDate(); } catch (e) {}
+        return getTodayString();
+    }
+
+    function getLocalSnapshot() {
+        let sleepFromGlobal = {};
+        let trackerFromGlobal = { fitness: {}, study: {} };
+
+        try { if (typeof globalSleepData !== "undefined") sleepFromGlobal = cleanSleepData(globalSleepData); } catch (e) {}
+        try { if (typeof globalTrackerData !== "undefined") trackerFromGlobal = cleanTrackerData(globalTrackerData); } catch (e) {}
+
+        const sleepFromCache = cleanSleepData(safeReadJson(SLEEP_CACHE_KEY, {}));
+        const trackerFromCache = cleanTrackerData(safeReadJson(TRACKER_CACHE_KEY, {}));
+
+        return {
+            sleep: Object.assign({}, sleepFromCache, sleepFromGlobal),
+            tracker: {
+                fitness: Object.assign({}, trackerFromCache.fitness, trackerFromGlobal.fitness),
+                study: Object.assign({}, trackerFromCache.study, trackerFromGlobal.study)
+            }
+        };
+    }
+
+    function valueText(value) {
+        if (value === undefined || value === null || value === "") return "--";
+        return String(value);
+    }
+
+    function hasValue(value) {
+        return value !== undefined && value !== null && value !== "" && value !== 0 && value !== "0";
+    }
+
+    function firebaseNodeUrl(nodeName) {
+        if (typeof FIREBASE_BASE_URL === "undefined") throw new Error("Firebase URL unavailable");
+        const cleanNode = String(nodeName || "").replace(/^\/+|\/+$/g, "");
+        return FIREBASE_BASE_URL + cleanNode + ".json?v=" + Date.now();
+    }
+
+    async function readCloudNode(nodeName) {
+        const response = await fetch(firebaseNodeUrl(nodeName), {
+            method: "GET",
+            cache: "no-store"
+        });
+        if (!response.ok) throw new Error("Cloud read failed: " + nodeName + " (" + response.status + ")");
+        return response.json();
+    }
+
+    function setSyncStatus(text, state) {
+        const note = document.getElementById("sync-check-note");
+        const button = document.getElementById("sync-check-btn");
+        if (note) {
+            note.textContent = text;
+            note.classList.remove("ok", "warn", "error");
+            if (state) note.classList.add(state);
+        }
+        if (button) button.textContent = state === "error" ? "SYNC ERROR" : "SYNC CHECK";
+    }
+
+    function buildRows(localBefore, localAfter, cloud) {
+        const today = getTodayString();
+        const sleepDate = getSleepDateString();
+        const cloudSleep = cleanSleepData(cloud.sleepRecords);
+        const cloudTracker = cleanTrackerData(cloud.tracker);
+
+        return [
+            {
+                label: "Wake " + today,
+                before: asObject(localBefore.sleep[today]).wake,
+                after: asObject(localAfter.sleep[today]).wake,
+                cloud: asObject(cloudSleep[today]).wake
+            },
+            {
+                label: "Sleep " + sleepDate,
+                before: asObject(localBefore.sleep[sleepDate]).sleep,
+                after: asObject(localAfter.sleep[sleepDate]).sleep,
+                cloud: asObject(cloudSleep[sleepDate]).sleep
+            },
+            {
+                label: "Fitness " + today,
+                before: localBefore.tracker.fitness[today],
+                after: localAfter.tracker.fitness[today],
+                cloud: cloudTracker.fitness[today]
+            },
+            {
+                label: "Study " + today,
+                before: localBefore.tracker.study[today],
+                after: localAfter.tracker.study[today],
+                cloud: cloudTracker.study[today]
+            }
+        ];
+    }
+
+    function summarizeSyncRows(rows) {
+        const localHasData = rows.some(function (row) { return hasValue(row.before); });
+        const cloudHasData = rows.some(function (row) { return hasValue(row.cloud); });
+        const localNotInCloud = rows.some(function (row) {
+            return hasValue(row.before) && valueText(row.before) !== valueText(row.cloud);
+        });
+        const cloudNotInLocalBefore = rows.some(function (row) {
+            return hasValue(row.cloud) && valueText(row.before) !== valueText(row.cloud);
+        });
+        const cloudNowInLocal = rows.every(function (row) {
+            return !hasValue(row.cloud) || valueText(row.after) === valueText(row.cloud);
+        });
+
+        if (!localHasData && !cloudHasData) return { text: "NO DATA TO SYNC", state: "warn" };
+        if (localNotInCloud) return { text: "LOCAL ≠ CLOUD", state: "warn" };
+        if (cloudNotInLocalBefore && cloudNowInLocal) return { text: "CLOUD FOUND · LOCAL REFRESHED", state: "ok" };
+        if (cloudHasData || localHasData) return { text: "SYNC OK", state: "ok" };
+        return { text: "SYNC CHECKED", state: "ok" };
+    }
+
+    function rowsToMessage(rows, summary) {
+        const lines = rows.map(function (row) {
+            return row.label + "\n  Local before: " + valueText(row.before) + "\n  Cloud: " + valueText(row.cloud) + "\n  Local after: " + valueText(row.after);
+        });
+        return summary.text + "\n\n" + lines.join("\n\n") + "\n\nTip: If desktop has a value but Cloud is --, open desktop and tap SYNC CHECK after saving. If Cloud has a value but phone is blank, tap SYNC CHECK on phone or refresh once.";
+    }
+
+    async function checkCloudSyncStatus() {
+        const button = document.getElementById("sync-check-btn");
+        if (button) button.textContent = "CHECKING...";
+        setSyncStatus("CHECKING CLOUD...", "warn");
+
+        try {
+            const localBefore = getLocalSnapshot();
+
+            let cloud = {};
+            const [sleepResult, trackerResult] = await Promise.allSettled([
+                readCloudNode("sleepRecords"),
+                readCloudNode("tracker")
+            ]);
+
+            if (sleepResult.status === "fulfilled") cloud.sleepRecords = sleepResult.value;
+            else throw sleepResult.reason || new Error("Sleep cloud read failed");
+
+            if (trackerResult.status === "fulfilled") cloud.tracker = trackerResult.value;
+            else throw trackerResult.reason || new Error("Tracker cloud read failed");
+
+            try { if (typeof window.fetchCloudData === "function") await window.fetchCloudData(); } catch (e) {}
+            try { if (typeof updateSleepButtons === "function") updateSleepButtons(); } catch (e) {}
+            try { if (typeof renderTrackerStats === "function") renderTrackerStats(); } catch (e) {}
+            try {
+                if (typeof lastChartSignature !== "undefined") lastChartSignature = "";
+                if (typeof renderChart === "function") renderChart();
+            } catch (e) {}
+
+            const localAfter = getLocalSnapshot();
+            const rows = buildRows(localBefore, localAfter, cloud);
+            const summary = summarizeSyncRows(rows);
+            const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+            setSyncStatus(summary.text + " · " + time, summary.state);
+            alert(rowsToMessage(rows, summary));
+            return { summary: summary, rows: rows };
+        } catch (error) {
+            console.warn("Cloud sync check failed.", error);
+            setSyncStatus("CLOUD CHECK FAILED", "error");
+            alert("Cloud check failed.\n\n" + (error && error.message ? error.message : String(error)) + "\n\nPlease check network / Firebase access, then try again.");
+            return null;
+        } finally {
+            if (button) button.textContent = "SYNC CHECK";
+        }
+    }
+
+    function installSyncCheckUi() {
+        if (document.getElementById("sync-check-btn")) return;
+
+        const btnGroup = document.querySelector("#page1 .btn-group");
+        if (!btnGroup) return;
+
+        const wrap = document.createElement("div");
+        wrap.className = "sync-check-wrap";
+        wrap.innerHTML = '<button class="btn btn-sync-check" id="sync-check-btn" type="button">SYNC CHECK</button><div class="sync-check-note" id="sync-check-note">CHECK CLOUD STATUS</div>';
+        btnGroup.appendChild(wrap);
+
+        const button = document.getElementById("sync-check-btn");
+        if (button) button.addEventListener("click", checkCloudSyncStatus);
+    }
+
+    function updatePassiveSyncStatus() {
+        const last = Number(window.__lastSuccessfulCloudSyncAt || 0);
+        if (!last) return;
+        const ageSeconds = Math.max(0, Math.round((Date.now() - last) / 1000));
+        if (ageSeconds <= 30) setSyncStatus("LAST CLOUD READ OK", "ok");
+    }
+
+    window.checkCloudSyncStatus = checkCloudSyncStatus;
+
+    setDefaultTianjinOnce();
+
+    function start() {
+        installSyncCheckUi();
+        refreshTianjinWeather();
+        setTimeout(refreshTianjinWeather, 800);
+        setTimeout(updatePassiveSyncStatus, 1600);
+        setInterval(updatePassiveSyncStatus, 15000);
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+    else start();
+})();
+</script>
+
+<!-- v170: 401-safe sync diagnosis + non-destructive cloud writes -->
+<style id="v170-sync-401-safe-css">
+.sync-check-note.blocked { color: #a85f5f; }
+.sync-check-note.local { color: #9b7461; }
+</style>
+<script id="v170-sync-401-safe">
+(function () {
+    "use strict";
+
+    const SLEEP_CACHE_KEY = "ccaxLifeTracker.sleepRecords.v167";
+    const TRACKER_CACHE_KEY = "ccaxLifeTracker.tracker.v167";
+    const SYNC_INTERVAL_MS = 15000;
+
+    if (window.__v168CloudSyncInterval) {
+        clearInterval(window.__v168CloudSyncInterval);
+        window.__v168CloudSyncInterval = null;
+    }
+    if (window.__v170CloudSyncInterval) {
+        clearInterval(window.__v170CloudSyncInterval);
+        window.__v170CloudSyncInterval = null;
+    }
+
+    function canSync() {
+        return typeof FIREBASE_BASE_URL !== "undefined" && typeof fetch === "function";
+    }
+
+    function asObject(value) {
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    }
+
+    function readJson(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            const parsed = JSON.parse(raw);
+            return parsed === null || parsed === undefined ? fallback : parsed;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function writeJson(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    }
+
+    function firebaseUrl(path) {
+        if (!canSync()) throw new Error("Firebase unavailable");
+        const cleanPath = String(path || "").replace(/^\/+|\/+$/g, "");
+        return FIREBASE_BASE_URL + cleanPath + ".json";
+    }
+
+    function cleanSleepData(data) {
+        const result = {};
+        Object.entries(asObject(data)).forEach(function ([date, record]) {
+            const source = asObject(record);
+            const cleaned = {};
+            if (typeof source.wake === "string" && source.wake.trim()) cleaned.wake = source.wake.trim();
+            if (typeof source.sleep === "string" && source.sleep.trim()) cleaned.sleep = source.sleep.trim();
+            if (Object.keys(cleaned).length) result[date] = cleaned;
+        });
+        return result;
+    }
+
+    function cleanTrackerData(data) {
+        const source = asObject(data);
+        const result = { fitness: {}, study: {} };
+        ["fitness", "study"].forEach(function (type) {
+            Object.entries(asObject(source[type])).forEach(function ([date, value]) {
+                const minutes = Math.max(0, Math.round(Number(value) || 0));
+                if (minutes > 0) result[type][date] = minutes;
+            });
+        });
+        return result;
+    }
+
+    function ensureGlobals() {
+        if (typeof globalSleepData === "undefined" || !globalSleepData) globalSleepData = {};
+        if (typeof globalTrackerData === "undefined" || !globalTrackerData) globalTrackerData = { fitness: {}, study: {} };
+        if (!globalTrackerData.fitness) globalTrackerData.fitness = {};
+        if (!globalTrackerData.study) globalTrackerData.study = {};
+    }
+
+    function persistLocal() {
+        ensureGlobals();
+        globalSleepData = cleanSleepData(globalSleepData);
+        globalTrackerData = cleanTrackerData(globalTrackerData);
+        writeJson(SLEEP_CACHE_KEY, globalSleepData);
+        writeJson(TRACKER_CACHE_KEY, globalTrackerData);
+    }
+
+    function localSnapshot() {
+        ensureGlobals();
+        const cacheSleep = cleanSleepData(readJson(SLEEP_CACHE_KEY, {}));
+        const cacheTracker = cleanTrackerData(readJson(TRACKER_CACHE_KEY, {}));
+        const globalSleep = cleanSleepData(globalSleepData);
+        const globalTracker = cleanTrackerData(globalTrackerData);
+
+        return {
+            sleep: Object.assign({}, cacheSleep, globalSleep),
+            tracker: {
+                fitness: Object.assign({}, cacheTracker.fitness, globalTracker.fitness),
+                study: Object.assign({}, cacheTracker.study, globalTracker.study)
+            }
+        };
+    }
+
+    function mergeSleep(remote, local) {
+        return Object.assign({}, cleanSleepData(remote), cleanSleepData(local));
+    }
+
+    function mergeTracker(remote, local) {
+        const r = cleanTrackerData(remote);
+        const l = cleanTrackerData(local);
+        return {
+            fitness: Object.assign({}, r.fitness, l.fitness),
+            study: Object.assign({}, r.study, l.study)
+        };
+    }
+
+    function refreshPanels() {
+        try { if (typeof migrateLegacyWakeData === "function") migrateLegacyWakeData(); } catch (e) {}
+        try { if (typeof updateSleepButtons === "function") updateSleepButtons(); } catch (e) {}
+        try {
+            if (typeof lastChartSignature !== "undefined") lastChartSignature = "";
+            if (typeof renderChart === "function") renderChart();
+        } catch (e) {}
+        try { if (typeof renderTrackerStats === "function") renderTrackerStats(); } catch (e) {}
+    }
+
+    function setSyncStatus(text, state) {
+        const note = document.getElementById("sync-check-note");
+        const button = document.getElementById("sync-check-btn");
+        if (note) {
+            note.textContent = text;
+            note.classList.remove("ok", "warn", "error", "blocked", "local");
+            if (state) note.classList.add(state);
+        }
+        if (button) button.textContent = state === "blocked" ? "CLOUD BLOCKED" : "SYNC CHECK";
+    }
+
+    function statusError(prefix, nodeName, status) {
+        const error = new Error(prefix + ": " + nodeName + " (" + status + ")");
+        error.status = status;
+        error.nodeName = nodeName;
+        return error;
+    }
+
+    async function cloudGet(nodeName) {
+        const response = await fetch(firebaseUrl(nodeName) + "?v=" + Date.now(), {
+            method: "GET",
+            cache: "no-store"
+        });
+        if (!response.ok) throw statusError("Cloud read failed", nodeName, response.status);
+        return response.json();
+    }
+
+    async function cloudPut(path, value) {
+        const response = await fetch(firebaseUrl(path), {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(value),
+            cache: "no-store"
+        });
+        if (!response.ok) throw statusError("Cloud write failed", path, response.status);
+        return response.json();
+    }
+
+    function isAuthBlocked(error) {
+        return error && (error.status === 401 || error.status === 403);
+    }
+
+    function explainBlocked(error) {
+        const code = error && error.status ? error.status : "401/403";
+        return "CLOUD BLOCKED " + code + "\n\nFirebase is rejecting the page's cloud read/write request. Cross-device sync cannot work while this is blocked.\n\nThe page will keep this device's local data and will not overwrite the cloud.\n\nFix in Firebase Realtime Database rules: allow this page to read and write, or add proper Firebase Auth/App Check support.";
+    }
+
+    async function syncFromCloudSafe() {
+        ensureGlobals();
+        const before = localSnapshot();
+        persistLocal();
+
+        if (!canSync()) {
+            setSyncStatus("LOCAL ONLY · FIREBASE UNAVAILABLE", "local");
+            return false;
+        }
+
+        try {
+            const results = await Promise.allSettled([
+                cloudGet("sleepRecords"),
+                cloudGet("tracker")
+            ]);
+
+            if (results[0].status === "rejected") throw results[0].reason;
+            if (results[1].status === "rejected") throw results[1].reason;
+
+            globalSleepData = mergeSleep(results[0].value, before.sleep);
+            globalTrackerData = mergeTracker(results[1].value, before.tracker);
+            persistLocal();
+            window.__lastSuccessfulCloudSyncAt = Date.now();
+            window.__cloudSyncBlockedAt = 0;
+            refreshPanels();
+            return true;
+        } catch (error) {
+            if (isAuthBlocked(error)) {
+                window.__cloudSyncBlockedAt = Date.now();
+                setSyncStatus("CLOUD BLOCKED " + error.status + " · LOCAL SAFE", "blocked");
+            } else {
+                setSyncStatus("LOCAL ONLY · CLOUD READ FAILED", "warn");
+            }
+            refreshPanels();
+            return false;
+        }
+    }
+
+    async function writeSleepDateToCloudSafe(dateStr) {
+        ensureGlobals();
+        globalSleepData = cleanSleepData(globalSleepData);
+        const record = asObject(globalSleepData[dateStr]);
+        const value = Object.keys(record).length ? record : null;
+        persistLocal();
+        refreshPanels();
+
+        if (!canSync()) return false;
+        try {
+            await cloudPut("sleepRecords/" + dateStr, value);
+            await syncFromCloudSafe();
+            return true;
+        } catch (error) {
+            if (isAuthBlocked(error)) setSyncStatus("CLOUD BLOCKED " + error.status + " · SAVED LOCAL", "blocked");
+            else setSyncStatus("SAVED LOCAL · CLOUD WRITE FAILED", "warn");
+            return false;
+        }
+    }
+
+    async function writeTrackerDateToCloudSafe(type, dateStr, minutes) {
+        ensureGlobals();
+        const safeType = type === "study" ? "study" : "fitness";
+        const mins = Math.max(0, Math.round(Number(minutes) || 0));
+
+        if (mins > 0) globalTrackerData[safeType][dateStr] = mins;
+        else delete globalTrackerData[safeType][dateStr];
+
+        globalTrackerData = cleanTrackerData(globalTrackerData);
+        persistLocal();
+        refreshPanels();
+
+        if (!canSync()) return false;
+        try {
+            await cloudPut("tracker/" + safeType + "/" + dateStr, mins > 0 ? mins : null);
+            await syncFromCloudSafe();
+            return true;
+        } catch (error) {
+            if (isAuthBlocked(error)) setSyncStatus("CLOUD BLOCKED " + error.status + " · SAVED LOCAL", "blocked");
+            else setSyncStatus("SAVED LOCAL · CLOUD WRITE FAILED", "warn");
+            return false;
+        }
+    }
+
+    async function addTrackerMinutesToCloudSafe(type, dateStr, minutes) {
+        ensureGlobals();
+        const safeType = type === "study" ? "study" : "fitness";
+        const addMins = Math.max(0, Math.round(Number(minutes) || 0));
+        if (addMins < 1) return false;
+
+        const local = localSnapshot();
+        const currentMins = Number(local.tracker[safeType][dateStr] || 0);
+        return writeTrackerDateToCloudSafe(safeType, dateStr, currentMins + addMins);
+    }
+
+    function getTodayStringSafe() {
+        try { if (typeof getDateString === "function") return getDateString(new Date()); } catch (e) {}
+        return new Date().toLocaleDateString("sv-SE");
+    }
+
+    function getSleepDateStringSafe() {
+        try { if (typeof getSleepTargetDate === "function") return getSleepTargetDate(); } catch (e) {}
+        return getTodayStringSafe();
+    }
+
+    function getTimeStringSafe() {
+        try { if (typeof getTimeString === "function") return getTimeString(new Date()); } catch (e) {}
+        const d = new Date();
+        return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+
+    function isValidTimeOrBlankSafe(value) {
+        try { if (typeof isValidTimeOrBlank === "function") return isValidTimeOrBlank(value); } catch (e) {}
+        return /^\s*$|^([01]\d|2[0-3]):[0-5]\d$/.test(String(value || ""));
+    }
+
+    function valueText(value) {
+        if (value === undefined || value === null || value === "") return "--";
+        return String(value);
+    }
+
+    function hasValue(value) {
+        return value !== undefined && value !== null && value !== "" && value !== 0 && value !== "0";
+    }
+
+    function buildRows(localBefore, localAfter, cloudSleep, cloudTracker) {
+        const today = getTodayStringSafe();
+        const sleepDate = getSleepDateStringSafe();
+        const sleep = cleanSleepData(cloudSleep);
+        const tracker = cleanTrackerData(cloudTracker);
+        return [
+            { label: "Wake " + today, before: asObject(localBefore.sleep[today]).wake, cloud: asObject(sleep[today]).wake, after: asObject(localAfter.sleep[today]).wake },
+            { label: "Sleep " + sleepDate, before: asObject(localBefore.sleep[sleepDate]).sleep, cloud: asObject(sleep[sleepDate]).sleep, after: asObject(localAfter.sleep[sleepDate]).sleep },
+            { label: "Fitness " + today, before: localBefore.tracker.fitness[today], cloud: tracker.fitness[today], after: localAfter.tracker.fitness[today] },
+            { label: "Study " + today, before: localBefore.tracker.study[today], cloud: tracker.study[today], after: localAfter.tracker.study[today] }
+        ];
+    }
+
+    function summarizeRows(rows) {
+        const localHas = rows.some(function (row) { return hasValue(row.before); });
+        const cloudHas = rows.some(function (row) { return hasValue(row.cloud); });
+        const localDifferent = rows.some(function (row) { return hasValue(row.before) && valueText(row.before) !== valueText(row.cloud); });
+        const cloudFilledLocal = rows.some(function (row) { return hasValue(row.cloud) && valueText(row.before) !== valueText(row.cloud) && valueText(row.after) === valueText(row.cloud); });
+
+        if (!localHas && !cloudHas) return { text: "NO DATA TO SYNC", state: "warn" };
+        if (cloudFilledLocal) return { text: "CLOUD FOUND · LOCAL REFRESHED", state: "ok" };
+        if (localDifferent) return { text: "LOCAL SAVED · CLOUD DIFF", state: "warn" };
+        return { text: "SYNC OK", state: "ok" };
+    }
+
+    function rowsToMessage(rows, summary) {
+        const lines = rows.map(function (row) {
+            return row.label + "\n  Local before: " + valueText(row.before) + "\n  Cloud: " + valueText(row.cloud) + "\n  Local after: " + valueText(row.after);
+        });
+        return summary.text + "\n\n" + lines.join("\n\n") + "\n\nNote: This version will not overwrite cloud data when cloud read is blocked.";
+    }
+
+    async function checkCloudSyncStatusV170() {
+        const button = document.getElementById("sync-check-btn");
+        if (button) button.textContent = "CHECKING...";
+        setSyncStatus("CHECKING CLOUD...", "warn");
+
+        const localBefore = localSnapshot();
+
+        try {
+            const results = await Promise.allSettled([
+                cloudGet("sleepRecords"),
+                cloudGet("tracker")
+            ]);
+
+            if (results[0].status === "rejected") throw results[0].reason;
+            if (results[1].status === "rejected") throw results[1].reason;
+
+            globalSleepData = mergeSleep(results[0].value, localBefore.sleep);
+            globalTrackerData = mergeTracker(results[1].value, localBefore.tracker);
+            persistLocal();
+            refreshPanels();
+
+            const localAfter = localSnapshot();
+            const rows = buildRows(localBefore, localAfter, results[0].value, results[1].value);
+            const summary = summarizeRows(rows);
+            const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+            setSyncStatus(summary.text + " · " + time, summary.state);
+            alert(rowsToMessage(rows, summary));
+            return { summary: summary, rows: rows };
+        } catch (error) {
+            if (isAuthBlocked(error)) {
+                setSyncStatus("CLOUD BLOCKED " + error.status + " · LOCAL SAFE", "blocked");
+                alert(explainBlocked(error));
+            } else {
+                setSyncStatus("CLOUD CHECK FAILED · LOCAL SAFE", "warn");
+                alert("Cloud check failed, but local data is safe.\n\n" + (error && error.message ? error.message : String(error)) + "\n\nPlease check network and try again.");
+            }
+            return null;
+        } finally {
+            if (button) button.textContent = "SYNC CHECK";
+        }
+    }
+
+    function replaceSyncButtonHandler() {
+        const oldButton = document.getElementById("sync-check-btn");
+        if (!oldButton) return;
+        const newButton = oldButton.cloneNode(true);
+        oldButton.parentNode.replaceChild(newButton, oldButton);
+        newButton.addEventListener("click", checkCloudSyncStatusV170);
+    }
+
+    window.fetchCloudData = fetchCloudData = function () {
+        return syncFromCloudSafe();
+    };
+
+    window.saveSleepData = saveSleepData = function () {
+        ensureGlobals();
+        persistLocal();
+        refreshPanels();
+
+        const todayStr = getTodayStringSafe();
+        const sleepTargetDate = getSleepDateStringSafe();
+        const dates = Array.from(new Set([todayStr, sleepTargetDate]));
+        return Promise.allSettled(dates.map(writeSleepDateToCloudSafe)).then(function () {
+            return syncFromCloudSafe();
+        });
+    };
+
+    window.toggleWakeCheckIn = toggleWakeCheckIn = function () {
+        const todayStr = getTodayStringSafe();
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+        if (globalSleepData[todayStr].wake) delete globalSleepData[todayStr].wake;
+        else globalSleepData[todayStr].wake = getTimeStringSafe();
+        if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
+        writeSleepDateToCloudSafe(todayStr);
+    };
+
+    window.toggleSleepCheckIn = toggleSleepCheckIn = function () {
+        const targetDate = getSleepDateStringSafe();
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+        if (globalSleepData[targetDate].sleep) delete globalSleepData[targetDate].sleep;
+        else globalSleepData[targetDate].sleep = getTimeStringSafe();
+        if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
+        writeSleepDateToCloudSafe(targetDate);
+    };
+
+    window.editTodayWakeRecord = editTodayWakeRecord = function () {
+        const todayStr = getTodayStringSafe();
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+        const currentWake = globalSleepData[todayStr].wake || "";
+        const wakeInput = prompt("Enter today's WAKE time in HH:MM format. Leave blank to clear wake time.", currentWake);
+        if (wakeInput === null) return;
+        if (!isValidTimeOrBlankSafe(wakeInput)) {
+            alert("Please enter time as HH:MM, e.g. 07:15.");
+            return;
+        }
+        const value = wakeInput.trim();
+        if (value) globalSleepData[todayStr].wake = value;
+        else delete globalSleepData[todayStr].wake;
+        if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
+        writeSleepDateToCloudSafe(todayStr);
+    };
+
+    window.editTodaySleepOnlyRecord = editTodaySleepOnlyRecord = function () {
+        const targetDate = getSleepDateStringSafe();
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+        const currentSleep = globalSleepData[targetDate].sleep || "";
+        const sleepInput = prompt("Enter SLEEP time in HH:MM format. Leave blank to clear sleep time.", currentSleep);
+        if (sleepInput === null) return;
+        if (!isValidTimeOrBlankSafe(sleepInput)) {
+            alert("Please enter time as HH:MM, e.g. 23:40.");
+            return;
+        }
+        const value = sleepInput.trim();
+        if (value) globalSleepData[targetDate].sleep = value;
+        else delete globalSleepData[targetDate].sleep;
+        if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
+        writeSleepDateToCloudSafe(targetDate);
+    };
+
+    window.addActivityMinutes = addActivityMinutes = function (type, minutes) {
+        const todayStr = typeof getTodayStringForTimer === "function" ? getTodayStringForTimer() : getTodayStringSafe();
+        return addTrackerMinutesToCloudSafe(type, todayStr, minutes);
+    };
+
+    window.editTodayActivity = editTodayActivity = function (type) {
+        if (timers[type] && timers[type].intervalId !== null) {
+            alert("Please stop or reset the active timer before editing today's data.");
+            return;
+        }
+        const safeType = type === "study" ? "study" : "fitness";
+        const todayStr = getTodayStringSafe();
+        if (!globalTrackerData[safeType]) globalTrackerData[safeType] = {};
+        const currentMinutes = globalTrackerData[safeType][todayStr] || 0;
+        const minutesInput = prompt("Enter today's " + (safeType === "fitness" ? "Fitness" : "Study") + " duration in MINUTES.\nEnter 0 to clear today's record:", currentMinutes);
+        if (minutesInput === null) return;
+        const minutes = parseInt(minutesInput, 10);
+        if (isNaN(minutes) || minutes < 0) {
+            alert("Please enter 0 or a positive number.");
+            return;
+        }
+        writeTrackerDateToCloudSafe(safeType, todayStr, minutes);
+    };
+
+    window.clearTodayActivity = clearTodayActivity = function (type) {
+        const safeType = type === "study" ? "study" : "fitness";
+        writeTrackerDateToCloudSafe(safeType, getTodayStringSafe(), 0);
+    };
+
+    window.toggleTimer = toggleTimer = function (type) {
+        const timerObj = timers[type];
+        if (!timerObj) return;
+
+        if (timerObj.intervalId === null) {
+            timerObj.startTime = new Date();
+            localStorage.setItem(type + "StartTime", timerObj.startTime.getTime());
+            timerObj.intervalId = setInterval(function () { updateLiveTimerDisplay(type); }, 1000);
+            setTimerButtonState(type, "running");
+            return;
+        }
+
+        clearInterval(timerObj.intervalId);
+        timerObj.intervalId = null;
+        localStorage.removeItem(type + "StartTime");
+
+        const elapsedSeconds = Math.floor((new Date() - timerObj.startTime) / 1000);
+        const elapsedMinutes = Math.round(elapsedSeconds / 60);
+        timerObj.startTime = null;
+        setTimerButtonState(type, "idle");
+
+        if (elapsedMinutes >= 1) addActivityMinutes(type, elapsedMinutes);
+        else {
+            alert("Duration too short (less than 1 minute). Not recorded.");
+            refreshPanels();
+        }
+    };
+
+    window.__forceCloudUploadNow = function () {
+        ensureGlobals();
+        persistLocal();
+        return Promise.allSettled([
+            cloudPut("sleepRecords", cleanSleepData(globalSleepData)),
+            cloudPut("tracker", cleanTrackerData(globalTrackerData))
+        ]).then(function () {
+            return syncFromCloudSafe();
+        });
+    };
+
+    window.checkCloudSyncStatus = checkCloudSyncStatusV170;
+
+    function startV170() {
+        replaceSyncButtonHandler();
+        setTimeout(replaceSyncButtonHandler, 300);
+        setTimeout(syncFromCloudSafe, 700);
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startV170);
+    else startV170();
+
+    window.addEventListener("focus", syncFromCloudSafe);
+    window.addEventListener("online", syncFromCloudSafe);
+    window.addEventListener("pageshow", function () { setTimeout(syncFromCloudSafe, 250); });
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) syncFromCloudSafe();
+    });
+
+    window.__v170CloudSyncInterval = setInterval(syncFromCloudSafe, SYNC_INTERVAL_MS);
+})();
+</script>
+
+
+<!-- v172: auto sync only; remove manual sync check UI -->
+<style id="v172-auto-sync-no-check-css">
+.sync-check-wrap,
+#sync-check-btn,
+#sync-check-note {
+    display: none !important;
+}
+</style>
+<script id="v172-auto-sync-no-check">
+(function () {
+    "use strict";
+
+    const AUTO_SYNC_INTERVAL_MS = 8000;
+
+    function clearOldSyncIntervals() {
+        [
+            "__v166DataSyncInterval",
+            "__v167DataSyncInterval",
+            "__v168CloudSyncInterval",
+            "__v170CloudSyncInterval",
+            "__v172AutoSyncInterval"
+        ].forEach(function (key) {
+            if (window[key]) {
+                clearInterval(window[key]);
+                window[key] = null;
+            }
+        });
+    }
+
+    function removeSyncCheckUi() {
+        document.querySelectorAll(".sync-check-wrap").forEach(function (node) {
+            node.remove();
+        });
+
+        ["sync-check-btn", "sync-check-note"].forEach(function (id) {
+            const node = document.getElementById(id);
+            if (node) node.remove();
+        });
+    }
+
+    async function autoCloudSync() {
+        removeSyncCheckUi();
+        if (document.hidden) return false;
+
+        try {
+            if (typeof window.fetchCloudData === "function") {
+                await window.fetchCloudData();
+                window.__lastAutoCloudSyncAt = Date.now();
+                return true;
+            }
+        } catch (error) {
+            console.warn("Auto cloud sync skipped.", error);
+        }
+
+        return false;
+    }
+
+    function startAutoSync() {
+        clearOldSyncIntervals();
+        removeSyncCheckUi();
+
+        autoCloudSync();
+        setTimeout(autoCloudSync, 800);
+        setTimeout(autoCloudSync, 2500);
+
+        window.__v172AutoSyncInterval = setInterval(autoCloudSync, AUTO_SYNC_INTERVAL_MS);
+    }
+
+    window.checkCloudSyncStatus = autoCloudSync;
+    window.autoCloudSync = autoCloudSync;
+
+    window.addEventListener("focus", autoCloudSync);
+    window.addEventListener("online", autoCloudSync);
+    window.addEventListener("pageshow", function () {
+        setTimeout(autoCloudSync, 250);
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) autoCloudSync();
+    });
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", startAutoSync);
+    } else {
+        startAutoSync();
+    }
 })();
 </script>
