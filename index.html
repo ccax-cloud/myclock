@@ -9367,3 +9367,448 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     window.__v167DataSyncInterval = setInterval(syncFromCloudLocalFirst, SYNC_INTERVAL_MS);
 })();
 </script>
+
+
+<script id="v168-cloud-sync-repair-full-put">
+(function () {
+    "use strict";
+
+    /*
+      v168 repair:
+      - Keep v167 localStorage protection.
+      - Restore cloud writes using full-node PUT after a cloud read + targeted merge.
+      - This matches the older Firebase write style that worked, while avoiding a blank cloud read
+        from wiping local data after refresh.
+    */
+
+    const SLEEP_CACHE_KEY = "ccaxLifeTracker.sleepRecords.v167";
+    const TRACKER_CACHE_KEY = "ccaxLifeTracker.tracker.v167";
+    const SYNC_INTERVAL_MS = 15000;
+
+    if (window.__v167DataSyncInterval) {
+        clearInterval(window.__v167DataSyncInterval);
+        window.__v167DataSyncInterval = null;
+    }
+    if (window.__v168CloudSyncInterval) {
+        clearInterval(window.__v168CloudSyncInterval);
+        window.__v168CloudSyncInterval = null;
+    }
+
+    function canSync() {
+        return typeof FIREBASE_BASE_URL !== "undefined" && typeof fetch === "function";
+    }
+
+    function asObject(value) {
+        return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    }
+
+    function firebaseUrl(nodeName) {
+        const cleanNode = String(nodeName || "").replace(/^\/+|\/+$/g, "");
+        return `${FIREBASE_BASE_URL}${cleanNode}.json`;
+    }
+
+    function readJson(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            const parsed = JSON.parse(raw);
+            return parsed === null || parsed === undefined ? fallback : parsed;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function writeJson(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.warn("Local cache save skipped.", e);
+        }
+    }
+
+    function cleanSleepData(data) {
+        const result = {};
+        Object.entries(asObject(data)).forEach(function ([date, record]) {
+            const safeRecord = asObject(record);
+            const cleaned = {};
+            if (typeof safeRecord.wake === "string" && safeRecord.wake.trim()) cleaned.wake = safeRecord.wake.trim();
+            if (typeof safeRecord.sleep === "string" && safeRecord.sleep.trim()) cleaned.sleep = safeRecord.sleep.trim();
+            if (Object.keys(cleaned).length) result[date] = cleaned;
+        });
+        return result;
+    }
+
+    function cleanTrackerData(data) {
+        const source = asObject(data);
+        const result = { fitness: {}, study: {} };
+
+        ["fitness", "study"].forEach(function (type) {
+            Object.entries(asObject(source[type])).forEach(function ([date, value]) {
+                const mins = Math.max(0, Math.round(Number(value) || 0));
+                if (mins > 0) result[type][date] = mins;
+            });
+        });
+
+        return result;
+    }
+
+    function ensureGlobals() {
+        if (typeof globalSleepData === "undefined" || !globalSleepData) globalSleepData = {};
+        if (typeof globalTrackerData === "undefined" || !globalTrackerData) globalTrackerData = { fitness: {}, study: {} };
+        if (!globalTrackerData.fitness) globalTrackerData.fitness = {};
+        if (!globalTrackerData.study) globalTrackerData.study = {};
+    }
+
+    function persistLocal() {
+        ensureGlobals();
+        globalSleepData = cleanSleepData(globalSleepData);
+        globalTrackerData = cleanTrackerData(globalTrackerData);
+        writeJson(SLEEP_CACHE_KEY, globalSleepData);
+        writeJson(TRACKER_CACHE_KEY, globalTrackerData);
+    }
+
+    function refreshPanels() {
+        try { if (typeof migrateLegacyWakeData === "function") migrateLegacyWakeData(); } catch (e) {}
+        try { if (typeof updateSleepButtons === "function") updateSleepButtons(); } catch (e) {}
+        try {
+            if (typeof lastChartSignature !== "undefined") lastChartSignature = "";
+            if (document.getElementById("page1")?.classList.contains("active") && typeof renderChart === "function") {
+                renderChart();
+            }
+        } catch (e) {}
+        try { if (typeof renderTrackerStats === "function") renderTrackerStats(); } catch (e) {}
+    }
+
+    function loadLocalFirst() {
+        ensureGlobals();
+
+        const localSleep = cleanSleepData(readJson(SLEEP_CACHE_KEY, {}));
+        const localTracker = cleanTrackerData(readJson(TRACKER_CACHE_KEY, {}));
+
+        globalSleepData = Object.assign({}, cleanSleepData(globalSleepData), localSleep);
+        globalTrackerData = {
+            fitness: Object.assign({}, cleanTrackerData(globalTrackerData).fitness, localTracker.fitness),
+            study: Object.assign({}, cleanTrackerData(globalTrackerData).study, localTracker.study),
+        };
+
+        refreshPanels();
+    }
+
+    async function cloudRead(nodeName) {
+        if (!canSync()) throw new Error("Firebase unavailable");
+        const res = await fetch(`${firebaseUrl(nodeName)}?v=${Date.now()}`, {
+            method: "GET",
+            cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`Cloud read failed: ${nodeName} (${res.status})`);
+        return res.json();
+    }
+
+    async function cloudPut(nodeName, value) {
+        if (!canSync()) throw new Error("Firebase unavailable");
+        const res = await fetch(firebaseUrl(nodeName), {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(value),
+            cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`Cloud write failed: ${nodeName} (${res.status})`);
+        return res.json();
+    }
+
+    async function syncFromCloudV168() {
+        loadLocalFirst();
+        if (!canSync()) return false;
+
+        try {
+            const [legacyResult, sleepResult, trackerResult] = await Promise.allSettled([
+                cloudRead("checkins"),
+                cloudRead("sleepRecords"),
+                cloudRead("tracker"),
+            ]);
+
+            if (legacyResult.status === "fulfilled") globalHistoryData = asObject(legacyResult.value);
+
+            const localSleep = cleanSleepData(readJson(SLEEP_CACHE_KEY, {}));
+            const remoteSleep = sleepResult.status === "fulfilled" ? cleanSleepData(sleepResult.value) : {};
+            globalSleepData = Object.assign({}, remoteSleep, localSleep);
+
+            const localTracker = cleanTrackerData(readJson(TRACKER_CACHE_KEY, {}));
+            const remoteTracker = trackerResult.status === "fulfilled" ? cleanTrackerData(trackerResult.value) : { fitness: {}, study: {} };
+            globalTrackerData = {
+                fitness: Object.assign({}, remoteTracker.fitness, localTracker.fitness),
+                study: Object.assign({}, remoteTracker.study, localTracker.study),
+            };
+
+            persistLocal();
+            window.__lastSuccessfulCloudSyncAt = Date.now();
+            refreshPanels();
+            return true;
+        } catch (e) {
+            console.warn("v168 cloud read skipped; local data kept.", e);
+            loadLocalFirst();
+            return false;
+        }
+    }
+
+    async function writeSleepDateToCloud(dateStr) {
+        ensureGlobals();
+
+        const cleanedLocal = cleanSleepData(globalSleepData);
+        const localRecord = cleanedLocal[dateStr] || null;
+
+        globalSleepData = cleanedLocal;
+        persistLocal();
+        refreshPanels();
+
+        if (!canSync()) return false;
+
+        try {
+            const remote = cleanSleepData(await cloudRead("sleepRecords").catch(function () { return {}; }));
+            if (localRecord) remote[dateStr] = localRecord;
+            else delete remote[dateStr];
+
+            await cloudPut("sleepRecords", remote);
+
+            globalSleepData = remote;
+            persistLocal();
+            refreshPanels();
+            return true;
+        } catch (e) {
+            console.warn("v168 sleep cloud write failed; local data kept.", e);
+            return false;
+        }
+    }
+
+    async function writeTrackerDateToCloud(type, dateStr, value) {
+        ensureGlobals();
+
+        const safeType = type === "study" ? "study" : "fitness";
+        const mins = Math.max(0, Math.round(Number(value) || 0));
+
+        if (mins > 0) globalTrackerData[safeType][dateStr] = mins;
+        else delete globalTrackerData[safeType][dateStr];
+
+        globalTrackerData = cleanTrackerData(globalTrackerData);
+        persistLocal();
+        refreshPanels();
+
+        if (!canSync()) return false;
+
+        try {
+            const remote = cleanTrackerData(await cloudRead("tracker").catch(function () { return {}; }));
+            if (mins > 0) remote[safeType][dateStr] = mins;
+            else delete remote[safeType][dateStr];
+
+            await cloudPut("tracker", remote);
+
+            globalTrackerData = remote;
+            persistLocal();
+            refreshPanels();
+            return true;
+        } catch (e) {
+            console.warn("v168 tracker cloud write failed; local data kept.", e);
+            return false;
+        }
+    }
+
+    async function addTrackerMinutesToCloud(type, dateStr, minutes) {
+        ensureGlobals();
+
+        const safeType = type === "study" ? "study" : "fitness";
+        const addMins = Math.max(0, Math.round(Number(minutes) || 0));
+        if (addMins < 1) return false;
+
+        let baseMins = Number(globalTrackerData[safeType]?.[dateStr] || 0);
+
+        if (canSync()) {
+            try {
+                const remote = cleanTrackerData(await cloudRead("tracker").catch(function () { return {}; }));
+                baseMins = Math.max(baseMins, Number(remote[safeType]?.[dateStr] || 0));
+            } catch (e) {}
+        }
+
+        return writeTrackerDateToCloud(safeType, dateStr, baseMins + addMins);
+    }
+
+    window.fetchCloudData = fetchCloudData = function () {
+        return syncFromCloudV168();
+    };
+
+    window.saveSleepData = saveSleepData = function () {
+        ensureGlobals();
+        persistLocal();
+        refreshPanels();
+
+        const todayStr = typeof getDateString === "function" ? getDateString(new Date()) : new Date().toLocaleDateString("sv-SE");
+        const sleepTargetDate = typeof getSleepTargetDate === "function" ? getSleepTargetDate() : todayStr;
+        const dates = Array.from(new Set([todayStr, sleepTargetDate]));
+
+        return Promise.allSettled(dates.map(writeSleepDateToCloud)).then(function () {
+            return syncFromCloudV168();
+        });
+    };
+
+    window.toggleWakeCheckIn = toggleWakeCheckIn = function () {
+        const todayStr = getDateString(new Date());
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+        if (globalSleepData[todayStr].wake) delete globalSleepData[todayStr].wake;
+        else globalSleepData[todayStr].wake = getTimeString(new Date());
+
+        if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
+
+        writeSleepDateToCloud(todayStr);
+    };
+
+    window.toggleSleepCheckIn = toggleSleepCheckIn = function () {
+        const targetDate = getSleepTargetDate();
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+
+        if (globalSleepData[targetDate].sleep) delete globalSleepData[targetDate].sleep;
+        else globalSleepData[targetDate].sleep = getTimeString(new Date());
+
+        if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
+
+        writeSleepDateToCloud(targetDate);
+    };
+
+    window.editTodayWakeRecord = editTodayWakeRecord = function () {
+        const todayStr = getDateString(new Date());
+        if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
+
+        const currentWake = globalSleepData[todayStr].wake || "";
+        const wakeInput = prompt("Enter today's WAKE time in HH:MM format. Leave blank to clear wake time.", currentWake);
+        if (wakeInput === null) return;
+
+        if (!isValidTimeOrBlank(wakeInput)) {
+            alert("Please enter time as HH:MM, e.g. 07:15.");
+            return;
+        }
+
+        const value = wakeInput.trim();
+        if (value) globalSleepData[todayStr].wake = value;
+        else delete globalSleepData[todayStr].wake;
+
+        if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
+
+        writeSleepDateToCloud(todayStr);
+    };
+
+    window.editTodaySleepOnlyRecord = editTodaySleepOnlyRecord = function () {
+        const targetDate = getSleepTargetDate();
+        if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
+
+        const currentSleep = globalSleepData[targetDate].sleep || "";
+        const sleepInput = prompt("Enter SLEEP time in HH:MM format. Leave blank to clear sleep time.", currentSleep);
+        if (sleepInput === null) return;
+
+        if (!isValidTimeOrBlank(sleepInput)) {
+            alert("Please enter time as HH:MM, e.g. 23:40.");
+            return;
+        }
+
+        const value = sleepInput.trim();
+        if (value) globalSleepData[targetDate].sleep = value;
+        else delete globalSleepData[targetDate].sleep;
+
+        if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
+
+        writeSleepDateToCloud(targetDate);
+    };
+
+    window.addActivityMinutes = addActivityMinutes = function (type, minutes) {
+        const todayStr = typeof getTodayStringForTimer === "function" ? getTodayStringForTimer() : new Date().toLocaleDateString("sv-SE");
+        return addTrackerMinutesToCloud(type, todayStr, minutes);
+    };
+
+    window.editTodayActivity = editTodayActivity = function (type) {
+        if (timers[type]?.intervalId !== null) {
+            alert("Please stop or reset the active timer before editing today's data.");
+            return;
+        }
+
+        const safeType = type === "study" ? "study" : "fitness";
+        const todayStr = new Date().toLocaleDateString("sv-SE");
+        if (!globalTrackerData[safeType]) globalTrackerData[safeType] = {};
+
+        const currentMinutes = globalTrackerData[safeType][todayStr] || 0;
+        const minutesInput = prompt(
+            `Enter today's ${safeType === "fitness" ? "Fitness" : "Study"} duration in MINUTES.\nEnter 0 to clear today's record:`,
+            currentMinutes,
+        );
+        if (minutesInput === null) return;
+
+        const minutes = parseInt(minutesInput, 10);
+        if (isNaN(minutes) || minutes < 0) {
+            alert("Please enter 0 or a positive number.");
+            return;
+        }
+
+        writeTrackerDateToCloud(safeType, todayStr, minutes);
+    };
+
+    window.clearTodayActivity = clearTodayActivity = function (type) {
+        const safeType = type === "study" ? "study" : "fitness";
+        const todayStr = new Date().toLocaleDateString("sv-SE");
+        writeTrackerDateToCloud(safeType, todayStr, 0);
+    };
+
+    window.toggleTimer = toggleTimer = function (type) {
+        const timerObj = timers[type];
+        if (!timerObj) return;
+
+        if (timerObj.intervalId === null) {
+            timerObj.startTime = new Date();
+            localStorage.setItem(`${type}StartTime`, timerObj.startTime.getTime());
+            timerObj.intervalId = setInterval(function () { updateLiveTimerDisplay(type); }, 1000);
+            setTimerButtonState(type, "running");
+            return;
+        }
+
+        clearInterval(timerObj.intervalId);
+        timerObj.intervalId = null;
+        localStorage.removeItem(`${type}StartTime`);
+
+        const elapsedSeconds = Math.floor((new Date() - timerObj.startTime) / 1000);
+        const elapsedMinutes = Math.round(elapsedSeconds / 60);
+        timerObj.startTime = null;
+        setTimerButtonState(type, "idle");
+
+        if (elapsedMinutes >= 1) addActivityMinutes(type, elapsedMinutes);
+        else {
+            alert("Duration too short (less than 1 minute). Not recorded.");
+            refreshPanels();
+        }
+    };
+
+    window.__forceCloudUploadNow = function () {
+        ensureGlobals();
+        persistLocal();
+        return Promise.allSettled([
+            cloudPut("sleepRecords", cleanSleepData(globalSleepData)),
+            cloudPut("tracker", cleanTrackerData(globalTrackerData)),
+        ]).then(function () {
+            return syncFromCloudV168();
+        });
+    };
+
+    loadLocalFirst();
+    setTimeout(loadLocalFirst, 250);
+    setTimeout(syncFromCloudV168, 1000);
+
+    window.addEventListener("focus", syncFromCloudV168);
+    window.addEventListener("online", function () {
+        if (typeof window.__forceCloudUploadNow === "function") window.__forceCloudUploadNow();
+    });
+    window.addEventListener("pageshow", function () {
+        loadLocalFirst();
+        setTimeout(syncFromCloudV168, 250);
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) syncFromCloudV168();
+    });
+
+    window.__v168CloudSyncInterval = setInterval(syncFromCloudV168, SYNC_INTERVAL_MS);
+})();
+</script>
