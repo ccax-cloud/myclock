@@ -4791,6 +4791,13 @@ body {
                     return 0.85 + ((clamped - 5) / 4) * 1.45; // 05-09 => 0.85-2.30
                 }
 
+                // Late manual wake records such as 10:35 should still appear on the wake line.
+                // Keep them just above the 09:00 band, below the sleep band, instead of returning null.
+                if (value < 21) {
+                    const clamped = Math.max(9, Math.min(12, value));
+                    return 2.30 + ((clamped - 9) / 3) * 0.35; // 09-12 => 2.30-2.65
+                }
+
                 if (value >= 21) {
                     const clamped = Math.max(22, Math.min(24, value));
                     return 2.70 + ((clamped - 22) / 2) * 1.45; // 22-24 => 2.70-4.15
@@ -4803,9 +4810,14 @@ body {
                 if (axisValue === null || axisValue === undefined || Number.isNaN(axisValue)) return null;
 
                 // Reverse the visual compression for tooltip display.
-                if (axisValue <= 2.5) {
+                if (axisValue <= 2.30) {
                     const ratio = Math.max(0, Math.min(1, (axisValue - 0.85) / 1.45));
                     return 5 + ratio * 4;
+                }
+
+                if (axisValue <= 2.65) {
+                    const ratio = Math.max(0, Math.min(1, (axisValue - 2.30) / 0.35));
+                    return 9 + ratio * 3;
                 }
 
                 const ratio = Math.max(0, Math.min(1, (axisValue - 2.70) / 1.45));
@@ -4836,6 +4848,37 @@ body {
             function getCssVar(name, fallback) {
                 const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
                 return value || fallback;
+            }
+
+
+            function colorWithAlpha(color, alpha) {
+                const value = String(color || "").trim();
+
+                if (value.startsWith("#")) {
+                    const rgb = hexToRgb(value);
+                    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+                }
+
+                const rgbaMatch = value.match(/^rgba?\(([^)]+)\)$/i);
+                if (rgbaMatch) {
+                    const parts = rgbaMatch[1].split(",").map((p) => p.trim());
+                    if (parts.length >= 3) {
+                        return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
+                    }
+                }
+
+                return value || `rgba(210, 224, 235, ${alpha})`;
+            }
+
+            function getAdaptiveSleepLineColor() {
+                const chartLine = getComputedStyle(document.documentElement)
+                    .getPropertyValue("--chart-line")
+                    .trim();
+
+                const themeName = getThemeNameFromColors(globalColors);
+                const alpha = (themeName === "evening" || themeName === "night") ? 0.62 : 0.52;
+
+                return colorWithAlpha(chartLine, alpha);
             }
 
             function renderChart() {
@@ -4992,6 +5035,12 @@ body {
 
                 if (chartInstance) chartInstance.destroy();
 
+                if (window.Chart?.defaults?.elements?.point) {
+                    Chart.defaults.elements.point.radius = 0;
+                    Chart.defaults.elements.point.hoverRadius = 0;
+                    Chart.defaults.elements.point.borderWidth = 0;
+                }
+
                 chartInstance = new Chart(ctx, {
                     type: "line",
                     data: {
@@ -5000,12 +5049,16 @@ body {
                             {
                                 label: "Wake",
                                 data: chartData,
-                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--chart-fill").trim(),
-                                borderColor: getComputedStyle(document.documentElement).getPropertyValue("--chart-line").trim(),
-                                borderWidth: 3.5,
+                                backgroundColor: "rgba(238, 246, 252, 0.10)",
+                                borderColor: "rgba(238, 246, 252, 0.88)",
+                                borderWidth: 3.4,
                                 pointRadius: 0,
                                 pointHoverRadius: 0,
                                 pointHitRadius: 12,
+                                pointBorderWidth: 0,
+                                pointBackgroundColor: "transparent",
+                                pointBorderColor: "transparent",
+                                order: 0,
                                 fill: true,
                                 tension: 0.3,
                                 spanGaps: true,
@@ -5014,14 +5067,20 @@ body {
                                 label: "Sleep",
                                 data: sleepChartData,
                                 backgroundColor: "transparent",
-                                borderColor: "rgba(76, 94, 112, 0.50)",
-                                borderWidth: 2.1,
+                                borderColor: getAdaptiveSleepLineColor(),
+                                borderWidth: 2.8,
+                                borderCapStyle: "round",
+                                borderJoinStyle: "round",
                                 pointRadius: 0,
                                 pointHoverRadius: 0,
                                 pointHitRadius: 12,
+                                pointBorderWidth: 0,
+                                pointBackgroundColor: "transparent",
+                                pointBorderColor: "transparent",
                                 fill: false,
                                 tension: 0.3,
-                                borderDash: [4, 6],
+                                borderDash: [2, 6],
+                                order: -10,
                                 spanGaps: true,
                             },
                         ],
@@ -5030,6 +5089,14 @@ body {
                         responsive: true,
                         maintainAspectRatio: false,
                         animation: false,
+                        elements: {
+                            point: {
+                                radius: 0,
+                                hoverRadius: 0,
+                                hitRadius: 12,
+                                borderWidth: 0,
+                            },
+                        },
                         interaction: { intersect: false, mode: "index" },
                         plugins: {
                             legend: { display: false },
@@ -8552,13 +8619,15 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 }
 </style>
 
-<!-- v173: optimized Tianjin default + automatic non-destructive cloud sync -->
-<script id="v173-tianjin-auto-sync-optimized">
+<!-- v181: optimized Tianjin default + automatic non-destructive cloud sync + one-tap delete protection -->
+<script id="v181-tianjin-auto-sync-one-tap-delete">
 (function () {
     "use strict";
 
     const SLEEP_CACHE_KEY = "ccaxLifeTracker.sleepRecords.v167";
     const TRACKER_CACHE_KEY = "ccaxLifeTracker.tracker.v167";
+    const SLEEP_DELETE_MARKER_KEY = "ccaxLifeTracker.sleepDeleteMarkers.v181";
+    const SLEEP_DELETE_HOLD_MS = 24 * 60 * 60 * 1000;
     const DEFAULT_CITY_VERSION_KEY = "ccaxLifeTracker.defaultCityVersion";
     const DEFAULT_CITY_VERSION = "v169-tianjin-default";
     const AUTO_SYNC_INTERVAL_MS = 8000;
@@ -8603,7 +8672,7 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     function firebaseUrl(path) {
         if (!canSync()) throw new Error("Firebase unavailable");
         const cleanPath = String(path || "").replace(/^\/+|\/+$/g, "");
-        return FIREBASE_BASE_URL + cleanPath + ".json";
+        return String(FIREBASE_BASE_URL).replace(/\/+$/, "") + "/" + cleanPath + ".json";
     }
 
     function cleanSleepData(data) {
@@ -8616,6 +8685,74 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
             if (Object.keys(cleaned).length) result[date] = cleaned;
         });
         return result;
+    }
+
+    function readSleepDeleteMarkers() {
+        return asObject(safeReadJson(SLEEP_DELETE_MARKER_KEY, {}));
+    }
+
+    function writeSleepDeleteMarkers(markers) {
+        safeWriteJson(SLEEP_DELETE_MARKER_KEY, asObject(markers));
+    }
+
+    function pruneSleepDeleteMarkers(markers) {
+        const source = asObject(markers);
+        const now = Date.now();
+        let changed = false;
+
+        Object.entries(source).forEach(function ([date, fields]) {
+            const dateFields = asObject(fields);
+            ["wake", "sleep"].forEach(function (field) {
+                const ts = Number(dateFields[field] || 0);
+                if (!ts || now - ts > SLEEP_DELETE_HOLD_MS) {
+                    if (dateFields[field]) {
+                        delete dateFields[field];
+                        changed = true;
+                    }
+                }
+            });
+
+            if (!dateFields.wake && !dateFields.sleep) {
+                delete source[date];
+                changed = true;
+            } else {
+                source[date] = dateFields;
+            }
+        });
+
+        if (changed) writeSleepDeleteMarkers(source);
+        return source;
+    }
+
+    function markSleepFieldDeleted(dateStr, field) {
+        if (field !== "wake" && field !== "sleep") return;
+        const markers = pruneSleepDeleteMarkers(readSleepDeleteMarkers());
+        if (!markers[dateStr]) markers[dateStr] = {};
+        markers[dateStr][field] = Date.now();
+        writeSleepDeleteMarkers(markers);
+    }
+
+    function clearSleepFieldDeleteMarker(dateStr, field) {
+        if (field !== "wake" && field !== "sleep") return;
+        const markers = pruneSleepDeleteMarkers(readSleepDeleteMarkers());
+        if (!markers[dateStr]) return;
+        if (markers[dateStr][field]) delete markers[dateStr][field];
+        if (!markers[dateStr].wake && !markers[dateStr].sleep) delete markers[dateStr];
+        writeSleepDeleteMarkers(markers);
+    }
+
+    function applySleepDeleteMarkers(data) {
+        const cleaned = cleanSleepData(data);
+        const markers = pruneSleepDeleteMarkers(readSleepDeleteMarkers());
+
+        Object.entries(markers).forEach(function ([date, fields]) {
+            if (!cleaned[date]) return;
+            if (fields.wake) delete cleaned[date].wake;
+            if (fields.sleep) delete cleaned[date].sleep;
+            if (!cleaned[date].wake && !cleaned[date].sleep) delete cleaned[date];
+        });
+
+        return cleaned;
     }
 
     function cleanTrackerData(data) {
@@ -8669,7 +8806,7 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
     }
 
     function mergeSleep(remote, local) {
-        return Object.assign({}, cleanSleepData(remote), cleanSleepData(local));
+        return applySleepDeleteMarkers(Object.assign({}, cleanSleepData(remote), cleanSleepData(local)));
     }
 
     function mergeTracker(remote, local) {
@@ -8753,7 +8890,6 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
         syncRunning = true;
         try {
             ensureGlobals();
-            const before = localSnapshot();
             persistLocal();
 
             if (!canSync()) return false;
@@ -8766,8 +8902,10 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
             if (results[0].status === "rejected") throw results[0].reason;
             if (results[1].status === "rejected") throw results[1].reason;
 
-            globalSleepData = mergeSleep(results[0].value, before.sleep);
-            globalTrackerData = mergeTracker(results[1].value, before.tracker);
+            // Re-read local cache after the network request. This keeps manual edits made during an in-flight sync.
+            const latestLocal = localSnapshot();
+            globalSleepData = mergeSleep(results[0].value, latestLocal.sleep);
+            globalTrackerData = mergeTracker(results[1].value, latestLocal.tracker);
             persistLocal();
 
             window.__lastSuccessfulCloudSyncAt = Date.now();
@@ -8790,11 +8928,12 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 
     async function writeSleepDateToCloudSafe(dateStr) {
         ensureGlobals();
-        globalSleepData = cleanSleepData(globalSleepData);
+        globalSleepData = applySleepDeleteMarkers(globalSleepData);
         const record = asObject(globalSleepData[dateStr]);
         const value = Object.keys(record).length ? record : null;
         persistLocal();
         refreshPanels(true);
+        requestAnimationFrame(function () { refreshPanels(true); });
 
         if (!canSync()) return false;
         try {
@@ -8935,24 +9074,37 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
         });
 
         assignGlobalFunction("toggleWakeCheckIn", function () {
+            ensureGlobals();
             const todayStr = getTodayStringSafe();
             if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
-            if (globalSleepData[todayStr].wake) delete globalSleepData[todayStr].wake;
-            else globalSleepData[todayStr].wake = getTimeStringSafe();
+            if (globalSleepData[todayStr].wake) {
+                delete globalSleepData[todayStr].wake;
+                markSleepFieldDeleted(todayStr, "wake");
+            } else {
+                globalSleepData[todayStr].wake = getTimeStringSafe();
+                clearSleepFieldDeleteMarker(todayStr, "wake");
+            }
             if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
             writeSleepDateToCloudSafe(todayStr);
         });
 
         assignGlobalFunction("toggleSleepCheckIn", function () {
+            ensureGlobals();
             const targetDate = getSleepDateStringSafe();
             if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
-            if (globalSleepData[targetDate].sleep) delete globalSleepData[targetDate].sleep;
-            else globalSleepData[targetDate].sleep = getTimeStringSafe();
+            if (globalSleepData[targetDate].sleep) {
+                delete globalSleepData[targetDate].sleep;
+                markSleepFieldDeleted(targetDate, "sleep");
+            } else {
+                globalSleepData[targetDate].sleep = getTimeStringSafe();
+                clearSleepFieldDeleteMarker(targetDate, "sleep");
+            }
             if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
             writeSleepDateToCloudSafe(targetDate);
         });
 
         assignGlobalFunction("editTodayWakeRecord", function () {
+            ensureGlobals();
             const todayStr = getTodayStringSafe();
             if (!globalSleepData[todayStr]) globalSleepData[todayStr] = {};
             const currentWake = globalSleepData[todayStr].wake || "";
@@ -8963,13 +9115,19 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
                 return;
             }
             const value = wakeInput.trim();
-            if (value) globalSleepData[todayStr].wake = value;
-            else delete globalSleepData[todayStr].wake;
+            if (value) {
+                globalSleepData[todayStr].wake = value;
+                clearSleepFieldDeleteMarker(todayStr, "wake");
+            } else {
+                delete globalSleepData[todayStr].wake;
+                markSleepFieldDeleted(todayStr, "wake");
+            }
             if (!globalSleepData[todayStr].wake && !globalSleepData[todayStr].sleep) delete globalSleepData[todayStr];
             writeSleepDateToCloudSafe(todayStr);
         });
 
         assignGlobalFunction("editTodaySleepOnlyRecord", function () {
+            ensureGlobals();
             const targetDate = getSleepDateStringSafe();
             if (!globalSleepData[targetDate]) globalSleepData[targetDate] = {};
             const currentSleep = globalSleepData[targetDate].sleep || "";
@@ -8980,8 +9138,13 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
                 return;
             }
             const value = sleepInput.trim();
-            if (value) globalSleepData[targetDate].sleep = value;
-            else delete globalSleepData[targetDate].sleep;
+            if (value) {
+                globalSleepData[targetDate].sleep = value;
+                clearSleepFieldDeleteMarker(targetDate, "sleep");
+            } else {
+                delete globalSleepData[targetDate].sleep;
+                markSleepFieldDeleted(targetDate, "sleep");
+            }
             if (!globalSleepData[targetDate].wake && !globalSleepData[targetDate].sleep) delete globalSleepData[targetDate];
             writeSleepDateToCloudSafe(targetDate);
         });
@@ -8992,6 +9155,7 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
         });
 
         assignGlobalFunction("editTodayActivity", function (type) {
+            ensureGlobals();
             if (timers[type] && timers[type].intervalId !== null) {
                 alert("Please stop or reset the active timer before editing today's data.");
                 return;
@@ -9128,6 +9292,7 @@ body.dashboard-layout-capture #tracker-capture-area .today-card .stat-value {
 })();
 
 </script>
+
 
 </body>
 </html>
